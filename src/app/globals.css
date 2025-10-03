@@ -1,0 +1,13 @@
+@import 'tailwindcss';
+
+
+/* Use the Quicksand variable font if needed in tailwind */
+:root {
+  --font-quicksand: 'Quicksand', sans-serif;
+}
+
+body {
+  font-family: var(--font-quicksand), system-ui, sans-serif;
+  background-color: rgba(255, 255, 255, 0.95); /* white/95 */
+  color: #111827; /* default text color */
+}
