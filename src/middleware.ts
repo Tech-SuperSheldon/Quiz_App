@@ -2,11 +2,12 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
-  const token = request.cookies.get("token")?.value;
+  // The app sets an HttpOnly cookie named `auth-token` after login/register.
+  // Check that cookie and redirect unauthenticated users to the login page.
+  const authToken = request.cookies.get("auth-token")?.value;
 
-  // If user is not logged in, redirect them to /dashboard
-  if (!token && request.nextUrl.pathname.startsWith("/dashboard")) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+  if (!authToken && request.nextUrl.pathname.startsWith("/dashboard")) {
+    return NextResponse.redirect(new URL("/auth/login", request.url));
   }
 
   return NextResponse.next();

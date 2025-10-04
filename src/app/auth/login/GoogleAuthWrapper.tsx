@@ -31,6 +31,7 @@ export default function GoogleAuthWrapper({
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({
           token: credentialResponse.credential,
         }),
@@ -53,12 +54,25 @@ export default function GoogleAuthWrapper({
           );
         }
 
-        // Redirect based on API response
-        if (data.redirectTo) {
-          router.replace(data.redirectTo);
+        // Redirect according to server response (dashboard for existing users,
+        // /auth/register for new users). Server sets HttpOnly cookies (auth-token)
+        // so we rely on server-provided redirectTo. Show a short toast when
+        // redirecting to registration so user sees context.
+        const dest = data.redirectTo || "/";
+        if (dest.includes("/auth/register")) {
+          toast.info("Redirecting to registration...");
+          setTimeout(() => router.replace(dest), 400);
         } else {
-          // Fallback redirect
-          router.replace("/");
+          // dashboard or other destination — use full navigation for dashboard to ensure cookies are applied
+          toast.success("Redirecting...");
+          setTimeout(() => {
+            if (dest === "/dashboard" || dest.includes("/dashboard")) {
+              // full reload to ensure auth cookie is used on the next request
+              window.location.assign(dest);
+            } else {
+              router.replace(dest);
+            }
+          }, 300);
         }
       } else {
         toast.error(data.error || "Login failed");

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
@@ -41,7 +43,16 @@ export default function DummyRegister() {
       if (res.ok && data && data.success) {
         // Redirect to backend-provided path or default dashboard
         const dest = data.redirectTo || "/dashboard";
-        router.replace(dest);
+        // show a short success toast so user sees confirmation
+        toast.success("Registration successful — redirecting...");
+        console.log("Redirecting to", dest);
+        setTimeout(() => {
+          if (dest === "/dashboard" || dest.includes("/dashboard")) {
+            window.location.assign(dest);
+          } else {
+            router.replace(dest);
+          }
+        }, 400);
         return;
       }
 
@@ -94,6 +105,7 @@ export default function DummyRegister() {
 
   return (
     <div className="max-w-md mx-auto mt-20 bg-white/95 p-8 shadow-xl rounded-xl border border-gray-200 text-center">
+      <ToastContainer position="top-right" autoClose={2500} />
       {/* Profile Picture */}
       <div className="w-24 h-24 mx-auto mb-4 shadow rounded-full overflow-hidden">
         <Image
