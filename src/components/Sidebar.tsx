@@ -1,116 +1,136 @@
 "use client";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion, Variants } from "framer-motion"; // Make sure Variants is imported
+import { motion } from "framer-motion";
 import {
+  HomeIcon,
   BookOpenIcon,
   AcademicCapIcon,
-  UserCircleIcon, // New icon for Profile
-  // ClipboardListIcon,
-  // CollectionIcon,
-  SparklesIcon,
+  TrophyIcon,
+  UserCircleIcon,
+  ArrowRightOnRectangleIcon
 } from "@heroicons/react/24/outline";
+
+interface NavItem {
+  href: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+}
 
 export default function Sidebar() {
   const pathname = usePathname();
 
-  const links = [
-     { href: "/dashboard/profile", label: "Profile", icon: UserCircleIcon }, // Added Profile link
- 
+  const navItems: NavItem[] = [
+    { href: "/dashboard", label: "Dashboard", icon: HomeIcon },
     { href: "/dashboard/courses", label: "Courses", icon: BookOpenIcon },
     { href: "/dashboard/quizzes", label: "Quizzes", icon: AcademicCapIcon },
-      // { href: "/dashboard/results", label: "Results", icon: ClipboardListIcon },
-    // { href: "/dashboard/topics", label: "Topics", icon: CollectionIcon },
-    { href: "/dashboard/leaderboard", label: "Leaderboard", icon: SparklesIcon },
+    { href: "/dashboard/leaderboard", label: "Leaderboard", icon: TrophyIcon },
+    { href: "/dashboard/profile", label: "Profile", icon: UserCircleIcon },
   ];
 
-  // Framer Motion variants for sidebar and items
-  const sidebarVariants: Variants = { // Added Variants type annotation
-    hidden: { opacity: 0, x: -50 },
-    visible: {
-      opacity: 1,
-      x: 0,
-      transition: {
-        duration: 0.3,
-        ease: "easeOut",
-        staggerChildren: 0.05,
-      },
-    },
-  };
-
-  const itemVariants: Variants = { // Added Variants type annotation
+  const itemVariants = {
     hidden: { opacity: 0, x: -20 },
-    visible: { opacity: 1, x: 0 },
+    visible: { 
+      opacity: 1, 
+      x: 0, 
+      transition: { 
+        duration: 0.4,
+        ease: "easeOut"
+      } 
+    }
   };
 
   return (
-    <motion.aside
-      className="w-64 bg-white shadow-xl rounded-lg p-6 h-[calc(100vh-48px)] flex flex-col justify-between"
-      variants={sidebarVariants}
-      initial="hidden"
-      animate="visible"
-    >
-      {/* Logo / Title */}
-      <div>
-        <div className="text-2xl font-extrabold text-gray-800 mb-8 text-center">
-          EduHub
-        </div>
+    <div className="h-full bg-gradient-to-b from-indigo-600 via-purple-600 to-blue-700 shadow-2xl flex flex-col">
+      {/* Header */}
+      <div className="p-8 pb-6">
+        <motion.div 
+          className="text-center"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent mb-2">
+            EduHub
+          </h1>
+          <div className="w-16 h-1 bg-gradient-to-r from-blue-300 to-purple-300 rounded-full mx-auto"></div>
+        </motion.div>
+      </div>
 
-        {/* Navigation Links */}
-        <ul className="space-y-3">
-          {links.map((link) => {
-            const Icon = link.icon;
-            const isActive = pathname.startsWith(link.href); // highlight active route
+      {/* Navigation */}
+      <nav className="flex-1 px-6">
+        <motion.ul 
+          className="space-y-3"
+          initial="hidden"
+          animate="visible"
+          transition={{ staggerChildren: 0.1 }}
+        >
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = pathname === item.href || 
+              (item.href !== "/dashboard" && pathname.startsWith(item.href));
+
             return (
-              <motion.li key={link.href} variants={itemVariants}>
+              <motion.li key={item.href} variants={itemVariants}>
                 <Link
-                  href={link.href}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ease-in-out group
-                    ${
-                      isActive
-                        ? "bg-indigo-600 text-white shadow-md"
-                        : "text-gray-700 hover:bg-indigo-50 hover:text-indigo-700"
-                    }
-                  `}
-                >
-                  <Icon
-                    className={`h-6 w-6 ${
-                      isActive
-                        ? "text-white"
-                        : "text-gray-500 group-hover:text-indigo-600"
+                  href={item.href}
+                  className={`flex items-center gap-4 px-4 py-4 rounded-2xl text-lg font-semibold transition-all duration-300 group relative overflow-hidden
+                    ${isActive 
+                      ? "bg-white/20 text-white shadow-lg backdrop-blur-sm" 
+                      : "text-blue-100 hover:bg-white/10 hover:text-white hover:shadow-md"
                     }`}
-                  />
-                  <span className="font-medium text-lg">{link.label}</span>
+                >
+                  {/* Active indicator */}
+                  {isActive && (
+                    <motion.div
+                      className="absolute left-0 top-0 h-full w-1 bg-white rounded-r"
+                      layoutId="activeIndicator"
+                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    />
+                  )}
+                  
+                  <Icon className={`h-6 w-6 transition-transform duration-300 ${
+                    isActive ? "text-white scale-110" : "text-blue-200 group-hover:scale-110"
+                  }`} />
+                  
+                  <span className="relative z-10">{item.label}</span>
                 </Link>
               </motion.li>
             );
           })}
-        </ul>
-      </div>
+        </motion.ul>
+      </nav>
 
-      {/* Optional: Logout link at bottom */}
-      <div className="pt-6 border-t border-gray-100 mt-6">
-        <Link
-          href="/auth/login" // Replace with actual logout route or function
-          className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-red-50 hover:text-red-700 transition-all duration-200 ease-in-out group"
+      {/* User & Logout */}
+      <div className="p-6 border-t border-white/20">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="space-y-4"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6 text-gray-500 group-hover:text-red-600"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
+          {/* User Info */}
+          <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-white/10 backdrop-blur-sm">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center">
+              <span className="text-white font-bold text-sm">JD</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-white font-semibold text-sm truncate">John Doe</p>
+              <p className="text-blue-200 text-xs">Premium Member</p>
+            </div>
+          </div>
+
+          {/* Logout */}
+          <Link
+            href="/auth/login"
+            className="flex items-center gap-4 px-4 py-3 rounded-2xl text-blue-100 hover:bg-red-500/20 hover:text-white transition-all duration-300 group"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-            />
-          </svg>
-          <span className="font-medium text-lg">Logout</span>
-        </Link>
+            <ArrowRightOnRectangleIcon className="h-5 w-5 transition-transform duration-300 group-hover:scale-110" />
+            <span className="font-semibold">Logout</span>
+          </Link>
+        </motion.div>
       </div>
-    </motion.aside>
+    </div>
   );
 }
