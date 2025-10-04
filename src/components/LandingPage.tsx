@@ -63,7 +63,13 @@ export default function LandingPage() {
               Go to Dashboard
             </button>
           ) : (
-            <GoogleButton text="Sign in with Google" />
+             <button
+              
+              className="mt-8 px-8 py-4 bg-indigo-600 text-white font-bold rounded-full shadow-lg hover:bg-indigo-700 transition-all duration-300 transform hover:scale-105"
+            >
+              Get Started now
+            </button>
+            
           )}
         </section>
 
@@ -100,27 +106,6 @@ export default function LandingPage() {
               <p className="mt-2 text-gray-600 text-sm">{f.desc}</p>
             </div>
           ))}
-        </section>
-
-        {/* Final CTA */}
-        <section className="bg-indigo-600 text-white text-center rounded-2xl py-12 px-12 max-w-5xl mx-auto mb-16">
-          <h2 className="text-2xl md:text-3xl font-bold">
-            Ready to Start Learning?
-          </h2>
-          <p className="mt-2 text-lg">
-            Join thousands of students who are already improving their knowledge
-            with our quiz platform.
-          </p>
-          {isLoggedIn ? (
-            <button
-              onClick={handleCtaClick}
-              className="mt-6 px-6 py-3 bg-white text-indigo-700 font-medium rounded-xl shadow hover:bg-gray-100 transition"
-            >
-              Continue to Dashboard
-            </button>
-          ) : (
-            <GoogleButton text="Sign in with Google" />
-          )}
         </section>
       </div>
     </div>

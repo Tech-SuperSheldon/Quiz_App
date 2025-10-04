@@ -1,90 +1,128 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import Cookies from "js-cookie";
 
-export default function Register() {
-  const [name, setName] = useState("");
-  const [mobile, setMobile] = useState("");
-  const [className, setClassName] = useState("");
-  const [exam, setExam] = useState("");
-  const [email, setEmail] = useState("");
-
+export default function DummyRegister() {
   const router = useRouter();
+
+  const [name, setName] = useState("John Doe");
+  const [email, setEmail] = useState("john.doe@example.com");
+  const [mobile, setMobile] = useState("");
+  const [grade, setGrade] = useState("");
+  const [course, setCourse] = useState<"NAPLAN" | "ICAS" | "">("");
+  const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // ✅ Save all user data in cookies
-    Cookies.set("token", "logged_in", { expires: 7 });
-    Cookies.set("student_name", name, { expires: 7 });
-    Cookies.set("student_class", className, { expires: 7 });
-    Cookies.set("student_email", email, { expires: 7 });
-    Cookies.set("student_mobile", mobile, { expires: 7 }); // ✅ added
-    Cookies.set("student_exam", exam, { expires: 7 });     // ✅ added
+    if (!name || !email || !grade || !course) {
+      alert("Please fill all required fields!");
+      return;
+    }
 
-    // Redirect to dashboard
-    router.push("/dashboard/profile"); // 🔄 directly go to profile after register
+    console.log({ name, email, mobile, grade, course });
+    setSubmitted(true);
+
+    // Redirect to dashboard after 2 seconds
+    setTimeout(() => {
+      router.push("/dashboard");
+    }, 2000);
   };
 
+  if (submitted) {
+    return (
+      <div className="max-w-md mx-auto mt-20 bg-white/95 p-8 shadow-xl rounded-xl border border-gray-200 text-center">
+        <h2 className="text-2xl font-bold text-green-600 mb-4">
+          Registration Successful!
+        </h2>
+        <p className="text-gray-700">
+          Welcome, <span className="font-semibold">{name}</span>! You have
+          successfully registered for <span className="font-semibold">{course}</span> in {grade}.
+        </p>
+        <p className="mt-4 text-gray-500">Redirecting to your dashboard...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-md mx-auto mt-30 bg-white/95 p-8 shadow-xl rounded-xl border border-gray-200">
-      <h2 className="text-3xl font-extrabold mb-6 text-center text-gray-800">
-        Join Us Today
-      </h2>
+    <div className="max-w-md mx-auto mt-20 bg-white/95 p-8 shadow-xl rounded-xl border border-gray-200 text-center">
+      {/* Profile Picture */}
+      <div className="w-24 h-24 mx-auto mb-4 shadow rounded-full overflow-hidden">
+        <Image
+          src="/Final-Logo-bg-removed.png"
+          alt="Profile"
+          width={96}
+          height={96}
+          className="object-cover w-full h-full"
+          priority
+        />
+      </div>
+
+      {/* Greeting */}
+      <p className="text-gray-600 mb-2">
+        Hi, <span className="font-semibold">{name}</span>
+      </p>
+
+      {/* Registration Form */}
       <form className="space-y-5" onSubmit={handleSubmit}>
         <input
           type="text"
           placeholder="Full Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full border border-gray-300 px-4 py-3 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-gray-700 placeholder-gray-400 transition duration-200 ease-in-out"
+          className="w-full border border-gray-300 px-4 py-3 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
           required
         />
         <input
           type="email"
-          placeholder="Email Address"
+          placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full border border-gray-300 px-4 py-3 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-gray-700 placeholder-gray-400 transition duration-200 ease-in-out"
+          className="w-full border border-gray-300 px-4 py-3 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
           required
         />
         <input
           type="tel"
-          placeholder="Mobile Number"
+          placeholder="Mobile Number (Optional)"
           value={mobile}
           onChange={(e) => setMobile(e.target.value)}
-          className="w-full border border-gray-300 px-4 py-3 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-gray-700 placeholder-gray-400 transition duration-200 ease-in-out"
-          required
+          className="w-full border border-gray-300 px-4 py-3 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
         />
         <select
-          title="Class"
-          value={className}
-          onChange={(e) => setClassName(e.target.value)}
-          className="w-full border border-gray-300 px-4 py-3 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-gray-700 placeholder-gray-400 transition duration-200 ease-in-out bg-white"
+          title="Grade"
+          value={grade}
+          onChange={(e) => setGrade(e.target.value)}
+          className="w-full border border-gray-300 px-4 py-3 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white"
           required
         >
-          <option value="">Select Class</option>
-          <option value="9">Class 9</option>
-          <option value="10">Class 10</option>
-          <option value="11">Class 11</option>
-          <option value="12">Class 12</option>
+          <option value="">Select Grade</option>
+          {Array.from({ length: 12 }, (_, i) => (
+            <option key={i + 1} value={`Grade ${i + 1}`}>
+              Grade {i + 1}
+            </option>
+          ))}
         </select>
-        <input
-          type="text"
-          placeholder="Exam (e.g., JEE, NEET, Boards)"
-          value={exam}
-          onChange={(e) => setExam(e.target.value)}
-          className="w-full border border-gray-300 px-4 py-3 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-gray-700 placeholder-gray-400 transition duration-200 ease-in-out"
+        <label htmlFor="course" className="block text-left font-semibold text-gray-700">
+          Course
+        </label>
+        <select
+          id="course"
+          value={course}
+          onChange={(e) => setCourse(e.target.value as "NAPLAN" | "ICAS")}
+          className="w-full border border-gray-300 px-4 py-3 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white"
           required
-        />
-
+        >
+          <option value="">Select Course</option>
+          <option value="NAPLAN">NAPLAN</option>
+          <option value="ICAS">ICAS</option>
+        </select>
         <button
           type="submit"
           className="w-full py-3 rounded-lg text-white font-semibold transition duration-300 ease-in-out bg-[#e66e37] shadow-[0_4px_10px_rgba(230,110,55,0.4)] hover:bg-[#e68355]"
         >
-          Register
+          Complete Registration
         </button>
       </form>
     </div>
