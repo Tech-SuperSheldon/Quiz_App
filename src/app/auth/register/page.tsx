@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
@@ -10,26 +10,71 @@ export default function DummyRegister() {
   const [name, setName] = useState("John Doe");
   const [email, setEmail] = useState("john.doe@example.com");
   const [mobile, setMobile] = useState("");
+  const [picture, setPicture] = useState<string | null>(null);
   const [grade, setGrade] = useState("");
   const [course, setCourse] = useState<"NAPLAN" | "ICAS" | "">("");
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage(null);
 
     if (!name || !email || !grade || !course) {
-      alert("Please fill all required fields!");
+      setErrorMessage("Please fill all required fields!");
       return;
     }
 
-    console.log({ name, email, mobile, grade, course });
-    setSubmitted(true);
+    setIsSubmitting(true);
 
-    // Redirect to dashboard after 2 seconds
-    setTimeout(() => {
-      router.push("/dashboard");
-    }, 2000);
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ name, email, mobile, grade, course }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok && data && data.success) {
+        // Redirect to backend-provided path or default dashboard
+        const dest = data.redirectTo || "/dashboard";
+        router.replace(dest);
+        return;
+      }
+
+      // Show error
+      const msg = data?.error || data?.message || "Registration failed";
+      setErrorMessage(msg);
+    } catch (err: any) {
+      setErrorMessage(err?.message || "Registration failed");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  useEffect(() => {
+    // Fetch temporary Google user data (if present) from server-side cookie
+    const fetchTemp = async () => {
+      try {
+        const res = await fetch("/api/auth/user-data");
+        if (!res.ok) return;
+        const json = await res.json();
+        if (json?.found && json?.data) {
+          const d = json.data;
+          if (d.name) setName(d.name);
+          if (d.email) setEmail(d.email);
+          if (d.picture) setPicture(d.picture);
+        }
+      } catch (e) {
+        // ignore
+      }
+    };
+
+    fetchTemp();
+  }, []);
 
   if (submitted) {
     return (
@@ -39,7 +84,8 @@ export default function DummyRegister() {
         </h2>
         <p className="text-gray-700">
           Welcome, <span className="font-semibold">{name}</span>! You have
-          successfully registered for <span className="font-semibold">{course}</span> in {grade}.
+          successfully registered for{" "}
+          <span className="font-semibold">{course}</span> in {grade}.
         </p>
         <p className="mt-4 text-gray-500">Redirecting to your dashboard...</p>
       </div>
@@ -51,7 +97,7 @@ export default function DummyRegister() {
       {/* Profile Picture */}
       <div className="w-24 h-24 mx-auto mb-4 shadow rounded-full overflow-hidden">
         <Image
-          src="/Final-Logo-bg-removed.png"
+          src={picture || "/Final-Logo-bg-removed.png"}
           alt="Profile"
           width={96}
           height={96}
@@ -67,6 +113,11 @@ export default function DummyRegister() {
 
       {/* Registration Form */}
       <form className="space-y-5" onSubmit={handleSubmit}>
+        {errorMessage && (
+          <div className="text-sm text-red-600 bg-red-50 p-2 rounded">
+            {errorMessage}
+          </div>
+        )}
         <input
           type="text"
           placeholder="Full Name"
@@ -104,7 +155,10 @@ export default function DummyRegister() {
             </option>
           ))}
         </select>
-        <label htmlFor="course" className="block text-left font-semibold text-gray-700">
+        <label
+          htmlFor="course"
+          className="block text-left font-semibold text-gray-700"
+        >
           Course
         </label>
         <select
@@ -121,8 +175,9 @@ export default function DummyRegister() {
         <button
           type="submit"
           className="w-full py-3 rounded-lg text-white font-semibold transition duration-300 ease-in-out bg-[#e66e37] shadow-[0_4px_10px_rgba(230,110,55,0.4)] hover:bg-[#e68355]"
+          disabled={isSubmitting}
         >
-          Complete Registration
+          {isSubmitting ? "Registering..." : "Complete Registration"}
         </button>
       </form>
     </div>
