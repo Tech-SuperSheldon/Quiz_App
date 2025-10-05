@@ -5,6 +5,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { storeRegistrationData } from "@/utils/authStorage";
 
 export default function DummyRegister() {
   const router = useRouter();
@@ -15,7 +16,7 @@ export default function DummyRegister() {
   const [picture, setPicture] = useState<string | null>(null);
   const [grade, setGrade] = useState("");
   const [course, setCourse] = useState<"NAPLAN" | "ICAS" | "">("");
-  const [submitted, setSubmitted] = useState(false);
+  const [submitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -40,7 +41,16 @@ export default function DummyRegister() {
 
       const data = await res.json().catch(() => ({}));
 
-      if (res.ok && data && data.success) {
+      if (
+        res.ok &&
+        data &&
+        data.success &&
+        data.message === "User created successfully"
+      ) {
+        // Store registration data locally
+        if (data.token && data.user) {
+          storeRegistrationData(data);
+        }
         // Redirect to backend-provided path or default dashboard
         const dest = data.redirectTo || "/dashboard";
         // show a short success toast so user sees confirmation
@@ -59,8 +69,8 @@ export default function DummyRegister() {
       // Show error
       const msg = data?.error || data?.message || "Registration failed";
       setErrorMessage(msg);
-    } catch (err: any) {
-      setErrorMessage(err?.message || "Registration failed");
+    } catch (err: unknown) {
+      setErrorMessage("Registration failed");
     } finally {
       setIsSubmitting(false);
     }
@@ -73,14 +83,18 @@ export default function DummyRegister() {
         const res = await fetch("/api/auth/user-data");
         if (!res.ok) return;
         const json = await res.json();
+        console.log("Fetched user data:", json); // Debug log
         if (json?.found && json?.data) {
           const d = json.data;
           if (d.name) setName(d.name);
           if (d.email) setEmail(d.email);
-          if (d.picture) setPicture(d.picture);
+          if (d.picture) {
+            console.log("Setting picture:", d.picture); // Debug log
+            setPicture(d.picture);
+          }
         }
-      } catch (e) {
-        // ignore
+      } catch (error) {
+        console.error("Error fetching user data:", error);
       }
     };
 
@@ -115,6 +129,13 @@ export default function DummyRegister() {
           height={96}
           className="object-cover w-full h-full"
           priority
+          onError={(e) => {
+            console.error("Image failed to load:", picture);
+            console.error("Error:", e);
+          }}
+          onLoad={() => {
+            console.log("Image loaded successfully:", picture);
+          }}
         />
       </div>
 

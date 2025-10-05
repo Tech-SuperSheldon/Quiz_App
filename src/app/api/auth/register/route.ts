@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
 
     // Get user data from temp cookie (set by the Google auth route)
     const tempAuthCookie = req.cookies.get("temp-auth");
-    let googleData: any = {};
+    let googleData: Record<string, unknown> = {};
 
     if (tempAuthCookie) {
       try {
@@ -38,9 +38,10 @@ export async function POST(req: NextRequest) {
         backendUrlRaw = backendUrlRaw.replace(/\/login\/?$/, "/register");
       }
 
-      const backendUrl =
-        backendUrlRaw ||
-        "https://levelupbackend.supersheldon.online/api/users/register";
+      // Ensure BASE_URL ends with a single slash, then append the endpoint
+      let baseUrl = backendUrlRaw || process.env.BASE_URL || "";
+      baseUrl = baseUrl.replace(/\/+$/, ""); // Remove trailing slashes
+      const backendUrl = `${baseUrl}/api/users/register`;
 
       console.log("Register route posting to backend URL:", backendUrl);
 
@@ -76,26 +77,66 @@ export async function POST(req: NextRequest) {
         body: JSON.stringify(payload),
       });
 
-      const backendData = await backendResponse.json();
+      let backendData: unknown = null;
+      const contentType = backendResponse.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        backendData = await backendResponse.json();
+      } else {
+        // If not JSON, get text for debugging
+        const text = await backendResponse.text();
+        console.error("Backend returned non-JSON response:", text);
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Backend returned invalid response",
+            details: text,
+          },
+          { status: 502 }
+        );
+      }
 
       if (backendResponse.ok) {
         // Registration successful - set auth cookie and redirect to dashboard
+        const backendObj =
+          typeof backendData === "object" && backendData !== null
+            ? (backendData as Record<string, unknown>)
+            : {};
         const response = NextResponse.json({
           success: true,
-          user: {
-            name: finalName,
-            email: finalEmail,
-            mobile: mobile,
-            grade: grade,
-            course: course,
-            picture: googleData.picture || "",
-            googleId: googleData.googleId || "",
-            ...backendData, // Include backend response data
-          },
+          message: "User created successfully",
+          token: backendObj.token,
+          user: backendObj.user,
           redirectTo: "/dashboard",
         });
 
-        // Set authentication cookie
+        // Save backend token and user id into cookies
+        if (backendObj.token) {
+          response.cookies.set("token", backendObj.token as string, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            maxAge: 60 * 60 * 24 * 7, // 7 days
+          });
+        }
+        if (
+          backendObj.user &&
+          typeof backendObj.user === "object" &&
+          backendObj.user !== null &&
+          "id" in backendObj.user
+        ) {
+          response.cookies.set(
+            "user_id",
+            (backendObj.user as Record<string, unknown>)["id"] as string,
+            {
+              httpOnly: true,
+              secure: process.env.NODE_ENV === "production",
+              sameSite: "lax",
+              maxAge: 60 * 60 * 24 * 7, // 7 days
+            }
+          );
+        }
+
+        // Set authentication cookie (legacy)
         response.cookies.set(
           "auth-token",
           JSON.stringify({
@@ -106,7 +147,7 @@ export async function POST(req: NextRequest) {
             course: course,
             picture: googleData.picture || "",
             googleId: googleData.googleId || "",
-            ...backendData,
+            ...backendObj,
           }),
           {
             httpOnly: true,
@@ -131,7 +172,19 @@ export async function POST(req: NextRequest) {
           {
             success: false,
             error:
-              backendData.error || backendData.message || "Registration failed",
+              (typeof backendData === "object" &&
+              backendData !== null &&
+              "error" in backendData
+                ? ((backendData as Record<string, unknown>)["error"] as string)
+                : undefined) ||
+              (typeof backendData === "object" &&
+              backendData !== null &&
+              "message" in backendData
+                ? ((backendData as Record<string, unknown>)[
+                    "message"
+                  ] as string)
+                : undefined) ||
+              "Registration failed",
             details: backendData,
           },
           { status: backendResponse.status }

@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ found: false });
     }
 
-    let data: any = {};
+    let data: Record<string, unknown> = {};
     try {
       data = JSON.parse(tempAuthCookie.value);
     } catch (e) {

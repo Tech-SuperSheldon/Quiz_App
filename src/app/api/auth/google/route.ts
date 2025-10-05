@@ -9,142 +9,104 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No token provided" }, { status: 400 });
     }
 
-    // Decode the JWT token to get user info
-    try {
-      const base64Url = token.split(".")[1];
-      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-      const jsonPayload = decodeURIComponent(
-        atob(base64)
-          .split("")
-          .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-          .join("")
-      );
+    // Decode JWT token (Google credential)
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join("")
+    );
 
-      const userInfo = JSON.parse(jsonPayload);
-      console.log("Google user info:", userInfo);
+    const userInfo = JSON.parse(jsonPayload);
+    console.log("Google user info:", userInfo);
 
-      // Call your backend API with the email
-      try {
-        const backendResponse = await fetch(
-          `${process.env.BASE_URL}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: userInfo.email,
-          }),
-        });
+    // Use the picture URL from Google JWT token if available
+    let profilePicture = userInfo.picture || null;
+    console.log("Google JWT picture URL:", profilePicture);
 
-        const backendData = await backendResponse.json();
-
-        if (backendResponse.ok) {
-          // User exists in backend - set cookie and redirect to dashboard
-          const response = NextResponse.json({
-            success: true,
-            user: {
-              name: userInfo.name,
-              email: userInfo.email,
-              picture: userInfo.picture,
-              googleId: userInfo.sub,
-              ...backendData, // Include backend response data
-            },
-            redirectTo: "/dashboard", // Existing user goes to dashboard
-          });
-
-          // Set authentication cookie
-          response.cookies.set(
-            "auth-token",
-            JSON.stringify({
-              name: userInfo.name,
-              email: userInfo.email,
-              picture: userInfo.picture,
-              googleId: userInfo.sub,
-              ...backendData,
-            }),
-            {
-              httpOnly: true,
-              secure: process.env.NODE_ENV === "production",
-              sameSite: "lax",
-              maxAge: 60 * 60 * 24 * 7, // 7 days
-            }
-          );
-
-          return response;
-        } else {
-          // User doesn't exist in backend - redirect to register
-          const response = NextResponse.json({
-            success: true,
-            user: {
-              name: userInfo.name,
-              email: userInfo.email,
-              picture: userInfo.picture,
-              googleId: userInfo.sub,
-              backendError: backendData,
-            },
-            redirectTo: "/auth/register", // New user goes to register
-          });
-
-          // Set temporary cookie for registration
-          response.cookies.set(
-            "temp-auth",
-            JSON.stringify({
-              name: userInfo.name,
-              email: userInfo.email,
-              picture: userInfo.picture,
-              googleId: userInfo.sub,
-            }),
-            {
-              httpOnly: true,
-              secure: process.env.NODE_ENV === "production",
-              sameSite: "lax",
-              maxAge: 60 * 60, // 1 hour
-            }
-          );
-
-          return response;
-        }
-      } catch (backendError) {
-        console.error("Backend error:", backendError);
-        // Backend is not accessible, redirect to register with temp data
-        const response = NextResponse.json({
-          success: true,
-          user: {
-            name: userInfo.name,
-            email: userInfo.email,
-            picture: userInfo.picture,
-            googleId: userInfo.sub,
-            backendConnected: false,
-          },
-          redirectTo: "/auth/register", // Default to register when backend is down
-        });
-
-        // Set temporary cookie for registration
-        response.cookies.set(
-          "temp-auth",
-          JSON.stringify({
-            name: userInfo.name,
-            email: userInfo.email,
-            picture: userInfo.picture,
-            googleId: userInfo.sub,
-          }),
-          {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
-            maxAge: 60 * 60, // 1 hour
-          }
-        );
-
-        return response;
+    // Try backend login
+    const backendResponse = await fetch(
+      `${process.env.BASE_URL}api/users/login`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: userInfo.email }),
       }
-    } catch (decodeError) {
-      console.error("Error decoding JWT:", decodeError);
-      return NextResponse.json(
-        { error: "Failed to process Google credentials" },
-        { status: 400 }
+    );
+
+    const backendData = await backendResponse.json();
+
+    // Create base response object
+    const response = NextResponse.json({
+      success: true,
+      user: {
+        name: userInfo.name,
+        email: userInfo.email,
+        picture: profilePicture,
+        googleId: userInfo.sub,
+        ...backendData,
+      },
+      redirectTo: backendResponse.ok ? "/dashboard" : "/auth/register",
+    });
+
+    // ✅ Secure backend cookie (HTTP-only)
+    response.cookies.set(
+      "auth-token",
+      JSON.stringify({
+        name: userInfo.name,
+        email: userInfo.email,
+        picture: profilePicture,
+        googleId: userInfo.sub,
+        ...backendData,
+      }),
+      {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 60 * 60 * 24 * 7, // 7 days
+        path: "/",
+      }
+    );
+
+    // ✅ Frontend-readable cookie (for Header)
+    response.cookies.set(
+      "auth-client",
+      JSON.stringify({
+        name: userInfo.name,
+        email: userInfo.email,
+        picture: profilePicture,
+      }),
+      {
+        httpOnly: false, // readable in browser
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 60 * 60 * 24 * 7,
+        path: "/",
+      }
+    );
+
+    // ✅ Temporary cookie for registration page if backend didn't find user
+    if (!backendResponse.ok) {
+      response.cookies.set(
+        "temp-auth",
+        JSON.stringify({
+          name: userInfo.name,
+          email: userInfo.email,
+          picture: profilePicture,
+          googleId: userInfo.sub,
+        }),
+        {
+          httpOnly: true,
+          sameSite: "lax",
+          maxAge: 60 * 60,
+          path: "/",
+        }
       );
     }
+
+    return response;
   } catch (error) {
     console.error("Google auth route error:", error);
     return NextResponse.json(
