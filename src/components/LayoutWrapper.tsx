@@ -14,7 +14,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
   return (
     <>
       {showLayout && <Header />}
-      <main className={`flex-1 container mx-auto ${!showLayout ? "flex items-center justify-center gap-4" : ""}`}>
+      <main className={`flex-1  ${!showLayout ? "flex items-center justify-center gap-4" : ""}`}>
         {pathname === "/" && <LandingPage />}
         {children}
       </main>

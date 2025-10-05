@@ -5,85 +5,105 @@ import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 
 export default function Settings() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [mobile, setMobile] = useState("");
-  const [className, setClassName] = useState("");
-  const [exam, setExam] = useState("");
+  const [user, setUser] = useState({
+    name: "",
+    email: "",
+    mobile: "",
+    grade: "",
+    course: "",
+    picture: "",
+  });
 
   const router = useRouter();
 
-  // Load user data from cookies
+  // ✅ Load user data from "auth-client" cookie
   useEffect(() => {
-    setName(Cookies.get("student_name") || "");
-    setEmail(Cookies.get("student_email") || "");
-    setMobile(Cookies.get("student_mobile") || "");
-    setClassName(Cookies.get("student_class") || "");
-    setExam(Cookies.get("student_exam") || "");
+    try {
+      const storedData = Cookies.get("auth-client");
+      if (storedData) {
+        const parsed = JSON.parse(storedData);
+        setUser({
+          name: parsed.name || "",
+          email: parsed.email || "",
+          mobile: parsed.mobile || "",
+          grade: parsed.grade || "",
+          course: parsed.course || "",
+          picture: parsed.picture || "",
+        });
+      }
+    } catch (err) {
+      console.error("Failed to load user data:", err);
+    }
   }, []);
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Save updated data to cookies
-    Cookies.set("student_name", name, { expires: 7 });
-    Cookies.set("student_email", email, { expires: 7 });
-    Cookies.set("student_mobile", mobile, { expires: 7 });
-    Cookies.set("student_class", className, { expires: 7 });
-    Cookies.set("student_exam", exam, { expires: 7 });
+    // ✅ Save updated data back to cookie
+    Cookies.set("auth-client", JSON.stringify(user), {
+      expires: 7,
+      sameSite: "lax",
+    });
 
     alert("Settings updated successfully!");
-    router.push("/dashboard"); // Optional: redirect back
+    router.push("/dashboard");
   };
 
   return (
     <div className="max-w-md mx-auto mt-10 bg-white/95 p-6 shadow-lg rounded-lg">
-      <h2 className="text-2xl font-bold mb-4 text-center">Settings</h2>
+      <h2 className="text-2xl font-bold mb-4 text-center">Profile Settings</h2>
+
+      {user.picture && (
+        <div className="flex justify-center mb-4">
+          <img
+            src={user.picture}
+            alt="Profile"
+            className="w-24 h-24 rounded-full shadow-md"
+          />
+        </div>
+      )}
+
       <form className="space-y-4" onSubmit={handleSave}>
         <input
           type="text"
           placeholder="Full Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          value={user.name}
+          onChange={(e) => setUser({ ...user, name: e.target.value })}
           className="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
           required
         />
+
         <input
           type="email"
           placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          value={user.email}
+          onChange={(e) => setUser({ ...user, email: e.target.value })}
           className="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
           required
         />
+
         <input
           type="tel"
           placeholder="Mobile Number"
-          value={mobile}
-          onChange={(e) => setMobile(e.target.value)}
+          value={user.mobile}
+          onChange={(e) => setUser({ ...user, mobile: e.target.value })}
           className="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-          required
         />
-        <select
-          title="Class"
-          value={className}
-          onChange={(e) => setClassName(e.target.value)}
-          className="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-          required
-        >
-          <option value="">Select Class</option>
-          <option value="9">Class 9</option>
-          <option value="10">Class 10</option>
-          <option value="11">Class 11</option>
-          <option value="12">Class 12</option>
-        </select>
+
         <input
           type="text"
-          placeholder="Exam"
-          value={exam}
-          onChange={(e) => setExam(e.target.value)}
+          placeholder="Grade"
+          value={user.grade}
+          onChange={(e) => setUser({ ...user, grade: e.target.value })}
           className="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-          required
+        />
+
+        <input
+          type="text"
+          placeholder="Course"
+          value={user.course}
+          onChange={(e) => setUser({ ...user, course: e.target.value })}
+          className="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
         />
 
         <button

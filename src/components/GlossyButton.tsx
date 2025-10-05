@@ -14,48 +14,35 @@ const GlossyButton: React.FC<GlossyButtonProps> = ({
   className = "",
 }) => {
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (onClick) {
-      onClick(e); // Call the passed onClick function
-    }
+    onClick?.(e);
   };
 
   return (
     <button
       onClick={handleClick}
-      className={`relative overflow-hidden bg-[#e66e37] hover:bg-[#e68355] text-white font-semibold px-5 py-1 rounded-full border-2 border-[#3A1F10] shadow-[1px_2px_0_0_rgba(0,0,0,0.8)] focus:outline-none focus:ring-2 focus:ring-[#D16F3B] transition-all duration-200 inline-block text-sm sm:text-base ${className}`}
+      className={`relative overflow-hidden animate-pulse-glow
+      bg-gradient-to-r from-[#7021ef] via-[#a224ec] to-[#ab3eea] 
+      text-white font-semibold px-6 py-2 rounded-full 
+      border border-white/20 
+      shadow-[0_4px_15px_rgba(123,47,247,0.4)] 
+      hover:shadow-[0_0_25px_rgba(201,111,255,0.6)]
+      hover:scale-[1.05]
+      active:scale-[0.98]
+      transition-all duration-300 ease-out
+      backdrop-blur-[2px]
+      before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/25 before:to-transparent before:opacity-40 before:rounded-full
+      dark:bg-gradient-to-r dark:from-[#a855f7] dark:via-[#d946ef] dark:to-[#8b5cf6]
+      ${className}`}
     >
-      {children}
+      <span className="relative z-10">{children}</span>
 
-      {/* Single streak overlay */}
-      <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-50">
-        <div className="absolute top-0 left-[-150%] w-[250%] h-full animate-shine-slow">
-          <svg
-            viewBox="0 0 53 54"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-full h-full"
-          >
-            <g opacity="0.2">
-              <rect
-                x="31.3149"
-                y="-9"
-                width="11"
-                height="70"
-                transform="rotate(26.574 31.3149 -9)"
-                fill="#D9D9D9"
-              />
-              <rect
-                x="47.3149"
-                y="-7.4563"
-                width="6.30956"
-                height="70"
-                transform="rotate(26.574 47.3149 -7.4563)"
-                fill="#D9D9D9"
-              />
-            </g>
-          </svg>
-        </div>
+      {/* Glossy streak animation */}
+      <div className="absolute top-0 left-[-150%] w-[250%] h-full z-20 animate-shine">
+        <div className="w-full h-full bg-gradient-to-r from-transparent via-white/60 to-transparent blur-[2px] skew-x-[20deg] opacity-70"></div>
       </div>
+
+      {/* Inner reflection overlay */}
+      <div className="absolute inset-0 rounded-full bg-gradient-to-t from-black/10 to-white/10 opacity-40 mix-blend-overlay pointer-events-none"></div>
     </button>
   );
 };
