@@ -22,12 +22,19 @@ export async function POST(req: NextRequest) {
     const userInfo = JSON.parse(jsonPayload);
     console.log("Google user info:", userInfo);
 
+    // Use the picture URL from Google JWT token if available
+    let profilePicture = userInfo.picture || null;
+    console.log("Google JWT picture URL:", profilePicture);
+
     // Try backend login
-    const backendResponse = await fetch(`${process.env.BASE_URL}api/users/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: userInfo.email }),
-    });
+    const backendResponse = await fetch(
+      `${process.env.BASE_URL}api/users/login`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: userInfo.email }),
+      }
+    );
 
     const backendData = await backendResponse.json();
 
@@ -37,7 +44,7 @@ export async function POST(req: NextRequest) {
       user: {
         name: userInfo.name,
         email: userInfo.email,
-        picture: userInfo.picture,
+        picture: profilePicture,
         googleId: userInfo.sub,
         ...backendData,
       },
@@ -50,7 +57,7 @@ export async function POST(req: NextRequest) {
       JSON.stringify({
         name: userInfo.name,
         email: userInfo.email,
-        picture: userInfo.picture,
+        picture: profilePicture,
         googleId: userInfo.sub,
         ...backendData,
       }),
@@ -69,7 +76,7 @@ export async function POST(req: NextRequest) {
       JSON.stringify({
         name: userInfo.name,
         email: userInfo.email,
-        picture: userInfo.picture,
+        picture: profilePicture,
       }),
       {
         httpOnly: false, // readable in browser
@@ -80,14 +87,14 @@ export async function POST(req: NextRequest) {
       }
     );
 
-    // ✅ Temporary cookie for registration page if backend didn’t find user
+    // ✅ Temporary cookie for registration page if backend didn't find user
     if (!backendResponse.ok) {
       response.cookies.set(
         "temp-auth",
         JSON.stringify({
           name: userInfo.name,
           email: userInfo.email,
-          picture: userInfo.picture,
+          picture: profilePicture,
           googleId: userInfo.sub,
         }),
         {
@@ -102,6 +109,9 @@ export async function POST(req: NextRequest) {
     return response;
   } catch (error) {
     console.error("Google auth route error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }

@@ -77,7 +77,7 @@ export default function GoogleAuthWrapper({
       } else {
         toast.error(data.error || "Login failed");
       }
-  } catch (error: unknown) {
+    } catch (error: unknown) {
       console.error("Google login error:", error);
       toast.error("Google login failed");
     }
@@ -106,6 +106,10 @@ export default function GoogleAuthWrapper({
           onError={() => toast.error("Google login failed")}
           theme="filled_blue"
           size="large"
+          useOneTap={false}
+          auto_select={false}
+          cancel_on_tap_outside={true}
+          scope="openid email profile"
         />
       </div>
 

@@ -6,7 +6,12 @@ import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Cookies from "js-cookie";
 import Image from "next/image";
-import { FaUserCircle, FaCog, FaSignOutAlt, FaChevronDown } from "react-icons/fa";
+import {
+  FaUserCircle,
+  FaCog,
+  FaSignOutAlt,
+  FaChevronDown,
+} from "react-icons/fa";
 
 export default function Header() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -20,12 +25,15 @@ export default function Header() {
   // ✅ Load user data from "auth-client" cookie
   useEffect(() => {
     const clientCookie = Cookies.get("auth-client");
+    console.log("Header - auth-client cookie:", clientCookie); // Debug log
     if (clientCookie) {
       try {
         const user = JSON.parse(clientCookie);
+        console.log("Header - parsed user data:", user); // Debug log
         setUserEmail(user.email || null);
         setUserName(user.name || null);
         setUserPic(user.picture || null);
+        console.log("Header - set user picture:", user.picture); // Debug log
       } catch (err) {
         console.error("Error parsing auth-client cookie:", err);
       }
@@ -104,6 +112,16 @@ export default function Header() {
                     width={36}
                     height={36}
                     className="rounded-full border-2 border-purple-400 group-hover:border-pink-400 transition-colors duration-300"
+                    onError={(e) => {
+                      console.error("Header - Image failed to load:", userPic);
+                      console.error("Header - Error:", e);
+                    }}
+                    onLoad={() => {
+                      console.log(
+                        "Header - Image loaded successfully:",
+                        userPic
+                      );
+                    }}
                   />
                 ) : (
                   <div className="w-9 h-9 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">

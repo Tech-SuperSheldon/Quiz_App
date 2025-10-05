@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
 
     // Get user data from temp cookie (set by the Google auth route)
     const tempAuthCookie = req.cookies.get("temp-auth");
-  let googleData: Record<string, unknown> = {};
+    let googleData: Record<string, unknown> = {};
 
     if (tempAuthCookie) {
       try {
@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
         body: JSON.stringify(payload),
       });
 
-  let backendData: unknown = null;
+      let backendData: unknown = null;
       const contentType = backendResponse.headers.get("content-type");
       if (contentType && contentType.includes("application/json")) {
         backendData = await backendResponse.json();
@@ -98,36 +98,33 @@ export async function POST(req: NextRequest) {
 
       if (backendResponse.ok) {
         // Registration successful - set auth cookie and redirect to dashboard
-        const backendObj = typeof backendData === "object" && backendData !== null ? backendData as Record<string, unknown> : {};
+        const backendObj =
+          typeof backendData === "object" && backendData !== null
+            ? (backendData as Record<string, unknown>)
+            : {};
         const response = NextResponse.json({
           success: true,
-          user: {
-            name: finalName,
-            email: finalEmail,
-            mobile: mobile,
-            grade: grade,
-            course: course,
-            picture: googleData.picture || "",
-            googleId: googleData.googleId || "",
-            ...backendObj, // Include backend response data
-          },
+          message: "User created successfully",
+          token: backendObj.token,
+          user: backendObj.user,
           redirectTo: "/dashboard",
         });
 
         // Save backend token and user id into cookies
         if (backendObj.token) {
-          response.cookies.set(
-            "token",
-            backendObj.token as string,
-            {
-              httpOnly: true,
-              secure: process.env.NODE_ENV === "production",
-              sameSite: "lax",
-              maxAge: 60 * 60 * 24 * 7, // 7 days
-            }
-          );
+          response.cookies.set("token", backendObj.token as string, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            maxAge: 60 * 60 * 24 * 7, // 7 days
+          });
         }
-        if (backendObj.user && typeof backendObj.user === "object" && backendObj.user !== null && "id" in backendObj.user) {
+        if (
+          backendObj.user &&
+          typeof backendObj.user === "object" &&
+          backendObj.user !== null &&
+          "id" in backendObj.user
+        ) {
           response.cookies.set(
             "user_id",
             (backendObj.user as Record<string, unknown>)["id"] as string,
@@ -176,8 +173,18 @@ export async function POST(req: NextRequest) {
           {
             success: false,
             error:
-              (typeof backendData === "object" && backendData !== null && "error" in backendData ? (backendData as Record<string, unknown>)["error"] as string : undefined) ||
-              (typeof backendData === "object" && backendData !== null && "message" in backendData ? (backendData as Record<string, unknown>)["message"] as string : undefined) ||
+              (typeof backendData === "object" &&
+              backendData !== null &&
+              "error" in backendData
+                ? ((backendData as Record<string, unknown>)["error"] as string)
+                : undefined) ||
+              (typeof backendData === "object" &&
+              backendData !== null &&
+              "message" in backendData
+                ? ((backendData as Record<string, unknown>)[
+                    "message"
+                  ] as string)
+                : undefined) ||
               "Registration failed",
             details: backendData,
           },
