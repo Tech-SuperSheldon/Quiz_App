@@ -6,12 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Cookies from "js-cookie";
 import Image from "next/image";
-import {
-  FaUserCircle,
-  FaCog,
-  FaSignOutAlt,
-  FaChevronDown,
-} from "react-icons/fa";
+import { FaUserCircle, FaSignOutAlt, FaChevronDown } from "react-icons/fa";
 
 export default function Header() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -165,18 +160,6 @@ export default function Header() {
                     </div>
 
                     <div className="p-2">
-                      <motion.button
-                        onClick={() => {
-                          router.push("/dashboard/settings");
-                          setDropdownOpen(false);
-                        }}
-                        className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-all duration-200 group"
-                        whileHover={{ x: 2 }}
-                      >
-                        <FaCog className="text-gray-500 group-hover:text-indigo-500 transition-colors" />
-                        <span>Settings</span>
-                      </motion.button>
-
                       <motion.button
                         onClick={handleLogout}
                         className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200 group"

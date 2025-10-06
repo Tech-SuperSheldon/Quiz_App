@@ -30,7 +30,6 @@ export default function ProfilePage() {
     // are also being set in cookies in your Register component if you want them here.
     setStudentMobile(Cookies.get("student_mobile") || "N/A");
     setStudentExam(Cookies.get("student_exam") || "N/A");
-
   }, [router]);
 
   return (
@@ -46,14 +45,6 @@ export default function ProfilePage() {
         <ProfileDetail label="Class" value={`Class ${studentClass}`} />
         <ProfileDetail label="Exam" value={studentExam} />
       </div>
-
-      <div className="mt-8 text-center">
-        <Link href="/dashboard/settings"
-            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
-        >
-            Edit Profile
-        </Link>
-      </div>
     </div>
   );
 }
@@ -62,8 +53,12 @@ export default function ProfilePage() {
 function ProfileDetail({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center py-3 border-b border-gray-100 last:border-b-0">
-      <p className="w-full sm:w-1/3 text-lg font-medium text-gray-600">{label}:</p>
-      <p className="w-full sm:w-2/3 text-lg text-gray-800 break-words">{value}</p>
+      <p className="w-full sm:w-1/3 text-lg font-medium text-gray-600">
+        {label}:
+      </p>
+      <p className="w-full sm:w-2/3 text-lg text-gray-800 break-words">
+        {value}
+      </p>
     </div>
   );
 }

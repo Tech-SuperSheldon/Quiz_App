@@ -7,32 +7,35 @@ import Cookies from "js-cookie";
 export default function LandingPage() {
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    const token = Cookies.get("token");
-    setIsLoggedIn(!!token);
-  }, []);
+    // Set client flag to prevent hydration mismatch
+    setIsClient(true);
 
-  const handleCtaClick = () => {
-    if (isLoggedIn) {
-      router.push("/dashboard");
+    // Use the same logic as Header component - check auth-client cookie
+    const clientCookie = Cookies.get("auth-client");
+    if (clientCookie) {
+      try {
+        const user = JSON.parse(clientCookie);
+        setIsLoggedIn(!!user.email);
+      } catch (err) {
+        console.error("Error parsing auth-client cookie:", err);
+        setIsLoggedIn(false);
+      }
     } else {
-      router.push("/register");
+      setIsLoggedIn(false);
     }
-  };
-
-  const handleGoogleSignIn = () => {
-    router.push("/auth/google");
-  };
+  }, []);
 
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.2
-      }
-    }
+        staggerChildren: 0.2,
+      },
+    },
   };
 
   const itemVariants = {
@@ -42,9 +45,9 @@ export default function LandingPage() {
       y: 0,
       transition: {
         duration: 0.6,
-        ease: "easeOut"
-      }
-    }
+        ease: "easeOut",
+      },
+    },
   };
 
   const features = [
@@ -52,26 +55,26 @@ export default function LandingPage() {
       title: "Multiple Topics",
       desc: "Choose from a wide variety of subjects and topics to test your knowledge across different domains.",
       icon: "📖",
-      color: "from-blue-500 to-cyan-500"
+      color: "from-blue-500 to-cyan-500",
     },
     {
       title: "Timed Challenges",
       desc: "Set your own time limits and challenge yourself to answer quickly and accurately under pressure.",
       icon: "⏱️",
-      color: "from-green-500 to-emerald-500"
+      color: "from-green-500 to-emerald-500",
     },
     {
       title: "Leaderboards",
       desc: "Compete with other students globally and see how you rank on our interactive leaderboards.",
       icon: "🏆",
-      color: "from-amber-500 to-orange-500"
+      color: "from-amber-500 to-orange-500",
     },
     {
       title: "Progress Tracking",
       desc: "Track your learning journey with detailed analytics and performance insights.",
       icon: "📊",
-      color: "from-purple-500 to-pink-500"
-    }
+      color: "from-purple-500 to-pink-500",
+    },
   ];
 
   return (
@@ -100,18 +103,17 @@ export default function LandingPage() {
             >
               Master Your Knowledge
             </motion.h1>
-            
+
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
               className="text-lg md:text-xl text-gray-600 dark:text-gray-300 leading-relaxed max-w-3xl mx-auto"
             >
-              Elevate your learning experience with interactive quizzes, personalized challenges, 
-              and comprehensive progress tracking. Join thousands of students already mastering their subjects.
+              Elevate your learning experience with interactive quizzes,
+              personalized challenges, and comprehensive progress tracking. Join
+              thousands of students already mastering their subjects.
             </motion.p>
-
-  
 
             {/* Stats */}
             <motion.div
@@ -124,7 +126,7 @@ export default function LandingPage() {
                 { number: "10K+", label: "Active Students" },
                 { number: "500+", label: "Quizzes" },
                 { number: "50+", label: "Subjects" },
-                { number: "98%", label: "Success Rate" }
+                { number: "98%", label: "Success Rate" },
               ].map((stat, index) => (
                 <motion.div
                   key={index}
@@ -140,6 +142,44 @@ export default function LandingPage() {
                 </motion.div>
               ))}
             </motion.div>
+
+            {/* CTA Section - Only show for logged-in users on client side */}
+            {isClient && isLoggedIn && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+                className="mt-12 flex justify-center items-center"
+              >
+                <motion.button
+                  onClick={() => router.push("/dashboard")}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-3"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 5a2 2 0 012-2h4a2 2 0 012 2v2H8V5z"
+                    />
+                  </svg>
+                  Go to Dashboard
+                </motion.button>
+              </motion.div>
+            )}
           </motion.div>
         </section>
 
@@ -152,15 +192,13 @@ export default function LandingPage() {
             viewport={{ once: true }}
             className="max-w-7xl mx-auto"
           >
-            <motion.div
-              variants={itemVariants}
-              className="text-center mb-12"
-            >
+            <motion.div variants={itemVariants} className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">
                 Why Choose Our Platform?
               </h2>
               <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                Designed for modern learners with features that make studying effective and enjoyable.
+                Designed for modern learners with features that make studying
+                effective and enjoyable.
               </p>
             </motion.div>
 
@@ -169,19 +207,23 @@ export default function LandingPage() {
                 <motion.div
                   key={index}
                   variants={itemVariants}
-                  whileHover={{ 
+                  whileHover={{
                     scale: 1.03,
                     y: -5,
-                    transition: { duration: 0.2 }
+                    transition: { duration: 0.2 },
                   }}
                   className="group relative overflow-hidden"
                 >
                   {/* Background Glow Effect */}
-                  <div className={`absolute inset-0 bg-gradient-to-r ${feature.color} opacity-0 group-hover:opacity-5 blur-xl transition-opacity duration-500`}></div>
-                  
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-r ${feature.color} opacity-0 group-hover:opacity-5 blur-xl transition-opacity duration-500`}
+                  ></div>
+
                   <div className="relative p-6 bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-2xl border border-gray-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-xl transition-all duration-500 h-full">
                     {/* Icon */}
-                    <div className={`inline-flex p-3 rounded-xl bg-gradient-to-r ${feature.color} shadow-lg mb-4`}>
+                    <div
+                      className={`inline-flex p-3 rounded-xl bg-gradient-to-r ${feature.color} shadow-lg mb-4`}
+                    >
                       <span className="text-2xl">{feature.icon}</span>
                     </div>
 
@@ -189,13 +231,15 @@ export default function LandingPage() {
                     <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-indigo-600 group-hover:to-purple-600 group-hover:bg-clip-text transition-all duration-300">
                       {feature.title}
                     </h3>
-                    
+
                     <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
                       {feature.desc}
                     </p>
 
                     {/* Hover Border Effect */}
-                    <div className={`absolute inset-0 rounded-2xl bg-gradient-to-r ${feature.color} opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10`}>
+                    <div
+                      className={`absolute inset-0 rounded-2xl bg-gradient-to-r ${feature.color} opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10`}
+                    >
                       <div className="absolute inset-[2px] rounded-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg"></div>
                     </div>
                   </div>
@@ -204,8 +248,6 @@ export default function LandingPage() {
             </div>
           </motion.div>
         </section>
-
-
       </div>
     </div>
   );
