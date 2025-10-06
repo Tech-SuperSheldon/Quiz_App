@@ -100,20 +100,27 @@ export default function GoogleAuthWrapper({
     <GoogleOAuthProvider clientId={clientId}>
       {children}
 
-      <div className="flex justify-center mt-4">
+      <div className="flex justify-center">
         <GoogleLogin
           onSuccess={handleSuccess}
           onError={() => toast.error("Google login failed")}
-          theme="filled_blue"
+          theme="outline"
           size="large"
           useOneTap={false}
           auto_select={false}
           cancel_on_tap_outside={true}
           scope="openid email profile"
+          shape="rectangular"
+          width="100%"
         />
       </div>
 
-      <ToastContainer position="top-right" autoClose={3000} />
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        toastClassName="bg-white dark:bg-slate-800 text-gray-800 dark:text-white border border-gray-200 dark:border-slate-700"
+        progressClassName="bg-gradient-to-r from-indigo-600 to-purple-600"
+      />
     </GoogleOAuthProvider>
   );
 }

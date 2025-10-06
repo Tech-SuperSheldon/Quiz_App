@@ -27,7 +27,6 @@ export default function LandingPage() {
       setIsLoggedIn(false);
     }
   }, []);
-
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -143,7 +142,7 @@ export default function LandingPage() {
               ))}
             </motion.div>
 
-            {/* CTA Section - Only show for logged-in users on client side */}
+            {/* Go to Dashboard Button - Only show for logged-in users (same logic as profile visibility) */}
             {isClient && isLoggedIn && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
