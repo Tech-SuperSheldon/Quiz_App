@@ -10,8 +10,8 @@ import { storeRegistrationData } from "@/utils/authStorage";
 export default function DummyRegister() {
   const router = useRouter();
 
-  const [name, setName] = useState("John Doe");
-  const [email, setEmail] = useState("john.doe@example.com");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [mobile, setMobile] = useState("");
   const [picture, setPicture] = useState<string | null>(null);
   const [grade, setGrade] = useState("");
@@ -19,6 +19,12 @@ export default function DummyRegister() {
   const [submitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Auto-fill from Google sign-in data (temp-auth cookie)
+  useEffect(() => {
+    // This will be handled by the existing Google auth flow
+    // The temp-auth cookie contains Google user data for registration
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
