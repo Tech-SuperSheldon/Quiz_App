@@ -1,19 +1,17 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import Cookies from "js-cookie";
 
 export default function LandingPage() {
   const router = useRouter();
+  const pathname = usePathname();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isClient, setIsClient] = useState(false);
 
-  useEffect(() => {
-    // Set client flag to prevent hydration mismatch
-    setIsClient(true);
-
-    // Use the same logic as Header component - check auth-client cookie
+  // Check authentication status - same logic as Header component
+  const checkAuthStatus = () => {
     const clientCookie = Cookies.get("auth-client");
     if (clientCookie) {
       try {
@@ -26,6 +24,32 @@ export default function LandingPage() {
     } else {
       setIsLoggedIn(false);
     }
+  };
+
+  useEffect(() => {
+    // Set client flag to prevent hydration mismatch
+    setIsClient(true);
+
+    // Check auth status on mount and when pathname changes (like Header does)
+    checkAuthStatus();
+  }, [pathname]);
+
+  // Listen for storage changes (when user logs out from another tab/window)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      checkAuthStatus();
+    };
+
+    // Listen for storage events (cookies are part of storage)
+    window.addEventListener("storage", handleStorageChange);
+
+    // Also check periodically in case of cookie changes
+    const interval = setInterval(checkAuthStatus, 1000);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      clearInterval(interval);
+    };
   }, []);
   const containerVariants = {
     hidden: { opacity: 0 },
