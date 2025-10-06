@@ -20,18 +20,27 @@ interface Question {
   question_attempted: boolean;
 }
 
-interface QuizProps {
-  onComplete?: (results: any) => void;
+interface QuizResult {
+  is_correct: boolean;
+  correct_answer: string;
+  explanation: string;
+  question_id: string;
+  user_answer: string;
+  time_spent: number;
 }
 
-export default function Quiz({ onComplete }: QuizProps) {
+interface QuizProps {
+  onComplete?: (results: QuizResult) => void;
+}
+
+export default function Quiz({}: QuizProps) {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showResult, setShowResult] = useState(false);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<QuizResult | null>(null);
   const [timeSpent, setTimeSpent] = useState(0);
   const [quizStarted, setQuizStarted] = useState(false);
   const [isGeneratingMore, setIsGeneratingMore] = useState(false);
@@ -437,7 +446,7 @@ export default function Quiz({ onComplete }: QuizProps) {
   };
 
   const getOptionColor = (option: string) => {
-    if (!showResult) return "bg-white hover:bg-gray-50";
+    if (!showResult || !result) return "bg-white hover:bg-gray-50";
 
     if (option === result.correct_answer) {
       return "bg-green-100 border-green-500 text-green-800";
@@ -475,9 +484,9 @@ export default function Quiz({ onComplete }: QuizProps) {
                 Welcome to the Quiz!
               </h1>
               <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-                Test your knowledge with our comprehensive quiz. You'll start
-                with 10 questions, and more will be generated automatically as
-                you progress through the quiz.
+                Test your knowledge with our comprehensive quiz. You&apos;ll
+                start with 10 questions, and more will be generated
+                automatically as you progress through the quiz.
               </p>
             </div>
 

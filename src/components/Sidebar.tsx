@@ -8,9 +8,7 @@ import {
   BookOpenIcon,
   AcademicCapIcon,
   TrophyIcon,
-  UserCircleIcon,
   ArrowRightOnRectangleIcon,
-  Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
 
 export default function Sidebar() {

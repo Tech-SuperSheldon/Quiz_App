@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     console.log("Google user info:", userInfo);
 
     // Use the picture URL from Google JWT token if available
-    let profilePicture = userInfo.picture || null;
+    const profilePicture = userInfo.picture || null;
     console.log("Google JWT picture URL:", profilePicture);
 
     // Try backend login

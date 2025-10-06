@@ -69,7 +69,7 @@ export default function DummyRegister() {
       // Show error
       const msg = data?.error || data?.message || "Registration failed";
       setErrorMessage(msg);
-    } catch (err: unknown) {
+    } catch {
       setErrorMessage("Registration failed");
     } finally {
       setIsSubmitting(false);

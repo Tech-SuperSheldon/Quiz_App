@@ -74,7 +74,7 @@ const Footer: React.FC = () => {
                 { href: "https://wa.me/917974695618", icon: FaWhatsapp, color: "hover:text-green-500", label: "WhatsApp" },
                 { href: "https://www.linkedin.com/company/super-sheldon/", icon: FaLinkedin, color: "hover:text-blue-600", label: "LinkedIn" },
                 { href: "https://www.youtube.com/@SuperSheldon-Education", icon: FaYoutube, color: "hover:text-red-600", label: "YouTube" }
-              ].map((social, index) => (
+              ].map((social) => (
                 <motion.div
                   key={social.label}
                   whileHover={{ scale: 1.1 }}

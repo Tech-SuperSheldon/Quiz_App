@@ -4,7 +4,6 @@
 import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation"; // Import useRouter for redirection
-import Link from "next/link";
 export default function ProfilePage() {
   const [studentName, setStudentName] = useState("N/A");
   const [studentClass, setStudentClass] = useState("N/A");
