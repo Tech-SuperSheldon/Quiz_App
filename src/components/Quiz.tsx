@@ -386,17 +386,6 @@ export default function Quiz({}: QuizProps) {
           }
 
           questionsGenerated = true;
-          console.log(
-            `➡️ AUTO-ADVANCE: Moving to question ${
-              nextIndex + 1
-            } after generating new questions`
-          );
-          setCurrentQuestionIndex(nextIndex);
-          setSelectedAnswer(null);
-          setShowResult(false);
-          setResult(null);
-          setTimeSpent(0);
-          return; // Exit early since we've already moved to next question
         } else {
           console.log(
             `⚠️ WARNING: No new questions generated for stage ${currentStage}, continuing with existing questions`
@@ -415,34 +404,31 @@ export default function Quiz({}: QuizProps) {
       }
     }
 
-    // Only advance to next question if no new questions were generated
-    // (if new questions were generated, we already advanced above)
-    if (!questionsGenerated) {
-      console.log(`➡️ ADVANCING: Moving to question ${nextIndex + 1}`);
-      setCurrentQuestionIndex(nextIndex);
+    // Always advance to next question (whether new questions were generated or not)
+    console.log(`➡️ ADVANCING: Moving to question ${nextIndex + 1}`);
+    setCurrentQuestionIndex(nextIndex);
 
-      // Check if the next question was already attempted
-      if (userAnswers[nextIndex]) {
-        // Show the previous answer and result for attempted questions
-        setSelectedAnswer(userAnswers[nextIndex]);
-        const nextResult = questionResults[nextIndex];
-        setResult({
-          is_correct: nextResult === "correct",
-          correct_answer: questions[nextIndex].correct_answer,
-          explanation: questions[nextIndex].explanation,
-          question_id: questions[nextIndex].question_id,
-          user_answer: userAnswers[nextIndex],
-          time_spent: 0,
-        });
-        setShowResult(true);
-      } else {
-        // Reset for unattempted questions
-        setSelectedAnswer(null);
-        setShowResult(false);
-        setResult(null);
-      }
-      setTimeSpent(0);
+    // Check if the next question was already attempted
+    if (userAnswers[nextIndex]) {
+      // Show the previous answer and result for attempted questions
+      setSelectedAnswer(userAnswers[nextIndex]);
+      const nextResult = questionResults[nextIndex];
+      setResult({
+        is_correct: nextResult === "correct",
+        correct_answer: questions[nextIndex].correct_answer,
+        explanation: questions[nextIndex].explanation,
+        question_id: questions[nextIndex].question_id,
+        user_answer: userAnswers[nextIndex],
+        time_spent: 0,
+      });
+      setShowResult(true);
+    } else {
+      // Reset for unattempted questions
+      setSelectedAnswer(null);
+      setShowResult(false);
+      setResult(null);
     }
+    setTimeSpent(0);
   };
 
   const getOptionColor = (option: string) => {

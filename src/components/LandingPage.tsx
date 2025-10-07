@@ -1,56 +1,7 @@
 "use client";
-import { useState, useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import Cookies from "js-cookie";
 
 export default function LandingPage() {
-  const router = useRouter();
-  const pathname = usePathname();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isClient, setIsClient] = useState(false);
-
-  // Check authentication status - same logic as Header component
-  const checkAuthStatus = () => {
-    const clientCookie = Cookies.get("auth-client");
-    if (clientCookie) {
-      try {
-        const user = JSON.parse(clientCookie);
-        setIsLoggedIn(!!user.email);
-      } catch (err) {
-        console.error("Error parsing auth-client cookie:", err);
-        setIsLoggedIn(false);
-      }
-    } else {
-      setIsLoggedIn(false);
-    }
-  };
-
-  useEffect(() => {
-    // Set client flag to prevent hydration mismatch
-    setIsClient(true);
-
-    // Check auth status on mount and when pathname changes (like Header does)
-    checkAuthStatus();
-  }, [pathname]);
-
-  // Listen for storage changes (when user logs out from another tab/window)
-  useEffect(() => {
-    const handleStorageChange = () => {
-      checkAuthStatus();
-    };
-
-    // Listen for storage events (cookies are part of storage)
-    window.addEventListener("storage", handleStorageChange);
-
-    // Also check periodically in case of cookie changes
-    const interval = setInterval(checkAuthStatus, 1000);
-
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-      clearInterval(interval);
-    };
-  }, []);
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -165,44 +116,6 @@ export default function LandingPage() {
                 </motion.div>
               ))}
             </motion.div>
-
-            {/* Go to Dashboard Button - Only show for logged-in users (same logic as profile visibility) */}
-            {isClient && isLoggedIn && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
-                className="mt-12 flex justify-center items-center"
-              >
-                <motion.button
-                  onClick={() => router.push("/dashboard")}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-3"
-                >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M8 5a2 2 0 012-2h4a2 2 0 012 2v2H8V5z"
-                    />
-                  </svg>
-                  Go to Dashboard
-                </motion.button>
-              </motion.div>
-            )}
           </motion.div>
         </section>
 
