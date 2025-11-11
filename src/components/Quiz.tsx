@@ -3,6 +3,9 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getAuthData } from "@/utils/authStorage";
+import { HARDCODED_QUESTIONS } from "@/hardcodedQuestions";
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:5000";
 
 interface Question {
   question_id: string;
@@ -79,13 +82,13 @@ export default function Quiz({}: QuizProps) {
         num_questions: 10,
       });
 
-      const response = await fetch("/api/quiz/generate", {
+      const response = await fetch(`${API_BASE_URL}/api/questions/generate`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${authData.token}`,
         },
         body: JSON.stringify({
-          token: authData.token,
           user_id: authData.userId,
           course_type: "Naplap",
           stage_number: stageNumber,
@@ -133,197 +136,280 @@ export default function Quiz({}: QuizProps) {
     }
   };
 
+  // const startQuiz = async () => {
+  //   console.log(`🚀 QUIZ START: Starting quiz for user`);
+  //   setIsLoading(true);
+  //   try {
+  //     // Always start with stage 1, the generateQuestions function will handle stage progression
+  //     console.log(
+  //       `🚀 QUIZ START: Calling generateQuestions(1) to get initial questions`
+  //     );
+  //     const newQuestions = await generateQuestions(1);
+
+  //     if (newQuestions && newQuestions.length > 0) {
+  //       setQuestions(newQuestions);
+  //       setQuizStarted(true);
+  //       // Log details about the first question to check its status
+  //       if (newQuestions[0]) {
+  //         console.log(
+  //           `📋 INITIAL QUESTION DETAILS: First question ID: ${newQuestions[0].question_id}`
+  //         );
+  //         console.log(
+  //           `📋 INITIAL QUESTION DETAILS: Question attempted: ${newQuestions[0].question_attempted}`
+  //         );
+  //         console.log(
+  //           `📋 INITIAL QUESTION DETAILS: User answer: ${newQuestions[0].user_answer}`
+  //         );
+  //         console.log(
+  //           `📋 INITIAL QUESTION DETAILS: Stage number: ${newQuestions[0].stage_number}`
+  //         );
+  //       }
+  //     } else {
+  //       // If no questions generated (all stages already have questions)
+  //       console.log("No questions generated after trying all stages");
+  //       alert("Unable to generate questions. Please try again later.");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error starting quiz:", error);
+  //     alert("Failed to start quiz. Please try again.");
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
+
   const startQuiz = async () => {
-    console.log(`🚀 QUIZ START: Starting quiz for user`);
-    setIsLoading(true);
-    try {
-      // Always start with stage 1, the generateQuestions function will handle stage progression
-      console.log(
-        `🚀 QUIZ START: Calling generateQuestions(1) to get initial questions`
-      );
-      const newQuestions = await generateQuestions(1);
+  console.log(`🚀 QUIZ START: Starting quiz for user`);
+  setIsLoading(true);
 
-      if (newQuestions && newQuestions.length > 0) {
-        setQuestions(newQuestions);
-        setQuizStarted(true);
-        // Log details about the first question to check its status
-        if (newQuestions[0]) {
-          console.log(
-            `📋 INITIAL QUESTION DETAILS: First question ID: ${newQuestions[0].question_id}`
-          );
-          console.log(
-            `📋 INITIAL QUESTION DETAILS: Question attempted: ${newQuestions[0].question_attempted}`
-          );
-          console.log(
-            `📋 INITIAL QUESTION DETAILS: User answer: ${newQuestions[0].user_answer}`
-          );
-          console.log(
-            `📋 INITIAL QUESTION DETAILS: Stage number: ${newQuestions[0].stage_number}`
-          );
-        }
-      } else {
-        // If no questions generated (all stages already have questions)
-        console.log("No questions generated after trying all stages");
-        alert("Unable to generate questions. Please try again later.");
-      }
-    } catch (error) {
-      console.error("Error starting quiz:", error);
-      alert("Failed to start quiz. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const submitAnswer = async () => {
-    if (!selectedAnswer || !currentQuestion) return;
-
-    // Prevent submitting answer for already attempted questions
-    if (userAnswers[currentQuestionIndex]) {
-      console.log(
-        `⚠️ SUBMIT BLOCKED: Question ${
-          currentQuestionIndex + 1
-        } already attempted`
-      );
-      return;
+  try {
+    const authData = getAuthData();
+    if (!authData) {
+      throw new Error("Authentication required");
     }
 
-    setIsSubmitting(true);
-    try {
-      const authData = getAuthData();
-      if (!authData) {
-        throw new Error("Authentication required");
-      }
+    const userCourse = authData.courseType || "Naplan"; // fallback if not stored
+    console.log(`🎯 User course type detected: ${userCourse}`);
 
+    // 🧠 Use hardcoded first batch
+    const initialQuestions =
+      HARDCODED_QUESTIONS[userCourse.toUpperCase()] ||
+      HARDCODED_QUESTIONS["NAPLAN"];
+
+    console.log(
+      `📘 Loaded ${initialQuestions.length} hardcoded questions for ${userCourse}`
+    );
+
+    // Set them directly — no backend call for stage 1
+    setQuestions(initialQuestions);
+    setQuizStarted(true);
+
+    // Logging for debug
+    if (initialQuestions[0]) {
       console.log(
-        `📤 SUBMIT ANSWER: Submitting answer for question ${
-          currentQuestionIndex + 1
-        } (ID: ${currentQuestion.question_id})`
+        `📋 INITIAL HARDCODED QUESTION: ${initialQuestions[0].question_name}`
       );
-      console.log(
-        `📤 SUBMIT ANSWER: Answer: "${selectedAnswer}", Time: ${timeSpent}s`
-      );
-      console.log(`📤 SUBMIT ANSWER: Request body:`, {
-        token: authData.token ? "***TOKEN***" : "NO_TOKEN",
+    }
+  } catch (error) {
+    console.error("Error starting quiz:", error);
+    alert("Failed to start quiz. Please try again.");
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+// ✅ Utility to detect if a question is hardcoded
+const isHardcodedQuestion = (questionId: string) => {
+  return (
+    questionId.startsWith("naplan_q") ||
+    questionId.startsWith("isac_q")
+  );
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const submitAnswer = async () => {
+  if (!selectedAnswer || !currentQuestion) return;
+
+  // Prevent submitting answer for already attempted questions
+  if (userAnswers[currentQuestionIndex]) {
+    console.log(
+      `⚠️ SUBMIT BLOCKED: Question ${
+        currentQuestionIndex + 1
+      } already attempted`
+    );
+    return;
+  }
+
+  setIsSubmitting(true);
+  try {
+    const authData = getAuthData();
+    if (!authData) {
+      throw new Error("Authentication required");
+    }
+
+    console.log(
+      `📤 SUBMIT ANSWER: Submitting answer for question ${
+        currentQuestionIndex + 1
+      } (ID: ${currentQuestion.question_id})`
+    );
+
+    // ✅ Detect hardcoded questions correctly
+    const isHardcoded =
+      currentQuestion.is_hardcoded ||
+      /^naplan_/i.test(currentQuestion.question_id) ||
+      /^isac_/i.test(currentQuestion.question_id);
+
+    if (isHardcoded) {
+      console.log("🧠 Using local evaluation for hardcoded question");
+
+      const is_correct =
+        selectedAnswer.trim().toLowerCase() ===
+        currentQuestion.correct_answer.trim().toLowerCase();
+
+      const mockResult = {
+        is_correct,
+        correct_answer: currentQuestion.correct_answer,
+        explanation: currentQuestion.explanation,
         question_id: currentQuestion.question_id,
         user_answer: selectedAnswer,
         time_spent: timeSpent,
-      });
-
-      const response = await fetch("/api/quiz/submit-answer", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          token: authData.token,
-          question_id: currentQuestion.question_id,
-          user_answer: selectedAnswer,
-          time_spent: timeSpent,
-        }),
-      });
-
-      const data = await response.json();
-      console.log(
-        `📤 SUBMIT RESPONSE: Status ${response.status} for question ${
-          currentQuestionIndex + 1
-        }`
-      );
-      console.log(`📤 SUBMIT RESPONSE: Full response data:`, data);
-      console.log(
-        `📤 SUBMIT RESPONSE: Response headers:`,
-        Object.fromEntries(response.headers.entries())
-      );
-
-      if (!response.ok) {
-        // Handle 409 error (answer already submitted) gracefully
-        if (response.status === 409) {
-          console.log(
-            `⚠️ SUBMIT WARNING: Answer already submitted for question ${
-              currentQuestionIndex + 1
-            } (ID: ${currentQuestion.question_id})`
-          );
-          console.log(
-            `⚠️ SUBMIT WARNING: Question attempted status: ${currentQuestion.question_attempted}`
-          );
-          console.log(
-            `⚠️ SUBMIT WARNING: User answer status: ${currentQuestion.user_answer}`
-          );
-
-          // Instead of showing "already submitted", simulate a successful submission
-          // This handles the backend inconsistency where questions show as not attempted but backend says they are
-          const mockResult = {
-            is_correct: selectedAnswer === currentQuestion.correct_answer,
-            correct_answer: currentQuestion.correct_answer,
-            explanation: currentQuestion.explanation,
-            question_id: currentQuestion.question_id,
-            user_answer: selectedAnswer,
-            time_spent: timeSpent,
-          };
-
-          console.log(
-            `🔄 SUBMIT FIX: Simulating successful submission for question ${
-              currentQuestionIndex + 1
-            }`
-          );
-          setResult(mockResult);
-          setShowResult(true);
-
-          // Update question results for the grid
-          setQuestionResults((prev) => ({
-            ...prev,
-            [currentQuestionIndex]: mockResult.is_correct
-              ? "correct"
-              : "incorrect",
-          }));
-
-          // Store user's answer
-          setUserAnswers((prev) => ({
-            ...prev,
-            [currentQuestionIndex]: selectedAnswer,
-          }));
-          return;
-        }
-        throw new Error(data.error || "Failed to submit answer");
-      }
+      };
 
       console.log(
-        `✅ SUBMIT SUCCESS: Answer submitted successfully for question ${
-          currentQuestionIndex + 1
-        }`
+        `🧩 LOCAL RESULT: ${is_correct ? "✅ Correct" : "❌ Incorrect"}`
       );
-      setResult(data);
+
+      setResult(mockResult);
       setShowResult(true);
-
-      // Update question results for the grid
       setQuestionResults((prev) => ({
         ...prev,
-        [currentQuestionIndex]: data.is_correct ? "correct" : "incorrect",
+        [currentQuestionIndex]: is_correct ? "correct" : "incorrect",
       }));
-
-      // Store user's answer
       setUserAnswers((prev) => ({
         ...prev,
         [currentQuestionIndex]: selectedAnswer,
       }));
-    } catch (error) {
-      console.error(
-        `❌ SUBMIT ERROR: Error submitting answer for question ${
-          currentQuestionIndex + 1
-        }:`,
-        error
-      );
-      // Don't show alert for 409 errors, just log them
-      if (
-        !(
-          error instanceof Error && error.message?.includes("already submitted")
-        )
-      ) {
-        alert("Failed to submit answer. Please try again.");
-      }
-    } finally {
-      setIsSubmitting(false);
+
+      return; // 🚫 Stop here — don’t call backend
     }
-  };
+    
+    // CASE 2 — Normal backend evaluation
+    console.log(
+      `📤 SUBMIT ANSWER: Answer: "${selectedAnswer}", Time: ${timeSpent}s`
+    );
+    console.log(`📤 SUBMIT ANSWER: Request body:`, {
+      token: authData.token ? "***TOKEN***" : "NO_TOKEN",
+      question_id: currentQuestion.question_id,
+      user_answer: selectedAnswer,
+      time_spent: timeSpent,
+    });
+
+    const response = await fetch(`${API_BASE_URL}/api/questions/submit-answer`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authData.token}`,
+      },
+      body: JSON.stringify({
+        question_id: currentQuestion.question_id,
+        user_answer: selectedAnswer,
+        time_spent: timeSpent,
+      }),
+    });
+
+    const data = await response.json();
+    console.log(
+      `📤 SUBMIT RESPONSE: Status ${response.status} for question ${
+        currentQuestionIndex + 1
+      }`
+    );
+    console.log(`📤 SUBMIT RESPONSE: Full response data:`, data);
+
+    if (!response.ok) {
+      // Handle 409 error (already submitted)
+      if (response.status === 409) {
+        console.log(
+          `⚠️ Backend says already submitted — simulating local success`
+        );
+
+        const mockResult = {
+          is_correct:
+            selectedAnswer.trim().toLowerCase() ===
+            currentQuestion.correct_answer.trim().toLowerCase(),
+          correct_answer: currentQuestion.correct_answer,
+          explanation: currentQuestion.explanation,
+          question_id: currentQuestion.question_id,
+          user_answer: selectedAnswer,
+          time_spent: timeSpent,
+        };
+
+        setResult(mockResult);
+        setShowResult(true);
+        setQuestionResults((prev) => ({
+          ...prev,
+          [currentQuestionIndex]: mockResult.is_correct
+            ? "correct"
+            : "incorrect",
+        }));
+        setUserAnswers((prev) => ({
+          ...prev,
+          [currentQuestionIndex]: selectedAnswer,
+        }));
+        return;
+      }
+      throw new Error(data.error || "Failed to submit answer");
+    }
+
+    console.log(
+      `✅ SUBMIT SUCCESS: Answer submitted successfully for question ${
+        currentQuestionIndex + 1
+      }`
+    );
+    setResult(data);
+    setShowResult(true);
+
+    setQuestionResults((prev) => ({
+      ...prev,
+      [currentQuestionIndex]: data.is_correct ? "correct" : "incorrect",
+    }));
+
+    setUserAnswers((prev) => ({
+      ...prev,
+      [currentQuestionIndex]: selectedAnswer,
+    }));
+  } catch (error) {
+    console.error(
+      `❌ SUBMIT ERROR: Error submitting answer for question ${
+        currentQuestionIndex + 1
+      }:`,
+      error
+    );
+
+    if (
+      !(
+        error instanceof Error && error.message?.includes("already submitted")
+      )
+    ) {
+      alert("Failed to submit answer. Please try again.");
+    }
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
 
   const nextQuestion = async () => {
     const nextIndex = currentQuestionIndex + 1;
