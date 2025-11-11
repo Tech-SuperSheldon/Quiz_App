@@ -91,7 +91,7 @@ export default function GoogleAuthWrapper({
         <div className="flex justify-center mt-4 text-sm text-red-600">
           Google client ID is not configured.
         </div>
-        <ToastContainer position="top-right" autoClose={3000} />
+        
       </>
     );
   }
@@ -115,12 +115,7 @@ export default function GoogleAuthWrapper({
         />
       </div>
 
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        toastClassName="bg-white dark:bg-slate-800 text-gray-800 dark:text-white border border-gray-200 dark:border-slate-700"
-        progressClassName="bg-gradient-to-r from-indigo-600 to-purple-600"
-      />
+      
     </GoogleOAuthProvider>
   );
 }

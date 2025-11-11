@@ -20,6 +20,8 @@ export default function DummyRegister() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:5000";
+
   // Auto-fill from Google sign-in data (temp-auth cookie)
   useEffect(() => {
     // This will be handled by the existing Google auth flow
@@ -38,7 +40,7 @@ export default function DummyRegister() {
     setIsSubmitting(true);
 
     try {
-      const res = await fetch("/api/auth/register", {
+      const res = await fetch(`${API_BASE_URL}/api/users/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -86,7 +88,7 @@ export default function DummyRegister() {
     // Fetch temporary Google user data (if present) from server-side cookie
     const fetchTemp = async () => {
       try {
-        const res = await fetch("/api/auth/user-data");
+        const res = await fetch(`${API_BASE_URL}/api/auth/user-data`);
         if (!res.ok) return;
         const json = await res.json();
         console.log("Fetched user data:", json); // Debug log

@@ -1,11 +1,12 @@
 "use client";
-
+import Cookies from "js-cookie";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import GoogleAuthWrapper from "./GoogleAuthWrapper";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { storeRegistrationData } from "@/utils/authStorage";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -24,6 +25,8 @@ export default function LoginPage() {
     }
 
     setIsLoading(true);
+    let isRedirecting = false; // <-- 1. Add this flag
+
     try {
       const response = await fetch(
         "https://levelupbackend.supersheldon.online/api/users/login",
@@ -39,20 +42,24 @@ export default function LoginPage() {
       );
 
       if (response.status === 404) {
-        // User not found, redirect to register
         toast.info("Account not found. Redirecting to registration...");
+        isRedirecting = true; // <-- 2. Set flag on redirect
         setTimeout(() => {
           router.push("/auth/register");
         }, 1500);
       } else if (response.ok) {
-        // User found, redirect to dashboard
         const data = await response.json();
         toast.success("Login successful! Redirecting to dashboard...");
+        isRedirecting = true; // <-- 2. Set flag on redirect
+
+        Cookies.set("auth-token", data.token, { expires: 7 });
+        storeRegistrationData(data);
+
         setTimeout(() => {
           router.push("/dashboard");
         }, 1500);
+
       } else {
-        // Other error
         const errorData = await response.json();
         toast.error(errorData.message || "Login failed. Please try again.");
       }
@@ -60,7 +67,10 @@ export default function LoginPage() {
       console.error("Email sign-in error:", error);
       toast.error("Network error. Please check your connection and try again.");
     } finally {
-      setIsLoading(false);
+      // 3. Only set loading to false if NOT redirecting
+      if (!isRedirecting) {
+        setIsLoading(false);
+      }
     }
   };
   return (
