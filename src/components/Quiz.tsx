@@ -72,20 +72,14 @@ export default function Quiz({}: QuizProps) {
       if (!token || !userId) {
         const clientCookie = Cookies.get("auth-client");
         if (clientCookie) {
-          try {
-            const parsed = JSON.parse(clientCookie);
-            token = token || parsed.token || parsed.auth_token || parsed.authToken;
-            userId = userId || parsed.userId || parsed.user_id || parsed.id;
-          } catch (e) {
-            // ignore parse errors
-          }
+          const parsed = JSON.parse(clientCookie);
+          token = token || parsed.token || parsed.auth_token || parsed.authToken;
+          userId = userId || parsed.userId || parsed.user_id || parsed.id;
         }
-        token = token || Cookies.get("token") || Cookies.get("auth-token") || undefined;
-        userId = userId || Cookies.get("user_id") || undefined;
       }
 
       if (!token || !userId) {
-        console.warn("generateQuestions: auth data not found via getAuthData() or cookies. Attempting request without full auth.");
+        console.warn("No token/user_id found, attempting with cookies.");
       }
 
       const headers: Record<string, string> = {
@@ -93,38 +87,36 @@ export default function Quiz({}: QuizProps) {
       };
       if (token) headers["Authorization"] = `Bearer ${token}`;
 
-      const response = await fetch("/api/questions/generate", {
-        method: "POST",
-        headers,
-        credentials: "include",
-        body: JSON.stringify({
-          token,
-          user_id: userId,
-          course_type: "Naplap",
-          stage_number: stageNumber,
-          grade: 5,
-          num_questions: 10,
-        }),
-      });
+      const response = await fetch(
+        "https://levelupbackend.supersheldon.online/api/questions/generate",
+        {
+          method: "POST",
+          headers: headers,
+          body: JSON.stringify({
+            user_id: userId,
+            course_type: "Naplap",
+            stage_number: stageNumber,
+            grade: 5,
+            num_questions: 10,
+          }),
+        }
+      );
 
       const data = await response.json();
       if (!response.ok) {
-        if (response.status === 409) {
-          return await generateQuestions(stageNumber + 1);
-        }
-        throw new Error(`Failed to generate questions (status ${response.status}): ${data?.error || "unknown error"}`);
+        throw new Error(data?.error || "Failed to generate questions");
       }
 
       return data.questions || [];
     } catch (error) {
-      console.error(`❌ API ERROR: Error generating questions for stage ${stageNumber}:`, error);
+      console.error(`❌ Error generating questions: ${error}`);
       throw error;
     }
   };
 
   // Start quiz function
   const startQuiz = async () => {
-    setIsLoading(true); // Set loading state to true
+    setIsLoading(true);
     try {
       const newQuestions = await generateQuestions(1); // Start with stage 1
       if (newQuestions && newQuestions.length > 0) {
@@ -145,29 +137,19 @@ export default function Quiz({}: QuizProps) {
   const submitAnswer = async () => {
     if (!selectedAnswer || !currentQuestion) return;
 
-    if (userAnswers[currentQuestionIndex]) {
-      console.log(`⚠️ SUBMIT BLOCKED: Question ${currentQuestionIndex + 1} already attempted`);
-      return;
-    }
-
     setIsSubmitting(true);
     try {
       let authData = getAuthData();
       let token = authData?.token;
       let userId = authData?.userId;
+
       if (!token || !userId) {
         const clientCookie = Cookies.get("auth-client");
         if (clientCookie) {
-          try {
-            const parsed = JSON.parse(clientCookie);
-            token = token || parsed.token || parsed.auth_token || parsed.authToken;
-            userId = userId || parsed.userId || parsed.user_id || parsed.id;
-          } catch (e) {
-            /* ignore */
-          }
+          const parsed = JSON.parse(clientCookie);
+          token = token || parsed.token || parsed.auth_token || parsed.authToken;
+          userId = userId || parsed.userId || parsed.user_id || parsed.id;
         }
-        token = token || Cookies.get("token") || Cookies.get("auth-token") || undefined;
-        userId = userId || Cookies.get("user_id") || undefined;
       }
 
       const submitHeaders: Record<string, string> = {
@@ -175,47 +157,38 @@ export default function Quiz({}: QuizProps) {
       };
       if (token) submitHeaders["Authorization"] = `Bearer ${token}`;
 
-      const response = await fetch("/api/questions/submit-answer", {
-        method: "POST",
-        headers: submitHeaders,
-        credentials: "include",
-        body: JSON.stringify({
-          token,
-          question_id: currentQuestion.question_id,
-          user_answer: selectedAnswer,
-          time_spent: timeSpent,
-        }),
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        if (response.status === 409) {
-          const mockResult = {
-            is_correct: selectedAnswer === currentQuestion.correct_answer,
-            correct_answer: currentQuestion.correct_answer,
-            explanation: currentQuestion.explanation,
+      const response = await fetch(
+        "https://levelupbackend.supersheldon.online/api/questions/submit-answer",
+        {
+          method: "POST",
+          headers: submitHeaders,
+          body: JSON.stringify({
             question_id: currentQuestion.question_id,
             user_answer: selectedAnswer,
             time_spent: timeSpent,
-          };
-          setResult(mockResult);
-          setShowResult(true);
-          setQuestionResults((prev) => ({ ...prev, [currentQuestionIndex]: mockResult.is_correct ? "correct" : "incorrect" }));
-          setUserAnswers((prev) => ({ ...prev, [currentQuestionIndex]: selectedAnswer }));
-          return;
+            token,
+          }),
         }
-        throw new Error(data.error || "Failed to submit answer");
+      );
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data?.error || "Failed to submit answer");
       }
 
       setResult(data);
       setShowResult(true);
-      setQuestionResults((prev) => ({ ...prev, [currentQuestionIndex]: data.is_correct ? "correct" : "incorrect" }));
-      setUserAnswers((prev) => ({ ...prev, [currentQuestionIndex]: selectedAnswer }));
+      setQuestionResults((prev) => ({
+        ...prev,
+        [currentQuestionIndex]: data.is_correct ? "correct" : "incorrect",
+      }));
+      setUserAnswers((prev) => ({
+        ...prev,
+        [currentQuestionIndex]: selectedAnswer,
+      }));
     } catch (error) {
-      console.error(`❌ SUBMIT ERROR: Error submitting answer for question ${currentQuestionIndex + 1}:`, error);
-      if (!(error instanceof Error && error.message?.includes("already submitted"))) {
-        alert("Failed to submit answer. Please try again.");
-      }
+      console.error(`❌ Error submitting answer: ${error}`);
+      alert("Failed to submit answer. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -224,23 +197,6 @@ export default function Quiz({}: QuizProps) {
   // Function to go to the next question
   const nextQuestion = async () => {
     const nextIndex = currentQuestionIndex + 1;
-
-    const shouldGenerateMore = (nextIndex === 1 || (nextIndex > 1 && (nextIndex - 1) % 10 === 0)) && !isGeneratingMore;
-    if (shouldGenerateMore) {
-      setIsGeneratingMore(true);
-      try {
-        const currentStage = Math.floor(nextIndex / 10) + 2;
-        const newQuestions = await generateQuestions(currentStage);
-
-        if (newQuestions && newQuestions.length > 0) {
-          setQuestions((prev) => [...prev, ...newQuestions]);
-        }
-      } catch (error) {
-        console.error(`❌ ERROR: Failed to generate more questions for stage ${Math.floor(nextIndex / 10) + 2}:`, error);
-      } finally {
-        setIsGeneratingMore(false);
-      }
-    }
 
     setCurrentQuestionIndex(nextIndex);
 
@@ -287,10 +243,6 @@ export default function Quiz({}: QuizProps) {
             <h1 className="text-4xl font-bold text-gray-800 mb-4">
               Welcome to the Quiz!
             </h1>
-            <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-              Test your knowledge with our comprehensive quiz. You&apos;ll start with 10 questions, and more will be generated automatically as you progress through the quiz.
-            </p>
-
             <motion.button
               onClick={startQuiz}
               disabled={isLoading}
@@ -382,9 +334,7 @@ export default function Quiz({}: QuizProps) {
                 >
                   <div className="flex items-center gap-2 mb-2">
                     <span
-                      className={`px-2 py-1 rounded text-sm font-medium ${
-                        result.is_correct ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                      }`}
+                      className={`px-2 py-1 rounded text-sm font-medium ${result.is_correct ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}
                     >
                       {result.is_correct ? "Correct!" : "Incorrect"}
                     </span>
@@ -428,77 +378,6 @@ export default function Quiz({}: QuizProps) {
               </div>
             </div>
           </motion.div>
-        </div>
-
-        {/* Question Grid Sidebar - Right Side */}
-        <div className="w-64 flex-shrink-0">
-          <div className="bg-white rounded-xl shadow-lg p-4 sticky top-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">
-              Questions
-            </h3>
-            <div className="grid grid-cols-5 gap-2">
-              {Array.from({ length: Math.max(questions.length + (isGeneratingMore ? 10 : 0), 10) }, (_, index) => {
-                const questionNumber = index + 1;
-                const result = questionResults[index];
-                const isCurrent = index === currentQuestionIndex;
-                const isAnswered = result === "correct" || result === "incorrect";
-                const isSkeleton = index >= questions.length && isGeneratingMore;
-
-                return (
-                  <button
-                    key={index}
-                    onClick={() => {
-                      if (index < questions.length) {
-                        setCurrentQuestionIndex(index);
-                        if (userAnswers[index]) {
-                          setSelectedAnswer(userAnswers[index]);
-                          setResult({
-                            is_correct: result === "correct",
-                            correct_answer: questions[index].correct_answer,
-                            explanation: questions[index].explanation,
-                            question_id: questions[index].question_id,
-                            user_answer: userAnswers[index],
-                            time_spent: 0,
-                          });
-                          setShowResult(true);
-                        } else {
-                          setSelectedAnswer(null);
-                          setShowResult(false);
-                          setResult(null);
-                        }
-                        setTimeSpent(0);
-                      }
-                    }}
-                    disabled={index >= questions.length && !isSkeleton}
-                    className={`
-                      w-10 h-10 rounded-lg text-sm font-medium transition-all duration-200
-                      ${isSkeleton ? "bg-gray-200 animate-pulse" : isCurrent ? "bg-indigo-600 text-white ring-2 ring-indigo-300" : isAnswered ? result === "correct" ? "bg-green-500 text-white hover:bg-green-600" : "bg-red-500 text-white hover:bg-red-600" : index < questions.length ? "bg-gray-200 text-gray-700 hover:bg-gray-300" : "bg-gray-100 text-gray-400 cursor-not-allowed"}
-                    `}
-                  >
-                    {isSkeleton ? (
-                      <div className="w-4 h-4 bg-gray-300 rounded animate-pulse"></div>
-                    ) : (
-                      questionNumber
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-            <div className="mt-4 text-xs text-gray-500">
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-3 h-3 bg-green-500 rounded"></div>
-                <span>Correct</span>
-              </div>
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-3 h-3 bg-red-500 rounded"></div>
-                <span>Incorrect</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-indigo-600 rounded"></div>
-                <span>Current</span>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
