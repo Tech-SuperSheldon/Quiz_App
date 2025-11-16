@@ -25,6 +25,7 @@ export async function POST(req: NextRequest) {
           user_id: user_id,
           course_type: course_type || "Naplap",
           stage_number: stage_number || 1,
+          grade : grade || 5,
           num_questions: num_questions || 10,
         }),
       }
