@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { course_type, stage_number, num_questions, token, user_id } = body;
+    const { course_type, stage_number, num_questions, token, user_id, grade } = body;
 
     if (!token || !user_id) {
       return NextResponse.json(
@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
           user_id: user_id,
           course_type: course_type || "Naplap",
           stage_number: stage_number || 1,
-          grade : grade || 5,
+          grade: grade || 5,
           num_questions: num_questions || 10,
         }),
       }
