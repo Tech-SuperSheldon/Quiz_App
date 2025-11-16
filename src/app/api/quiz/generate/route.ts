@@ -12,7 +12,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Call the backend API to generate questions
     const backendResponse = await fetch(
       `${process.env.BASE_URL}api/questions/generate`,
       {
@@ -32,16 +31,9 @@ export async function POST(req: NextRequest) {
     );
 
     const data = await backendResponse.json();
-    console.log("Backend response:", backendResponse.status, data);
-
     if (!backendResponse.ok) {
-      console.error(
-        "Backend generate questions failed:",
-        backendResponse.status,
-        data
-      );
       return NextResponse.json(
-        { error: data.message || data.error || "Failed to generate questions" },
+        { error: data.message || "Failed to generate questions" },
         { status: backendResponse.status }
       );
     }
