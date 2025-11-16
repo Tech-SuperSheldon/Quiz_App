@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getAuthData } from "@/utils/authStorage";
 import Cookies from "js-cookie";
+import Image from "next/image";
 
 interface Question {
   question_id: string;
@@ -263,7 +264,14 @@ export default function Quiz({}: QuizProps) {
       <div className="max-w-4xl mx-auto p-6">
         <div className="bg-white rounded-xl shadow-lg p-8">
           <div className="text-center">
-            <h1 className="text-4xl font-bold text-gray-800 mb-4">Welcome to the Quiz!</h1>
+          <Image
+            src="/Yellow and Blue Gradient Virtual Assistant Course Facebook Cover (5).jpg"
+            alt="Super Sheldon Quiz"
+            width={100}
+            height={100}
+            className="w-full object-contain"
+            priority
+          />
             <motion.button
               onClick={startQuiz}
               disabled={isLoading}
