@@ -207,6 +207,8 @@ export default function Quiz({}: QuizProps) {
 
       setShowResult(true);
 
+      console.log("hello baby");
+
       setQuestionResults((prev) => ({
         ...prev,
         [currentQuestionIndex]: data.is_correct ? "correct" : "incorrect",
