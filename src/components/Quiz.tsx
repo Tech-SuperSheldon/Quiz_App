@@ -1,10 +1,9 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getAuthData } from "@/utils/authStorage";
 import Cookies from "js-cookie";
 import Image from "next/image";
+import { ObjectId } from "bson"; // Ensure this is imported for ObjectId validation
 
 interface Question {
   question_id: string;
@@ -142,7 +141,7 @@ export default function Quiz({}: QuizProps) {
     }
 
     // Ensure question_id is valid
-    if (!currentQuestion.question_id) {
+    if (!ObjectId.isValid(currentQuestion.question_id)) {
       console.error("Invalid question ID");
       alert("Invalid question. Please try again.");
       return;
@@ -191,8 +190,6 @@ export default function Quiz({}: QuizProps) {
         }
       );
 
-       
-
       const data = await response.json();
       console.log(data);
       if (!response.ok) {
@@ -209,8 +206,6 @@ export default function Quiz({}: QuizProps) {
       });
 
       setShowResult(true);
-
-     
 
       setQuestionResults((prev) => ({
         ...prev,
