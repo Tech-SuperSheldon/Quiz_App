@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getAuthData } from "@/utils/authStorage";
@@ -146,6 +148,11 @@ export default function Quiz({}: QuizProps) {
       return;
     }
 
+    // Log the question ID before submission to check if it's correctly formatted
+    console.log("Submitting answer...");
+    console.log("Question ID:", currentQuestion.question_id); // Log question ID
+    console.log("Selected Answer:", selectedAnswer); // Log selected answer
+
     setIsSubmitting(true);
     try {
       let authData = getAuthData();
@@ -262,14 +269,14 @@ export default function Quiz({}: QuizProps) {
       <div className="max-w-4xl mx-auto p-6">
         <div className="bg-white rounded-xl shadow-lg p-8">
           <div className="text-center">
-          <Image
-            src="/Yellow and Blue Gradient Virtual Assistant Course Facebook Cover (5).jpg"
-            alt="Super Sheldon Quiz"
-            width={100}
-            height={100}
-            className="w-full object-contain"
-            priority
-          />
+            <Image
+              src="/Yellow and Blue Gradient Virtual Assistant Course Facebook Cover (5).jpg"
+              alt="Super Sheldon Quiz"
+              width={100}
+              height={100}
+              className="w-full object-contain"
+              priority
+            />
             <motion.button
               onClick={startQuiz}
               disabled={isLoading}
@@ -396,11 +403,7 @@ export default function Quiz({}: QuizProps) {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    {isSubmitting
-                      ? "Submitting..."
-                      : userAnswers[currentQuestionIndex]
-                      ? "Already Attempted"
-                      : "Submit Answer"}
+                    {isSubmitting ? "Submitting..." : userAnswers[currentQuestionIndex] ? "Already Attempted" : "Submit Answer"}
                   </motion.button>
                 ) : (
                   <motion.button
