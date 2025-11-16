@@ -64,12 +64,10 @@ export default function Quiz({}: QuizProps) {
 
   const generateQuestions = async (stageNumber: number = 1) => {
     try {
-      // try primary helper
       let authData = getAuthData();
       let token = authData?.token;
       let userId = authData?.userId;
 
-      // fallback: try cookies (auth-client, token, auth-token)
       if (!token || !userId) {
         const clientCookie = Cookies.get("auth-client");
         if (clientCookie) {
@@ -85,36 +83,21 @@ export default function Quiz({}: QuizProps) {
         userId = userId || Cookies.get("user_id") || undefined;
       }
 
-      // If still missing auth, log and continue — backend may reject but we won't throw early
       if (!token || !userId) {
-        console.warn(
-          "generateQuestions: auth data not found via getAuthData() or cookies. Attempting request without full auth."
-        );
+        console.warn("generateQuestions: auth data not found via getAuthData() or cookies. Attempting request without full auth.");
       }
-
-      console.log(
-        `📡 API CALL: Calling generateQuestions API for stage ${stageNumber}`
-      );
-      console.log(`📡 API CALL: Request body:`, {
-        token: token ? "***TOKEN***" : "NO_TOKEN",
-        user_id: userId,
-        course_type: "Naplap",
-        stage_number: stageNumber,
-        num_questions: 10,
-      });
 
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
       };
       if (token) headers["Authorization"] = `Bearer ${token}`;
 
-      // include credentials so cookies (session cookie) are sent to same-origin API routes
       const response = await fetch("/api/quiz/generate", {
         method: "POST",
         headers,
         credentials: "include",
         body: JSON.stringify({
-          token, // include token in body as some endpoints expect it there
+          token,
           user_id: userId,
           course_type: "Naplap",
           stage_number: stageNumber,
@@ -123,113 +106,33 @@ export default function Quiz({}: QuizProps) {
       });
 
       const data = await response.json();
-      console.log(
-        `📡 API RESPONSE: Status ${response.status} for stage ${stageNumber}`
-      );
-      console.log(`📡 API RESPONSE: Full response data:`, data);
-      console.log(
-        `📡 API RESPONSE: Response headers:`,
-        Object.fromEntries(response.headers.entries())
-      );
-
       if (!response.ok) {
-        // Handle 409 error (questions already exist) by trying next stage
         if (response.status === 409) {
-          console.log(
-            `🔄 STAGE PROGRESSION: Questions already exist for stage ${stageNumber}, trying stage ${
-              stageNumber + 1
-            }`
-          );
-
-          // Always try next stage when 409 error occurs (infinite stages)
           return await generateQuestions(stageNumber + 1);
         }
-        throw new Error(
-          `Failed to generate questions (status ${response.status}): ${data?.error || "unknown error"}`
-        );
+        throw new Error(`Failed to generate questions (status ${response.status}): ${data?.error || "unknown error"}`);
       }
 
-      console.log(
-        `✅ API SUCCESS: Generated ${
-          data.questions?.length || 0
-        } questions for stage ${stageNumber}`
-      );
       return data.questions || [];
     } catch (error) {
-      console.error(
-        `❌ API ERROR: Error generating questions for stage ${stageNumber}:`,
-        error
-      );
+      console.error(`❌ API ERROR: Error generating questions for stage ${stageNumber}:`, error);
       throw error;
     }
   };
 
   const startQuiz = async () => {
-    console.log(`🚀 QUIZ START: Starting quiz for user`);
     setIsLoading(true);
     try {
-      // 1) Ensure we have current auth/session info from the server
-      try {
-        console.log("📡 AUTH CHECK: Fetching /api/auth/status");
-        const authResp = await fetch("/api/auth/status", {
-          method: "GET",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-        });
-        const authData = await authResp.json().catch(() => null);
-        console.log("📡 AUTH CHECK: status", authResp.status, "body:", authData);
-        if (!authResp.ok) {
-          // If unauthenticated, surface a clear message
-          if (authResp.status === 401 || authResp.status === 403) {
-            console.warn("🔒 AUTH: User not authenticated according to /api/auth/status");
-            alert("You are not logged in. Please log in before starting the quiz.");
-            setIsLoading(false);
-            return;
-          }
-          // continue for other non-OK statuses but log them
-        }
-      } catch (err) {
-        console.warn("📡 AUTH CHECK: failed to call /api/auth/status", err);
-        // continue — generateQuestions already has fallbacks, but log will help
-      }
-
-      // 2) Always start with stage 1, the generateQuestions function will handle stage progression
-      console.log(
-        `🚀 QUIZ START: Calling generateQuestions(1) to get initial questions`
-      );
       const newQuestions = await generateQuestions(1);
-
       if (newQuestions && newQuestions.length > 0) {
         setQuestions(newQuestions);
         setQuizStarted(true);
-        // Log details about the first question to check its status
-        if (newQuestions[0]) {
-          console.log(
-            `📋 INITIAL QUESTION DETAILS: First question ID: ${newQuestions[0].question_id}`
-          );
-          console.log(
-            `📋 INITIAL QUESTION DETAILS: Question attempted: ${newQuestions[0].question_attempted}`
-          );
-          console.log(
-            `📋 INITIAL QUESTION DETAILS: User answer: ${newQuestions[0].user_answer}`
-          );
-          console.log(
-            `📋 INITIAL QUESTION DETAILS: Stage number: ${newQuestions[0].stage_number}`
-          );
-        }
       } else {
-        // If no questions generated (all stages already have questions)
-        console.log("No questions generated after trying all stages");
         alert("Unable to generate questions. Please try again later.");
       }
     } catch (error) {
       console.error("Error starting quiz:", error);
-      // Show server error details when available
-      if (error instanceof Error) {
-        alert(`Failed to start quiz. ${error.message}`);
-      } else {
-        alert("Failed to start quiz. Please try again.");
-      }
+      alert("Failed to start quiz. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -238,19 +141,13 @@ export default function Quiz({}: QuizProps) {
   const submitAnswer = async () => {
     if (!selectedAnswer || !currentQuestion) return;
 
-    // Prevent submitting answer for already attempted questions
     if (userAnswers[currentQuestionIndex]) {
-      console.log(
-        `⚠️ SUBMIT BLOCKED: Question ${
-          currentQuestionIndex + 1
-        } already attempted`
-      );
+      console.log(`⚠️ SUBMIT BLOCKED: Question ${currentQuestionIndex + 1} already attempted`);
       return;
     }
 
     setIsSubmitting(true);
     try {
-      // try primary helper and fallback to cookies (same logic as generateQuestions)
       let authData = getAuthData();
       let token = authData?.token;
       let userId = authData?.userId;
@@ -269,27 +166,11 @@ export default function Quiz({}: QuizProps) {
         userId = userId || Cookies.get("user_id") || undefined;
       }
 
-      console.log(
-        `📤 SUBMIT ANSWER: Submitting answer for question ${
-          currentQuestionIndex + 1
-        } (ID: ${currentQuestion.question_id})`
-      );
-      console.log(
-        `📤 SUBMIT ANSWER: Answer: "${selectedAnswer}", Time: ${timeSpent}s`
-      );
-      console.log(`📤 SUBMIT ANSWER: Request body:`, {
-        token: token ? "***TOKEN***" : "NO_TOKEN",
-        question_id: currentQuestion.question_id,
-        user_answer: selectedAnswer,
-        time_spent: timeSpent,
-      });
-
       const submitHeaders: Record<string, string> = {
         "Content-Type": "application/json",
       };
       if (token) submitHeaders["Authorization"] = `Bearer ${token}`;
 
-      // include credentials so server-side session/cookies are forwarded
       const response = await fetch("/api/quiz/submit-answer", {
         method: "POST",
         headers: submitHeaders,
@@ -303,34 +184,8 @@ export default function Quiz({}: QuizProps) {
       });
 
       const data = await response.json();
-      console.log(
-        `📤 SUBMIT RESPONSE: Status ${response.status} for question ${
-          currentQuestionIndex + 1
-        }`
-      );
-      console.log(`📤 SUBMIT RESPONSE: Full response data:`, data);
-      console.log(
-        `📤 SUBMIT RESPONSE: Response headers:`,
-        Object.fromEntries(response.headers.entries())
-      );
-
       if (!response.ok) {
-        // Handle 409 error (answer already submitted) gracefully
         if (response.status === 409) {
-          console.log(
-            `⚠️ SUBMIT WARNING: Answer already submitted for question ${
-              currentQuestionIndex + 1
-            } (ID: ${currentQuestion.question_id})`
-          );
-          console.log(
-            `⚠️ SUBMIT WARNING: Question attempted status: ${currentQuestion.question_attempted}`
-          );
-          console.log(
-            `⚠️ SUBMIT WARNING: User answer status: ${currentQuestion.user_answer}`
-          );
-
-          // Instead of showing "already submitted", simulate a successful submission
-          // This handles the backend inconsistency where questions show as not attempted but backend says they are
           const mockResult = {
             is_correct: selectedAnswer === currentQuestion.correct_answer,
             correct_answer: currentQuestion.correct_answer,
@@ -339,65 +194,22 @@ export default function Quiz({}: QuizProps) {
             user_answer: selectedAnswer,
             time_spent: timeSpent,
           };
-
-          console.log(
-            `🔄 SUBMIT FIX: Simulating successful submission for question ${
-              currentQuestionIndex + 1
-            }`
-          );
           setResult(mockResult);
           setShowResult(true);
-
-          // Update question results for the grid
-          setQuestionResults((prev) => ({
-            ...prev,
-            [currentQuestionIndex]: mockResult.is_correct
-              ? "correct"
-              : "incorrect",
-          }));
-
-          // Store user's answer
-          setUserAnswers((prev) => ({
-            ...prev,
-            [currentQuestionIndex]: selectedAnswer,
-          }));
+          setQuestionResults((prev) => ({ ...prev, [currentQuestionIndex]: mockResult.is_correct ? "correct" : "incorrect" }));
+          setUserAnswers((prev) => ({ ...prev, [currentQuestionIndex]: selectedAnswer }));
           return;
         }
         throw new Error(data.error || "Failed to submit answer");
       }
 
-      console.log(
-        `✅ SUBMIT SUCCESS: Answer submitted successfully for question ${
-          currentQuestionIndex + 1
-        }`
-      );
       setResult(data);
       setShowResult(true);
-
-      // Update question results for the grid
-      setQuestionResults((prev) => ({
-        ...prev,
-        [currentQuestionIndex]: data.is_correct ? "correct" : "incorrect",
-      }));
-
-      // Store user's answer
-      setUserAnswers((prev) => ({
-        ...prev,
-        [currentQuestionIndex]: selectedAnswer,
-      }));
+      setQuestionResults((prev) => ({ ...prev, [currentQuestionIndex]: data.is_correct ? "correct" : "incorrect" }));
+      setUserAnswers((prev) => ({ ...prev, [currentQuestionIndex]: selectedAnswer }));
     } catch (error) {
-      console.error(
-        `❌ SUBMIT ERROR: Error submitting answer for question ${
-          currentQuestionIndex + 1
-        }:`,
-        error
-      );
-      // Don't show alert for 409 errors, just log them
-      if (
-        !(
-          error instanceof Error && error.message?.includes("already submitted")
-        )
-      ) {
+      console.error(`❌ SUBMIT ERROR: Error submitting answer for question ${currentQuestionIndex + 1}:`, error);
+      if (!(error instanceof Error && error.message?.includes("already submitted"))) {
         alert("Failed to submit answer. Please try again.");
       }
     } finally {
@@ -407,90 +219,27 @@ export default function Quiz({}: QuizProps) {
 
   const nextQuestion = async () => {
     const nextIndex = currentQuestionIndex + 1;
-    console.log(
-      `➡️ NEXT QUESTION: Moving from question ${
-        currentQuestionIndex + 1
-      } to question ${nextIndex + 1}`
-    );
 
-    // Generate more questions on 2nd, 12th, 22nd, 32nd, etc.
-    // This means: index 1 (2nd question), index 11 (12th question), index 21 (22nd question), etc.
-    const shouldGenerateMore =
-      (nextIndex === 1 || (nextIndex > 1 && (nextIndex - 1) % 10 === 0)) &&
-      !isGeneratingMore;
-
-    if (shouldGenerateMore) {
-      console.log(
-        `🔄 QUESTION GENERATION: Should generate more questions at question ${
-          nextIndex + 1
-        }`
-      );
-    }
-
-    let questionsGenerated = false;
-
+    const shouldGenerateMore = (nextIndex === 1 || (nextIndex > 1 && (nextIndex - 1) % 10 === 0)) && !isGeneratingMore;
     if (shouldGenerateMore) {
       setIsGeneratingMore(true);
       try {
-        // Calculate stage based on how many batches of 10 questions we've had
-        // For 2nd question (index 1): stage 2, for 12th question (index 11): stage 3, for 22nd question (index 21): stage 4, etc.
         const currentStage = Math.floor(nextIndex / 10) + 2;
-        console.log(
-          `🚀 TRIGGERING generateQuestions API for stage ${currentStage} at question ${
-            nextIndex + 1
-          }`
-        );
-
         const newQuestions = await generateQuestions(currentStage);
 
-        // Only add questions if we got new ones - append them to the end
         if (newQuestions && newQuestions.length > 0) {
           setQuestions((prev) => [...prev, ...newQuestions]);
-          console.log(
-            `✅ SUCCESS: Added ${newQuestions.length} new questions to the end of the quiz`
-          );
-          // Log details about the first question to check its status
-          if (newQuestions[0]) {
-            console.log(
-              `📋 QUESTION DETAILS: First new question ID: ${newQuestions[0].question_id}`
-            );
-            console.log(
-              `📋 QUESTION DETAILS: Question attempted: ${newQuestions[0].question_attempted}`
-            );
-            console.log(
-              `📋 QUESTION DETAILS: User answer: ${newQuestions[0].user_answer}`
-            );
-            console.log(
-              `📋 QUESTION DETAILS: Stage number: ${newQuestions[0].stage_number}`
-            );
-          }
-
-          questionsGenerated = true;
-        } else {
-          console.log(
-            `⚠️ WARNING: No new questions generated for stage ${currentStage}, continuing with existing questions`
-          );
         }
       } catch (error) {
-        console.error(
-          `❌ ERROR: Failed to generate more questions for stage ${
-            Math.floor(nextIndex / 10) + 2
-          }:`,
-          error
-        );
-        // Don't show error to user, just continue with existing questions
+        console.error(`❌ ERROR: Failed to generate more questions for stage ${Math.floor(nextIndex / 10) + 2}:`, error);
       } finally {
         setIsGeneratingMore(false);
       }
     }
 
-    // Always advance to next question (whether new questions were generated or not)
-    console.log(`➡️ ADVANCING: Moving to question ${nextIndex + 1}`);
     setCurrentQuestionIndex(nextIndex);
 
-    // Check if the next question was already attempted
     if (userAnswers[nextIndex]) {
-      // Show the previous answer and result for attempted questions
       setSelectedAnswer(userAnswers[nextIndex]);
       const nextResult = questionResults[nextIndex];
       setResult({
@@ -503,7 +252,6 @@ export default function Quiz({}: QuizProps) {
       });
       setShowResult(true);
     } else {
-      // Reset for unattempted questions
       setSelectedAnswer(null);
       setShowResult(false);
       setResult(null);
@@ -531,21 +279,6 @@ export default function Quiz({}: QuizProps) {
         <div className="bg-white rounded-xl shadow-lg p-8">
           <div className="text-center">
             <div className="mb-8">
-              <div className="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg
-                  className="w-10 h-10 text-indigo-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-                  />
-                </svg>
-              </div>
               <h1 className="text-4xl font-bold text-gray-800 mb-4">
                 Welcome to the Quiz!
               </h1>
@@ -554,82 +287,6 @@ export default function Quiz({}: QuizProps) {
                 start with 10 questions, and more will be generated
                 automatically as you progress through the quiz.
               </p>
-            </div>
-
-            {/* Quiz Features */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="bg-gray-50 rounded-lg p-6">
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <svg
-                    className="w-6 h-6 text-blue-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                  Smart Progression
-                </h3>
-                <p className="text-sm text-gray-600">
-                  Questions are generated automatically as you progress through
-                  the quiz
-                </p>
-              </div>
-
-              <div className="bg-gray-50 rounded-lg p-6">
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <svg
-                    className="w-6 h-6 text-green-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13 10V3L4 14h7v7l9-11h-7z"
-                    />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                  Instant Feedback
-                </h3>
-                <p className="text-sm text-gray-600">
-                  Get immediate results and explanations for each question
-                </p>
-              </div>
-
-              <div className="bg-gray-50 rounded-lg p-6">
-                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <svg
-                    className="w-6 h-6 text-purple-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                    />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                  Progress Tracking
-                </h3>
-                <p className="text-sm text-gray-600">
-                  Visual grid shows your progress and question status
-                </p>
-              </div>
             </div>
 
             <motion.button
