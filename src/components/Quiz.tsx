@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getAuthData } from "@/utils/authStorage";
@@ -398,7 +396,11 @@ export default function Quiz({}: QuizProps) {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    {isSubmitting ? "Submitting..." : userAnswers[currentQuestionIndex] ? "Already Attempted" : "Submit Answer"}
+                    {isSubmitting
+                      ? "Submitting..."
+                      : userAnswers[currentQuestionIndex]
+                      ? "Already Attempted"
+                      : "Submit Answer"}
                   </motion.button>
                 ) : (
                   <motion.button
