@@ -20,34 +20,28 @@ export default function Header() {
 
   // Load user data from "auth-client" cookie
   useEffect(() => {
-    const clientCookie = Cookies.get("auth-client");
-    if (clientCookie) {
-      try {
-        const user = JSON.parse(clientCookie);
-        setUserEmail(user.email || null);
-        setUserName(user.name || null);
-        setUserPic(user.picture || null);
-      } catch (err) {
-        console.error("Error parsing auth-client cookie:", err);
+    // Close dropdown if clicked outside
+    const handleOutsideClick = (event: MouseEvent) => {
+      if (dropdownOpen && !(event.target as HTMLElement).closest(".profile-dropdown-container")) {
+        setDropdownOpen(false);
       }
-    } else {
-      setUserEmail(null);
-      setUserName(null);
-      setUserPic(null);
-    }
-  }, [pathname]);
+    };
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, [dropdownOpen]);
 
   // Logout clears both frontend & backend cookies
   const handleLogout = () => {
-    Cookies.remove("auth-client");
     Cookies.remove("token");
-    Cookies.remove("auth-token");
-    Cookies.remove("temp-auth");
-    Cookies.remove("user_id");
+    Cookies.remove("student_name");
+    Cookies.remove("student_email");
+    Cookies.remove("student_class");
+    Cookies.remove("student_mobile");
+    Cookies.remove("student_exam");
+    Cookies.remove("student_profile_pic");
     setUserEmail(null);
     setUserPic(null);
-    setUserName(null);
-    setDropdownOpen(false);
+    setDropdownOpen(false); // Close dropdown on logout
     router.push("/");
   };
 
@@ -130,6 +124,7 @@ export default function Header() {
         {userEmail ? (
           <div className="relative z-50">
             <motion.button
+              type="button"
               onClick={() => setDropdownOpen(!dropdownOpen)}
               className="flex items-center gap-3 px-3 py-2 rounded-full bg-gradient-to-br from-white/90 to-gray-50/90 dark:from-slate-800/90 dark:to-slate-900/90 backdrop-blur-lg border border-gray-200/60 dark:border-slate-700/60 shadow-lg hover:shadow-xl hover:bg-white/100 dark:hover:bg-slate-700/100 transition-all duration-300 ease-out group focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-900"
               whileHover={{ scale: 1.02 }} // Reduced scale slightly for subtlety
