@@ -92,7 +92,7 @@ export default function Quiz({}: QuizProps) {
       };
       if (token) headers["Authorization"] = `Bearer ${token}`;
 
-      const response = await fetch("/api/quiz/generate", {
+      const response = await fetch("/api/questions/generate", {
         method: "POST",
         headers,
         credentials: "include",
@@ -101,7 +101,9 @@ export default function Quiz({}: QuizProps) {
           user_id: userId,
           course_type: "Naplap",
           stage_number: stageNumber,
+          grade : grade,
           num_questions: 10,
+          
         }),
       });
 
@@ -171,7 +173,7 @@ export default function Quiz({}: QuizProps) {
       };
       if (token) submitHeaders["Authorization"] = `Bearer ${token}`;
 
-      const response = await fetch("/api/quiz/submit-answer", {
+      const response = await fetch("/api/questions/submit-answer", {
         method: "POST",
         headers: submitHeaders,
         credentials: "include",
