@@ -3,39 +3,22 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { motion, AnimatePresence, useScroll, useSpring } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Cookies from "js-cookie";
 import Image from "next/image";
-import { FaUserCircle, FaSignOutAlt, FaChevronDown, FaHome, FaChartBar, FaEnvelope } from "react-icons/fa";
+import { FaUserCircle, FaSignOutAlt, FaChevronDown } from "react-icons/fa";
 
 export default function Header() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [userPic, setUserPic] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
+  const [scrolling, setScrolling] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
   const isDashboard = pathname.startsWith("/dashboard");
 
-  const { scrollY } = useScroll();
-  const headerWidth = useSpring(scrollY, {
-    stiffness: 100,
-    damping: 30,
-    restDelta: 0.001,
-  });
-
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    return scrollY.on("change", (latest) => {
-      if (latest > 50) { // Adjust scroll threshold as needed
-        setScrolled(true);
-      } else {
-        setScrolled(false);
-      }
-    });
-  }, [scrollY]);
-
+  // Load user data from "auth-client" cookie
   useEffect(() => {
     const clientCookie = Cookies.get("auth-client");
     if (clientCookie) {
@@ -54,6 +37,7 @@ export default function Header() {
     }
   }, [pathname]);
 
+  // Logout clears both frontend & backend cookies
   const handleLogout = () => {
     Cookies.remove("auth-client");
     Cookies.remove("token");
@@ -67,109 +51,132 @@ export default function Header() {
     router.push("/");
   };
 
-  const navItems = [
-    { name: "Home", href: "/", icon: FaHome },
-    { name: "Dashboard", href: "/dashboard", icon: FaChartBar, requiresAuth: true },
-    { name: "Contact Us", href: "/contact", icon: FaEnvelope },
-  ];
+  // Scroll listener to shrink header on scroll
+  const handleScroll = () => {
+    if (window.scrollY > 50) {
+      setScrolling(true);
+    } else {
+      setScrolling(false);
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const dropdownVariants = {
-    hidden: { opacity: 0, y: -10, scale: 0.95 },
+    hidden: { opacity: 0, y: -15, scale: 0.9 }, // Slightly more pronounced initial state
     visible: {
       opacity: 1,
       y: 0,
       scale: 1,
-      transition: { duration: 0.2, ease: "easeOut" },
+      transition: { duration: 0.25, ease: "easeOut" }, // Slightly longer, smoother transition
     },
     exit: {
       opacity: 0,
-      y: -10,
-      scale: 0.95,
-      transition: { duration: 0.15, ease: "easeIn" },
+      y: -15, // Matches initial for symmetrical animation
+      scale: 0.9,
+      transition: { duration: 0.2, ease: "easeIn" },
     },
   };
 
   return (
-    <motion.header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300
-        ${isDashboard
-          ? "bg-gradient-to-r from-white/70 via-white/50 to-white/70 dark:from-slate-900/80 dark:to-slate-800/80 backdrop-blur-xl shadow-2xl border border-white/30"
-          : "bg-white/90 dark:bg-slate-900/90 backdrop-blur-md shadow-md"
-        }
-        ${scrolled ? "w-[93%] mx-auto rounded-b-2xl" : "w-full"}
-        py-2`} 
+    <header
+      className={`fixed top-0 left-0 right-0 mx-auto z-50 transition-all duration-700 ease-in-out transform
+        ${scrolling
+          ? "w-[98%] bg-gradient-to-r from-white/90 via-white/70 to-white/90 dark:from-slate-900/90 dark:to-slate-800/90 backdrop-blur-3xl shadow-3xl shadow-indigo-300/40 dark:shadow-purple-900/30 border border-white/50 dark:border-slate-700/60 rounded-3xl py-1.5"
+          : "w-full bg-white/98 dark:bg-slate-950/98 shadow-xl shadow-gray-300/40 dark:shadow-slate-800/40 rounded-none py-3"
+        }`}
     >
-      <nav className={`flex items-center justify-between px-6 transition-all duration-300 ${scrolled ? "py-2" : "py-3"}`}>
-        <Link href="/" className="flex items-center gap-2">
+      <nav className="container mx-auto flex items-center justify-between px-8 transition-all duration-700"> {/* Increased px for more breathing room */}
+        <Link href="/" className="flex items-center gap-2 group">
           <Image
             src="/Final-Logo-bg-removed.png"
             alt="Super Sheldon Quiz"
-            width={scrolled ? 80 : 100} 
-            height={scrolled ? 80 : 100}
-            className="w-full object-contain"
+            width={60} // Slightly larger logo
+            height={60} // Slightly larger logo
+            className="w-full object-contain group-hover:scale-105 transition-transform duration-300 ease-out"
             priority
           />
         </Link>
 
-        {/* Navigation Links */}
-        <div className="hidden md:flex items-center gap-6">
-          {navItems.map((item) => {
-            if (item.requiresAuth && !userEmail) {
-              return null;
-            }
-            const isActive = pathname === item.href || (item.href === "/dashboard" && pathname.startsWith("/dashboard"));
-            return (
-              <Link key={item.name} href={item.href}>
-                <motion.span
-                  className={`flex items-center gap-2 text-base font-medium transition-colors duration-200
-                    ${isActive ? "text-indigo-600 dark:text-purple-400" : "text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-purple-400"}`}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <item.icon className="w-4 h-4" />
-                  {item.name}
-                </motion.span>
-              </Link>
-            );
-          })}
+        {/* Navbar Links Container with Blur Effect */}
+        <div
+          className={`hidden md:flex space-x-10 justify-center flex-grow transition-all duration-500 font-medium
+            ${scrolling ? "backdrop-blur-xl px-6 py-2 rounded-full bg-white/30 dark:bg-slate-700/30" : "backdrop-blur-none px-0 py-0"}`}
+        >
+          <Link
+            href="/"
+            className="text-gray-700 dark:text-gray-200 hover:text-purple-600 dark:hover:text-purple-400 transition-colors duration-300 ease-in-out text-lg"
+          >
+            Home
+          </Link>
+          <Link
+            href="/dashboard"
+            className="text-gray-700 dark:text-gray-200 hover:text-purple-600 dark:hover:text-purple-400 transition-colors duration-300 ease-in-out text-lg"
+          >
+            Dashboard
+          </Link>
+          <Link
+            href="#contact"
+            className="text-gray-700 dark:text-gray-200 hover:text-purple-600 dark:hover:text-purple-400 transition-colors duration-300 ease-in-out text-lg"
+          >
+            Contact Us
+          </Link>
         </div>
 
+        {/* User Profile or Get Started Button */}
         {userEmail ? (
-          <div className="relative">
+          <div className="relative z-50">
             <motion.button
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="flex items-center gap-2 px-2 py-1 rounded-full bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg border border-gray-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-xl transition-all duration-300 group"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.98 }}
+              className="flex items-center gap-3 px-3 py-2 rounded-full bg-gradient-to-br from-white/90 to-gray-50/90 dark:from-slate-800/90 dark:to-slate-900/90 backdrop-blur-lg border border-gray-200/60 dark:border-slate-700/60 shadow-lg hover:shadow-xl hover:bg-white/100 dark:hover:bg-slate-700/100 transition-all duration-300 ease-out group focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-900"
+              whileHover={{ scale: 1.02 }} // Reduced scale slightly for subtlety
+              whileTap={{ scale: 0.97 }} // Slightly more distinct tap
             >
+              {/* Profile Picture */}
               <div className="relative">
                 {userPic ? (
                   <Image
                     src={userPic}
                     alt="Profile"
-                    width={36}
-                    height={36}
-                    className="rounded-full border-2 border-purple-400 group-hover:border-pink-400 transition-colors duration-300"
+                    width={40} // Slightly larger
+                    height={40} // Slightly larger
+                    className="rounded-full border-2 border-purple-500 group-hover:border-pink-500 shadow-md transition-colors duration-300 ease-in-out"
                     onError={(e) => {
                       console.error("Header - Image failed to load:", userPic);
+                      console.error("Header - Error:", e);
+                    }}
+                    onLoad={() => {
+                      console.log(
+                        "Header - Image loaded successfully:",
+                        userPic
+                      );
                     }}
                   />
                 ) : (
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
-                    <FaUserCircle className="text-white text-lg" />
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 flex items-center justify-center shadow-inner">
+                    <FaUserCircle className="text-white text-xl" /> {/* Larger icon */}
                   </div>
                 )}
               </div>
+              {/* User Name */}
+              <span className="hidden md:block text-gray-800 dark:text-gray-100 font-semibold text-base whitespace-nowrap">
+                {userName || "Guest"}
+              </span>
 
+              {/* Dropdown Arrow */}
               <motion.div
                 animate={{ rotate: dropdownOpen ? 180 : 0 }}
                 transition={{ duration: 0.2 }}
-                className="text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300"
+                className="text-gray-500 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors duration-300"
               >
-                <FaChevronDown className="w-3 h-3" />
+                <FaChevronDown className="w-3.5 h-3.5" /> {/* Slightly larger arrow */}
               </motion.div>
             </motion.button>
 
+            {/* Dropdown Menu */}
             <AnimatePresence>
               {dropdownOpen && (
                 <>
@@ -182,29 +189,28 @@ export default function Header() {
                     initial="hidden"
                     animate="visible"
                     exit="exit"
-                    className="absolute right-0 mt-2 min-w-[220px] bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border border-gray-200/50 dark:border-slate-700/50 rounded-2xl shadow-2xl z-50 overflow-hidden"
+                    className="absolute right-0 mt-3 min-w-[240px] bg-white/98 dark:bg-slate-900/98 backdrop-blur-2xl border border-gray-200/60 dark:border-slate-700/60 rounded-2xl shadow-3xl shadow-purple-200/30 dark:shadow-purple-900/30 z-50 overflow-hidden"
                   >
-                    <div className="px-4 py-3 border-b border-gray-200/50 dark:border-slate-700/50">
-                      <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-                        {userName || "User"}
+                    <div className="px-5 py-3 border-b border-gray-200/60 dark:border-slate-700/60 bg-gradient-to-r from-purple-50 dark:from-slate-800/50 to-pink-50 dark:to-slate-800/50">
+                      <p className="text-base font-bold text-gray-900 dark:text-white truncate">
+                        {userName || "User Profile"}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-1">
+                      <p className="text-sm text-gray-600 dark:text-gray-300 truncate mt-1">
                         {userEmail}
                       </p>
                     </div>
 
                     <div className="p-2">
-                      <motion.button
+                      <button
                         onClick={handleLogout}
-                        className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200 group"
-                        whileHover={{ x: 2 }}
+                        className="flex items-center gap-3 w-full px-4 py-2.5 text-base font-medium text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 active:scale-98 transition-all duration-200 group"
                       >
-                        <FaSignOutAlt className="group-hover:scale-110 transition-transform" />
+                        <FaSignOutAlt className="group-hover:scale-110 transition-transform text-xl" /> {/* Larger icon */}
                         <span>Logout</span>
-                      </motion.button>
+                      </button>
                     </div>
 
-                    <div className="px-4 py-3 border-t border-gray-200/50 dark:border-slate-700/50 bg-gray-50/50 dark:bg-slate-700/30">
+                    <div className="px-5 py-3 border-t border-gray-200/60 dark:border-slate-700/60 bg-gray-100/50 dark:bg-slate-800/50">
                       <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
                         <span>Member since</span>
                         <span>{new Date().getFullYear()}</span>
@@ -218,8 +224,8 @@ export default function Header() {
         ) : (
           <Link href="/auth/login">
             <motion.button
-              className="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:from-indigo-700 hover:to-purple-700"
-              whileHover={{ scale: 1.05 }}
+              className="px-8 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-xl shadow-lg shadow-purple-400/50 hover:shadow-xl hover:shadow-pink-400/50 transition-all duration-300 ease-in-out hover:from-purple-700 hover:to-pink-700 active:scale-95"
+              whileHover={{ scale: 1.00 }}
               whileTap={{ scale: 0.95 }}
             >
               Get Started
@@ -227,6 +233,6 @@ export default function Header() {
           </Link>
         )}
       </nav>
-    </motion.header>
+    </header>
   );
 }
