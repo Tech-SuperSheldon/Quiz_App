@@ -62,6 +62,7 @@ export default function Quiz({}: QuizProps) {
     }
   }, [quizStarted, showResult]);
 
+  // Function to generate questions
   const generateQuestions = async (stageNumber: number = 1) => {
     try {
       let authData = getAuthData();
@@ -101,9 +102,8 @@ export default function Quiz({}: QuizProps) {
           user_id: userId,
           course_type: "Naplap",
           stage_number: stageNumber,
-          grade : grade,
+          grade: 5,
           num_questions: 10,
-          
         }),
       });
 
@@ -122,13 +122,14 @@ export default function Quiz({}: QuizProps) {
     }
   };
 
+  // Start quiz function
   const startQuiz = async () => {
-    setIsLoading(true);
+    setIsLoading(true); // Set loading state to true
     try {
-      const newQuestions = await generateQuestions(1);
+      const newQuestions = await generateQuestions(1); // Start with stage 1
       if (newQuestions && newQuestions.length > 0) {
-        setQuestions(newQuestions);
-        setQuizStarted(true);
+        setQuestions(newQuestions); // Set the fetched questions
+        setQuizStarted(true); // Set quiz to started
       } else {
         alert("Unable to generate questions. Please try again later.");
       }
@@ -136,10 +137,11 @@ export default function Quiz({}: QuizProps) {
       console.error("Error starting quiz:", error);
       alert("Failed to start quiz. Please try again.");
     } finally {
-      setIsLoading(false);
+      setIsLoading(false); // Set loading state to false
     }
   };
 
+  // Submit answer function
   const submitAnswer = async () => {
     if (!selectedAnswer || !currentQuestion) return;
 
@@ -219,6 +221,7 @@ export default function Quiz({}: QuizProps) {
     }
   };
 
+  // Function to go to the next question
   const nextQuestion = async () => {
     const nextIndex = currentQuestionIndex + 1;
 
@@ -261,6 +264,7 @@ export default function Quiz({}: QuizProps) {
     setTimeSpent(0);
   };
 
+  // Function to get the color of the answer options
   const getOptionColor = (option: string) => {
     if (!showResult || !result) return "bg-white hover:bg-gray-50";
 
@@ -280,16 +284,12 @@ export default function Quiz({}: QuizProps) {
       <div className="max-w-4xl mx-auto p-6">
         <div className="bg-white rounded-xl shadow-lg p-8">
           <div className="text-center">
-            <div className="mb-8">
-              <h1 className="text-4xl font-bold text-gray-800 mb-4">
-                Welcome to the Quiz!
-              </h1>
-              <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-                Test your knowledge with our comprehensive quiz. You&apos;ll
-                start with 10 questions, and more will be generated
-                automatically as you progress through the quiz.
-              </p>
-            </div>
+            <h1 className="text-4xl font-bold text-gray-800 mb-4">
+              Welcome to the Quiz!
+            </h1>
+            <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+              Test your knowledge with our comprehensive quiz. You&apos;ll start with 10 questions, and more will be generated automatically as you progress through the quiz.
+            </p>
 
             <motion.button
               onClick={startQuiz}
@@ -304,22 +304,7 @@ export default function Quiz({}: QuizProps) {
                   Starting Quiz...
                 </div>
               ) : (
-                <div className="flex items-center gap-3">
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  Start Quiz
-                </div>
+                "Start Quiz"
               )}
             </motion.button>
           </div>
@@ -378,13 +363,7 @@ export default function Quiz({}: QuizProps) {
                   key={index}
                   onClick={() => !showResult && setSelectedAnswer(option)}
                   disabled={showResult}
-                  className={`w-full p-4 text-left border-2 rounded-lg transition-all duration-200 ${getOptionColor(
-                    option
-                  )} ${
-                    selectedAnswer === option && !showResult
-                      ? "border-indigo-500 bg-indigo-50"
-                      : ""
-                  }`}
+                  className={`w-full p-4 text-left border-2 rounded-lg transition-all duration-200 ${getOptionColor(option)} ${selectedAnswer === option && !showResult ? "border-indigo-500 bg-indigo-50" : ""}`}
                   whileHover={!showResult ? { scale: 1.02 } : {}}
                   whileTap={!showResult ? { scale: 0.98 } : {}}
                 >
@@ -404,9 +383,7 @@ export default function Quiz({}: QuizProps) {
                   <div className="flex items-center gap-2 mb-2">
                     <span
                       className={`px-2 py-1 rounded text-sm font-medium ${
-                        result.is_correct
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
+                        result.is_correct ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
                       }`}
                     >
                       {result.is_correct ? "Correct!" : "Incorrect"}
@@ -431,20 +408,12 @@ export default function Quiz({}: QuizProps) {
                 {!showResult ? (
                   <motion.button
                     onClick={submitAnswer}
-                    disabled={
-                      !selectedAnswer ||
-                      isSubmitting ||
-                      !!userAnswers[currentQuestionIndex]
-                    }
+                    disabled={!selectedAnswer || isSubmitting || !!userAnswers[currentQuestionIndex]}
                     className="px-6 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    {isSubmitting
-                      ? "Submitting..."
-                      : userAnswers[currentQuestionIndex]
-                      ? "Already Attempted"
-                      : "Submit Answer"}
+                    {isSubmitting ? "Submitting..." : userAnswers[currentQuestionIndex] ? "Already Attempted" : "Submit Answer"}
                   </motion.button>
                 ) : (
                   <motion.button
@@ -468,76 +437,52 @@ export default function Quiz({}: QuizProps) {
               Questions
             </h3>
             <div className="grid grid-cols-5 gap-2">
-              {Array.from(
-                {
-                  length: Math.max(
-                    questions.length + (isGeneratingMore ? 10 : 0),
-                    10
-                  ),
-                },
-                (_, index) => {
-                  const questionNumber = index + 1;
-                  const result = questionResults[index];
-                  const isCurrent = index === currentQuestionIndex;
-                  const isAnswered =
-                    result === "correct" || result === "incorrect";
-                  const isSkeleton =
-                    index >= questions.length && isGeneratingMore;
+              {Array.from({ length: Math.max(questions.length + (isGeneratingMore ? 10 : 0), 10) }, (_, index) => {
+                const questionNumber = index + 1;
+                const result = questionResults[index];
+                const isCurrent = index === currentQuestionIndex;
+                const isAnswered = result === "correct" || result === "incorrect";
+                const isSkeleton = index >= questions.length && isGeneratingMore;
 
-                  return (
-                    <button
-                      key={index}
-                      onClick={() => {
-                        if (index < questions.length) {
-                          setCurrentQuestionIndex(index);
-                          // If question was already answered, show the previous answer and result
-                          if (userAnswers[index]) {
-                            setSelectedAnswer(userAnswers[index]);
-                            // Always show result for attempted questions
-                            setResult({
-                              is_correct: result === "correct",
-                              correct_answer: questions[index].correct_answer,
-                              explanation: questions[index].explanation,
-                              question_id: questions[index].question_id,
-                              user_answer: userAnswers[index],
-                              time_spent: 0,
-                            });
-                            setShowResult(true);
-                          } else {
-                            setSelectedAnswer(null);
-                            setShowResult(false);
-                            setResult(null);
-                          }
-                          setTimeSpent(0);
+                return (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      if (index < questions.length) {
+                        setCurrentQuestionIndex(index);
+                        if (userAnswers[index]) {
+                          setSelectedAnswer(userAnswers[index]);
+                          setResult({
+                            is_correct: result === "correct",
+                            correct_answer: questions[index].correct_answer,
+                            explanation: questions[index].explanation,
+                            question_id: questions[index].question_id,
+                            user_answer: userAnswers[index],
+                            time_spent: 0,
+                          });
+                          setShowResult(true);
+                        } else {
+                          setSelectedAnswer(null);
+                          setShowResult(false);
+                          setResult(null);
                         }
-                      }}
-                      disabled={index >= questions.length && !isSkeleton}
-                      className={`
-                        w-10 h-10 rounded-lg text-sm font-medium transition-all duration-200
-                        ${
-                          isSkeleton
-                            ? "bg-gray-200 animate-pulse"
-                            : isCurrent
-                            ? "bg-indigo-600 text-white ring-2 ring-indigo-300"
-                            : isAnswered
-                            ? result === "correct"
-                              ? "bg-green-500 text-white hover:bg-green-600"
-                              : "bg-red-500 text-white hover:bg-red-600"
-                            : index < questions.length
-                            ? "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                            : "bg-gray-100 text-gray-400 cursor-not-allowed"
-                        }
-                      `}
-                    >
-                      {isSkeleton ? (
-                        <div className="w-4 h-4 bg-gray-300 rounded animate-pulse"></div>
-                      ) : (
-                        questionNumber
-                      )}
-                    </button>
-                  );
-                }
-              )}
+                        setTimeSpent(0);
+                      }
+                    }}
+                    disabled={index >= questions.length && !isSkeleton}
+                    className={`
+                      w-10 h-10 rounded-lg text-sm font-medium transition-all duration-200
+                      ${isSkeleton ? "bg-gray-200 animate-pulse" : isCurrent ? "bg-indigo-600 text-white ring-2 ring-indigo-300" : isAnswered ? result === "correct" ? "bg-green-500 text-white hover:bg-green-600" : "bg-red-500 text-white hover:bg-red-600" : index < questions.length ? "bg-gray-200 text-gray-700 hover:bg-gray-300" : "bg-gray-100 text-gray-400 cursor-not-allowed"}
+                    `}
+                  >
+                    {isSkeleton ? (
+                      <div className="w-4 h-4 bg-gray-300 rounded animate-pulse"></div>
+                    ) : (
+                      questionNumber
+                    )}
+                  </button>
+                );
+              })}
             </div>
             <div className="mt-4 text-xs text-gray-500">
               <div className="flex items-center gap-2 mb-1">
