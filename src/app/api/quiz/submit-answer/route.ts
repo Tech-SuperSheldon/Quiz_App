@@ -4,7 +4,14 @@ export async function POST(req: NextRequest) {
   try {
     // Parse request body
     const body = await req.json();
-    const { question_id, user_answer, time_spent, token } = body;
+    let { question_id, user_answer, time_spent, token } = body;
+    // fallback to Authorization header if token not in body
+    if (!token) {
+      const authHeader = req.headers.get("authorization");
+      if (authHeader && authHeader.startsWith("Bearer ")) {
+        token = authHeader.split(" ")[1];
+      }
+    }
 
     // Check for missing required fields
     if (!token || !question_id || !user_answer) {
@@ -21,7 +28,7 @@ export async function POST(req: NextRequest) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: token ? `Bearer ${token}` : "",
         },
         body: JSON.stringify({
           question_id,
