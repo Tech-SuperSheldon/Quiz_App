@@ -140,6 +140,13 @@ export default function Quiz({}: QuizProps) {
       return;
     }
 
+    // Ensure question_id is valid
+    if (!currentQuestion.question_id) {
+      console.error("Invalid question ID");
+      alert("Invalid question. Please try again.");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       let authData = getAuthData();
@@ -154,6 +161,10 @@ export default function Quiz({}: QuizProps) {
           userId = userId || parsed.userId || parsed.user_id || parsed.id;
         }
       }
+
+      console.log("Token:", token);
+      console.log("User ID:", userId);
+      console.log("Question ID:", currentQuestion.question_id);
 
       const submitHeaders: Record<string, string> = {
         "Content-Type": "application/json",
@@ -199,7 +210,7 @@ export default function Quiz({}: QuizProps) {
         [currentQuestionIndex]: selectedAnswer,
       }));
     } catch (error) {
-      console.error(`❌ Error submitting answer: ${error}`);
+      console.error("Error submitting answer:", error);
       alert("Failed to submit answer. Please try again.");
     } finally {
       setIsSubmitting(false);
@@ -252,9 +263,7 @@ export default function Quiz({}: QuizProps) {
       <div className="max-w-4xl mx-auto p-6">
         <div className="bg-white rounded-xl shadow-lg p-8">
           <div className="text-center">
-            <h1 className="text-4xl font-bold text-gray-800 mb-4">
-              Welcome to the Quiz!
-            </h1>
+            <h1 className="text-4xl font-bold text-gray-800 mb-4">Welcome to the Quiz!</h1>
             <motion.button
               onClick={startQuiz}
               disabled={isLoading}
@@ -327,7 +336,9 @@ export default function Quiz({}: QuizProps) {
                   key={index}
                   onClick={() => !showResult && setSelectedAnswer(option)}
                   disabled={showResult}
-                  className={`w-full p-4 text-left border-2 rounded-lg transition-all duration-200 ${getOptionColor(option)} ${selectedAnswer === option && !showResult ? "border-indigo-500 bg-indigo-50" : ""}`}
+                  className={`w-full p-4 text-left border-2 rounded-lg transition-all duration-200 ${getOptionColor(
+                    option
+                  )} ${selectedAnswer === option && !showResult ? "border-indigo-500 bg-indigo-50" : ""}`}
                   whileHover={!showResult ? { scale: 1.02 } : {}}
                   whileTap={!showResult ? { scale: 0.98 } : {}}
                 >
@@ -346,7 +357,11 @@ export default function Quiz({}: QuizProps) {
                 >
                   <div className="flex items-center gap-2 mb-2">
                     <span
-                      className={`px-2 py-1 rounded text-sm font-medium ${result.is_correct ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}
+                      className={`px-2 py-1 rounded text-sm font-medium ${
+                        result.is_correct
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
+                      }`}
                     >
                       {result.is_correct ? "Correct!" : "Incorrect"}
                     </span>
