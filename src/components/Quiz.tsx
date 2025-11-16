@@ -108,9 +108,11 @@ export default function Quiz({}: QuizProps) {
       };
       if (token) headers["Authorization"] = `Bearer ${token}`;
 
+      // include credentials so cookies (session cookie) are sent to same-origin API routes
       const response = await fetch("/api/quiz/generate", {
         method: "POST",
         headers,
+        credentials: "include",
         body: JSON.stringify({
           token, // include token in body as some endpoints expect it there
           user_id: userId,
@@ -142,7 +144,9 @@ export default function Quiz({}: QuizProps) {
           // Always try next stage when 409 error occurs (infinite stages)
           return await generateQuestions(stageNumber + 1);
         }
-        throw new Error(data.error || "Failed to generate questions");
+        throw new Error(
+          `Failed to generate questions (status ${response.status}): ${data?.error || "unknown error"}`
+        );
       }
 
       console.log(
@@ -150,7 +154,7 @@ export default function Quiz({}: QuizProps) {
           data.questions?.length || 0
         } questions for stage ${stageNumber}`
       );
-      return data.questions;
+      return data.questions || [];
     } catch (error) {
       console.error(
         `❌ API ERROR: Error generating questions for stage ${stageNumber}:`,
@@ -216,9 +220,23 @@ export default function Quiz({}: QuizProps) {
 
     setIsSubmitting(true);
     try {
-      const authData = getAuthData();
-      if (!authData) {
-        throw new Error("Authentication required");
+      // try primary helper and fallback to cookies (same logic as generateQuestions)
+      let authData = getAuthData();
+      let token = authData?.token;
+      let userId = authData?.userId;
+      if (!token || !userId) {
+        const clientCookie = Cookies.get("auth-client");
+        if (clientCookie) {
+          try {
+            const parsed = JSON.parse(clientCookie);
+            token = token || parsed.token || parsed.auth_token || parsed.authToken;
+            userId = userId || parsed.userId || parsed.user_id || parsed.id;
+          } catch (e) {
+            /* ignore */
+          }
+        }
+        token = token || Cookies.get("token") || Cookies.get("auth-token") || undefined;
+        userId = userId || Cookies.get("user_id") || undefined;
       }
 
       console.log(
@@ -230,19 +248,24 @@ export default function Quiz({}: QuizProps) {
         `📤 SUBMIT ANSWER: Answer: "${selectedAnswer}", Time: ${timeSpent}s`
       );
       console.log(`📤 SUBMIT ANSWER: Request body:`, {
-        token: authData.token ? "***TOKEN***" : "NO_TOKEN",
+        token: token ? "***TOKEN***" : "NO_TOKEN",
         question_id: currentQuestion.question_id,
         user_answer: selectedAnswer,
         time_spent: timeSpent,
       });
 
+      const submitHeaders: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (token) submitHeaders["Authorization"] = `Bearer ${token}`;
+
+      // include credentials so server-side session/cookies are forwarded
       const response = await fetch("/api/quiz/submit-answer", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: submitHeaders,
+        credentials: "include",
         body: JSON.stringify({
-          token: authData.token,
+          token,
           question_id: currentQuestion.question_id,
           user_answer: selectedAnswer,
           time_spent: timeSpent,
