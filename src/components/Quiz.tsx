@@ -191,9 +191,10 @@ export default function Quiz({}: QuizProps) {
         }
       );
 
-       console.log("hello baby");
+       
 
       const data = await response.json();
+      console.log(response);
       if (!response.ok) {
         throw new Error(data?.error || "Failed to submit answer");
       }
