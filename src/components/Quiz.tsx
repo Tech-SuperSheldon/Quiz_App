@@ -88,7 +88,7 @@ export default function Quiz({}: QuizProps) {
       if (token) headers["Authorization"] = `Bearer ${token}`;
 
       const response = await fetch(
-        "https://levelupbackend.supersheldon.online/api/questions/generate",
+        "/api/quiz/generate",
         {
           method: "POST",
           headers: headers,
@@ -172,7 +172,7 @@ export default function Quiz({}: QuizProps) {
       if (token) submitHeaders["Authorization"] = `Bearer ${token}`;
 
       const response = await fetch(
-        "https://levelupbackend.supersheldon.online/api/questions/submit-answer",
+        "/api/quiz/submit-answer",
         {
           method: "POST",
           headers: submitHeaders,
