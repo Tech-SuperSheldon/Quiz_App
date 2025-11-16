@@ -133,53 +133,43 @@ export default function Quiz({}: QuizProps) {
     }
   };
 
- const startQuiz = async () => {
-    console.log(`🚀 QUIZ START: Starting quiz for user`);
-    setIsLoading(true);
-    setQuizStarted(false); // Temporarily set to false to ensure welcome screen shows during loading if needed
-    try {
-      console.log(
-        `🚀 QUIZ START: Calling generateQuestions(1) to get initial questions`
-      );
-      const initialQuestions = await generateQuestions(1);
+const startQuiz = async () => {
+  console.log("🚀 QUIZ START: Starting quiz for user");
 
-      if (initialQuestions && initialQuestions.length > 0) {
-        setQuestions(initialQuestions);
-        setCurrentQuestionIndex(0); // <--- THIS WAS THE KEY MISSING PIECE
-        setSelectedAnswer(null);    // Reset selected answer for the first question
-        setShowResult(false);       // Hide result display
-        setResult(null);            // Clear previous result
-        setTimeSpent(0);            // Reset timer for the new quiz session
-        setQuestionResults({});     // Clear all previous question attempt results
-        setUserAnswers({});         // Clear all previous user answers
+  const authData = getAuthData();
+  console.log("DEBUG AUTH DATA", authData);
 
-        setQuizStarted(true); // Now the quiz can truly start
-        console.log("Quiz started successfully with initial questions.");
-        if (initialQuestions[0]) {
-          console.log(
-            `📋 INITIAL QUESTION DETAILS: First question ID: ${initialQuestions[0].question_id}`
-          );
-          console.log(
-            `📋 INITIAL QUESTION DETAILS: Question attempted: ${initialQuestions[0].question_attempted}`
-          );
-          console.log(
-            `📋 INITIAL QUESTION DETAILS: User answer: ${initialQuestions[0].user_answer}`
-          );
-          console.log(
-            `📋 INITIAL QUESTION DETAILS: Stage number: ${initialQuestions[0].stage_number}`
-          );
-        }
-      } else {
-        console.log("No questions generated after trying all stages or API returned empty.");
-        alert("Unable to generate questions. Please try again later.");
-      }
-    } catch (error) {
-      console.error("Error starting quiz:", error);
-      alert("Failed to start quiz. Please try again.");
-    } finally {
-      setIsLoading(false);
+  if (!authData || !authData.token || !authData.userId) {
+    alert("Please login again. Your session expired.");
+    return;
+  }
+
+  setIsLoading(true);
+
+  try {
+    console.log(`🚀 QUIZ START: Calling generateQuestions(1)`);
+
+    const newQuestions = await generateQuestions(1);
+
+    if (!newQuestions) {
+      alert("Authentication error. Please login again.");
+      return;
     }
-  };
+
+    if (newQuestions.length > 0) {
+      setQuestions(newQuestions);
+      setQuizStarted(true);
+    } else {
+      alert("No questions available. Try again later.");
+    }
+  } catch (error) {
+    console.error("Error starting quiz:", error);
+    alert("Failed to start quiz. Please try again.");
+  } finally {
+    setIsLoading(false);
+  }
+};
+
   const submitAnswer = async () => {
     if (!selectedAnswer || !currentQuestion) return;
 
