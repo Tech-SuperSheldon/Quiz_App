@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getAuthData } from "@/utils/authStorage";
+import Cookies from "js-cookie";
 
 interface Question {
   question_id: string;
@@ -63,36 +64,61 @@ export default function Quiz({}: QuizProps) {
 
   const generateQuestions = async (stageNumber: number = 1) => {
     try {
-      const authData = getAuthData();
-      if (!authData) {
-        throw new Error("Authentication required");
+      // try primary helper
+      let authData = getAuthData();
+      let token = authData?.token;
+      let userId = authData?.userId;
+
+      // fallback: try cookies (auth-client, token, auth-token)
+      if (!token || !userId) {
+        const clientCookie = Cookies.get("auth-client");
+        if (clientCookie) {
+          try {
+            const parsed = JSON.parse(clientCookie);
+            token = token || parsed.token || parsed.auth_token || parsed.authToken;
+            userId = userId || parsed.userId || parsed.user_id || parsed.id;
+          } catch (e) {
+            // ignore parse errors
+          }
+        }
+        token = token || Cookies.get("token") || Cookies.get("auth-token") || undefined;
+        userId = userId || Cookies.get("user_id") || undefined;
+      }
+
+      // If still missing auth, log and continue — backend may reject but we won't throw early
+      if (!token || !userId) {
+        console.warn(
+          "generateQuestions: auth data not found via getAuthData() or cookies. Attempting request without full auth."
+        );
       }
 
       console.log(
         `📡 API CALL: Calling generateQuestions API for stage ${stageNumber}`
       );
       console.log(`📡 API CALL: Request body:`, {
-        token: authData.token ? "***TOKEN***" : "NO_TOKEN",
-        user_id: authData.userId,
+        token: token ? "***TOKEN***" : "NO_TOKEN",
+        user_id: userId,
         course_type: "Naplap",
         stage_number: stageNumber,
         num_questions: 10,
       });
 
-   const response = await fetch("/api/quiz/generate", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    "Authorization": `Bearer ${authData.token}`
-  },
-  body: JSON.stringify({
-    user_id: authData.userId,
-    course_type: "Naplap",
-    stage_number: stageNumber,
-    num_questions: 10
-  })
-});
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
 
+      const response = await fetch("/api/quiz/generate", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          token, // include token in body as some endpoints expect it there
+          user_id: userId,
+          course_type: "Naplap",
+          stage_number: stageNumber,
+          num_questions: 10,
+        }),
+      });
 
       const data = await response.json();
       console.log(
@@ -134,42 +160,46 @@ export default function Quiz({}: QuizProps) {
     }
   };
 
-const startQuiz = async () => {
-  console.log("🚀 QUIZ START: Starting quiz for user");
+  const startQuiz = async () => {
+    console.log(`🚀 QUIZ START: Starting quiz for user`);
+    setIsLoading(true);
+    try {
+      // Always start with stage 1, the generateQuestions function will handle stage progression
+      console.log(
+        `🚀 QUIZ START: Calling generateQuestions(1) to get initial questions`
+      );
+      const newQuestions = await generateQuestions(1);
 
-  const authData = getAuthData();
-  console.log("DEBUG AUTH DATA", authData);
-
-  if (!authData || !authData.token || !authData.userId) {
-    alert("Please login again. Your session expired.");
-    return;
-  }
-
-  setIsLoading(true);
-
-  try {
-    console.log(`🚀 QUIZ START: Calling generateQuestions(1)`);
-
-    const newQuestions = await generateQuestions(1);
-
-    if (!newQuestions) {
-      alert("Authentication error. Please login again.");
-      return;
+      if (newQuestions && newQuestions.length > 0) {
+        setQuestions(newQuestions);
+        setQuizStarted(true);
+        // Log details about the first question to check its status
+        if (newQuestions[0]) {
+          console.log(
+            `📋 INITIAL QUESTION DETAILS: First question ID: ${newQuestions[0].question_id}`
+          );
+          console.log(
+            `📋 INITIAL QUESTION DETAILS: Question attempted: ${newQuestions[0].question_attempted}`
+          );
+          console.log(
+            `📋 INITIAL QUESTION DETAILS: User answer: ${newQuestions[0].user_answer}`
+          );
+          console.log(
+            `📋 INITIAL QUESTION DETAILS: Stage number: ${newQuestions[0].stage_number}`
+          );
+        }
+      } else {
+        // If no questions generated (all stages already have questions)
+        console.log("No questions generated after trying all stages");
+        alert("Unable to generate questions. Please try again later.");
+      }
+    } catch (error) {
+      console.error("Error starting quiz:", error);
+      alert("Failed to start quiz. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
-
-    if (newQuestions.length > 0) {
-      setQuestions(newQuestions);
-      setQuizStarted(true);
-    } else {
-      alert("No questions available. Try again later.");
-    }
-  } catch (error) {
-    console.error("Error starting quiz:", error);
-    alert("Failed to start quiz. Please try again.");
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
   const submitAnswer = async () => {
     if (!selectedAnswer || !currentQuestion) return;
