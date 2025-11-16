@@ -79,19 +79,20 @@ export default function Quiz({}: QuizProps) {
         num_questions: 10,
       });
 
-      const response = await fetch("/api/quiz/generate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          token: authData.token,
-          user_id: authData.userId,
-          course_type: "Naplap",
-          stage_number: stageNumber,
-          num_questions: 10,
-        }),
-      });
+   const response = await fetch("/api/quiz/generate", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${authData.token}`
+  },
+  body: JSON.stringify({
+    user_id: authData.userId,
+    course_type: "Naplap",
+    stage_number: stageNumber,
+    num_questions: 10
+  })
+});
+
 
       const data = await response.json();
       console.log(
