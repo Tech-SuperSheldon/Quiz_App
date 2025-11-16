@@ -104,8 +104,8 @@ export default function Header() {
           <Image
             src="/Final-Logo-bg-removed.png"
             alt="Super Sheldon Quiz"
-            width={scrolled ? 80 : 100} 
-            height={scrolled ? 80 : 100}
+            width={scrolled ? 80 : 50} 
+            height={scrolled ? 80 : 50}
             className="w-full object-contain"
             priority
           />
