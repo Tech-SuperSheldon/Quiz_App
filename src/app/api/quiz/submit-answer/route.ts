@@ -12,7 +12,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Call the backend API to submit answer
     const backendResponse = await fetch(
       `${process.env.BASE_URL}api/questions/submit-answer`,
       {
