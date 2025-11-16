@@ -18,47 +18,40 @@ export default function Header() {
   const pathname = usePathname();
   const isDashboard = pathname.startsWith("/dashboard");
 
-  // Load user data from cookies on component mount
+  // ✅ Load user data from "auth-client" cookie
   useEffect(() => {
-    const email = Cookies.get("student_email");
-    const name = Cookies.get("student_name");
-    const profilePic = Cookies.get("student_profile_pic");
-
-    if (email) {
-      setUserEmail(email);
-      setUserName(name || email); // Use email if name is not available
-      setUserPic(profilePic || null);
-    }
-  }, []); // Empty dependency array means this runs once on mount
-
-  // Close dropdown if clicked outside
-  useEffect(() => {
-    const handleOutsideClick = (event: MouseEvent) => {
-      if (dropdownOpen && !(event.target as HTMLElement).closest(".profile-dropdown-container")) {
-        setDropdownOpen(false);
+    const clientCookie = Cookies.get("auth-client");
+    if (clientCookie) {
+      try {
+        const user = JSON.parse(clientCookie);
+        setUserEmail(user.email || null);
+        setUserName(user.name || null);
+        setUserPic(user.picture || null);
+      } catch (err) {
+        console.error("Error parsing auth-client cookie:", err);
       }
-    };
-    document.addEventListener("mousedown", handleOutsideClick);
-    return () => document.removeEventListener("mousedown", handleOutsideClick);
-  }, [dropdownOpen]);
+    } else {
+      setUserEmail(null);
+      setUserName(null);
+      setUserPic(null);
+    }
+  }, [pathname]);
 
-  // Logout clears both frontend & backend cookies
+  // ✅ Logout clears both frontend & backend cookies
   const handleLogout = () => {
+    Cookies.remove("auth-client");
     Cookies.remove("token");
-    Cookies.remove("student_name");
-    Cookies.remove("student_email");
-    Cookies.remove("student_class");
-    Cookies.remove("student_mobile");
-    Cookies.remove("student_exam");
-    Cookies.remove("student_profile_pic");
+    Cookies.remove("auth-token");
+    Cookies.remove("temp-auth");
+    Cookies.remove("user_id");
     setUserEmail(null);
     setUserPic(null);
-    setUserName(null); // Clear username on logout
-    setDropdownOpen(false); // Close dropdown on logout
+    setUserName(null);
+    setDropdownOpen(false);
     router.push("/");
   };
 
-  // Scroll listener to shrink header on scroll
+  // ✅ Scroll listener to shrink header on scroll
   const handleScroll = () => {
     if (window.scrollY > 50) {
       setScrolling(true);
@@ -73,61 +66,61 @@ export default function Header() {
   }, []);
 
   const dropdownVariants = {
-    hidden: { opacity: 0, y: -15, scale: 0.9 }, // Slightly more pronounced initial state
+    hidden: { opacity: 0, y: -10, scale: 0.95 },
     visible: {
       opacity: 1,
       y: 0,
       scale: 1,
-      transition: { duration: 0.25, ease: "easeOut" }, // Slightly longer, smoother transition
+      transition: { duration: 0.2, ease: "easeOut" },
     },
     exit: {
       opacity: 0,
-      y: -15, // Matches initial for symmetrical animation
-      scale: 0.9,
-      transition: { duration: 0.2, ease: "easeIn" },
+      y: -10,
+      scale: 0.95,
+      transition: { duration: 0.15, ease: "easeIn" },
     },
   };
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 mx-auto z-50 transition-all duration-700 ease-in-out transform
+      className={`fixed top-0 left-0 right-0 mx-auto z-50 transition-all duration-500
         ${scrolling
-          ? "w-[98%] bg-gradient-to-r from-white/90 via-white/70 to-white/90 dark:from-slate-900/90 dark:to-slate-800/90 backdrop-blur-3xl shadow-3xl shadow-indigo-300/40 dark:shadow-purple-900/30 border border-white/50 dark:border-slate-700/60 rounded-3xl py-1.5"
-          : "w-full bg-white/98 dark:bg-slate-950/98 shadow-xl shadow-gray-300/40 dark:shadow-slate-800/40 rounded-none py-3"
+          ? "w-11/12 bg-gradient-to-r from-white/80 via-white/50 to-white/80 dark:from-slate-900/80 dark:to-slate-800/80 backdrop-blur-xl shadow-2xl border border-white/30 rounded-xl"
+          : "w-full bg-white/90 dark:bg-slate-900/90 shadow-md rounded-xl"
         }`}
     >
-      <nav className="container mx-auto flex items-center justify-between px-8 transition-all duration-700"> {/* Increased px for more breathing room */}
-        <Link href="/" className="flex items-center gap-2 group">
+      <nav className="flex items-center justify-between px-6 py-3 transition-all duration-500">
+        <Link href="/" className="flex items-center gap-2">
           <Image
             src="/Final-Logo-bg-removed.png"
             alt="Super Sheldon Quiz"
-            width={60} // Slightly larger logo
-            height={60} // Slightly larger logo
-            className="w-full object-contain group-hover:scale-105 transition-transform duration-300 ease-out"
+            width={50}
+            height={50}
+            className="w-full object-contain"
             priority
           />
         </Link>
 
         {/* Navbar Links Container with Blur Effect */}
         <div
-          className={`hidden md:flex space-x-10 justify-center flex-grow transition-all duration-500 font-medium
-            ${scrolling ? "backdrop-blur-xl px-6 py-2 rounded-full bg-white/30 dark:bg-slate-700/30" : "backdrop-blur-none px-0 py-0"}`}
+          className={`flex space-x-8 justify-center flex-grow transition-all duration-500
+            ${scrolling ? "backdrop-blur-xl px-4" : "backdrop-blur-md px-6"}`}
         >
           <Link
             href="/"
-            className="text-gray-700 dark:text-gray-200 hover:text-purple-600 dark:hover:text-purple-400 transition-colors duration-300 ease-in-out text-lg"
+            className="text-gray-800 dark:text-white hover:text-purple-600 transition-colors duration-300"
           >
             Home
           </Link>
           <Link
             href="/dashboard"
-            className="text-gray-700 dark:text-gray-200 hover:text-purple-600 dark:hover:text-purple-400 transition-colors duration-300 ease-in-out text-lg"
+            className="text-gray-800 dark:text-white hover:text-purple-600 transition-colors duration-300"
           >
             Dashboard
           </Link>
           <Link
             href="#contact"
-            className="text-gray-700 dark:text-gray-200 hover:text-purple-600 dark:hover:text-purple-400 transition-colors duration-300 ease-in-out text-lg"
+            className="text-gray-800 dark:text-white hover:text-purple-600 transition-colors duration-300"
           >
             Contact Us
           </Link>
@@ -135,13 +128,12 @@ export default function Header() {
 
         {/* User Profile or Get Started Button */}
         {userEmail ? (
-          <div className="relative z-50 profile-dropdown-container"> {/* Added a class for outside click detection */}
+          <div className="relative">
             <motion.button
-              type="button"
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="flex items-center gap-3 px-3 py-2 rounded-full bg-gradient-to-br from-white/90 to-gray-50/90 dark:from-slate-800/90 dark:to-slate-900/90 backdrop-blur-lg border border-gray-200/60 dark:border-slate-700/60 shadow-lg hover:shadow-xl hover:bg-white/100 dark:hover:bg-slate-700/100 transition-all duration-300 ease-out group focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-900"
-              whileHover={{ scale: 1.02 }} // Reduced scale slightly for subtlety
-              whileTap={{ scale: 0.97 }} // Slightly more distinct tap
+              className="flex items-center gap-2 px-2 py-1 rounded-full bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg border border-gray-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-xl transition-all duration-300 group"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.98 }}
             >
               {/* Profile Picture */}
               <div className="relative">
@@ -149,33 +141,34 @@ export default function Header() {
                   <Image
                     src={userPic}
                     alt="Profile"
-                    width={40} // Slightly larger
-                    height={40} // Slightly larger
-                    className="rounded-full border-2 border-purple-500 group-hover:border-pink-500 shadow-md transition-colors duration-300 ease-in-out"
+                    width={36}
+                    height={36}
+                    className="rounded-full border-2 border-purple-400 group-hover:border-pink-400 transition-colors duration-300"
                     onError={(e) => {
                       console.error("Header - Image failed to load:", userPic);
-                      // Fallback to FaUserCircle if image fails to load
-                      setUserPic(null);
+                      console.error("Header - Error:", e);
+                    }}
+                    onLoad={() => {
+                      console.log(
+                        "Header - Image loaded successfully:",
+                        userPic
+                      );
                     }}
                   />
                 ) : (
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 flex items-center justify-center shadow-inner">
-                    <FaUserCircle className="text-white text-xl" /> {/* Larger icon */}
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+                    <FaUserCircle className="text-white text-lg" />
                   </div>
                 )}
               </div>
-              {/* User Name */}
-              <span className="hidden md:block text-gray-800 dark:text-gray-100 font-semibold text-base whitespace-nowrap">
-                {userName || "Guest"}
-              </span>
 
               {/* Dropdown Arrow */}
               <motion.div
                 animate={{ rotate: dropdownOpen ? 180 : 0 }}
                 transition={{ duration: 0.2 }}
-                className="text-gray-500 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors duration-300"
+                className="text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300"
               >
-                <FaChevronDown className="w-3.5 h-3.5" /> {/* Slightly larger arrow */}
+                <FaChevronDown className="w-3 h-3" />
               </motion.div>
             </motion.button>
 
@@ -192,28 +185,29 @@ export default function Header() {
                     initial="hidden"
                     animate="visible"
                     exit="exit"
-                    className="absolute right-0 mt-3 min-w-[240px] bg-white/98 dark:bg-slate-900/98 backdrop-blur-2xl border border-gray-200/60 dark:border-slate-700/60 rounded-2xl shadow-3xl shadow-purple-200/30 dark:shadow-purple-900/30 z-50 overflow-hidden"
+                    className="absolute right-0 mt-2 min-w-[220px] bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border border-gray-200/50 dark:border-slate-700/50 rounded-2xl shadow-2xl z-50 overflow-hidden"
                   >
-                    <div className="px-5 py-3 border-b border-gray-200/60 dark:border-slate-700/60 bg-gradient-to-r from-purple-50 dark:from-slate-800/50 to-pink-50 dark:to-slate-800/50">
-                      <p className="text-base font-bold text-gray-900 dark:text-white truncate">
-                        {userName || "User Profile"}
+                    <div className="px-4 py-3 border-b border-gray-200/50 dark:border-slate-700/50">
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                        {userName || "User"}
                       </p>
-                      <p className="text-sm text-gray-600 dark:text-gray-300 truncate mt-1">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-1">
                         {userEmail}
                       </p>
                     </div>
 
                     <div className="p-2">
-                      <button
+                      <motion.button
                         onClick={handleLogout}
-                        className="flex items-center gap-3 w-full px-4 py-2.5 text-base font-medium text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 active:scale-98 transition-all duration-200 group"
+                        className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200 group"
+                        whileHover={{ x: 2 }}
                       >
-                        <FaSignOutAlt className="group-hover:scale-110 transition-transform text-xl" /> {/* Larger icon */}
+                        <FaSignOutAlt className="group-hover:scale-110 transition-transform" />
                         <span>Logout</span>
-                      </button>
+                      </motion.button>
                     </div>
 
-                    <div className="px-5 py-3 border-t border-gray-200/60 dark:border-slate-700/60 bg-gray-100/50 dark:bg-slate-800/50">
+                    <div className="px-4 py-3 border-t border-gray-200/50 dark:border-slate-700/50 bg-gray-50/50 dark:bg-slate-700/30">
                       <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
                         <span>Member since</span>
                         <span>{new Date().getFullYear()}</span>
@@ -227,8 +221,8 @@ export default function Header() {
         ) : (
           <Link href="/auth/login">
             <motion.button
-              className="px-8 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-xl shadow-lg shadow-purple-400/50 hover:shadow-xl hover:shadow-pink-400/50 transition-all duration-300 ease-in-out hover:from-purple-700 hover:to-pink-700 active:scale-95"
-              whileHover={{ scale: 1.00 }}
+              className="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:from-indigo-700 hover:to-purple-700"
+              whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
               Get Started
