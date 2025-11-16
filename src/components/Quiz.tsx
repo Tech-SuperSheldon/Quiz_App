@@ -134,87 +134,77 @@ export default function Quiz({}: QuizProps) {
   };
 
   // Submit answer function
-const submitAnswer = async () => {
-  if (!selectedAnswer || !currentQuestion) {
-    alert("Please select an answer before submitting.");
-    return;
-  }
+  const submitAnswer = async () => {
+    if (!selectedAnswer || !currentQuestion) {
+      alert("Please select an answer before submitting.");
+      return;
+    }
 
-  setIsSubmitting(true);
-  try {
-    let authData = getAuthData();
-    let token = authData?.token;
-    let userId = authData?.userId;
+    setIsSubmitting(true);
+    try {
+      let authData = getAuthData();
+      let token = authData?.token;
+      let userId = authData?.userId;
 
-    if (!token || !userId) {
-      const clientCookie = Cookies.get("auth-client");
-      if (clientCookie) {
-        const parsed = JSON.parse(clientCookie);
-        token = token || parsed.token || parsed.auth_token || parsed.authToken;
-        userId = userId || parsed.userId || parsed.user_id || parsed.id;
+      if (!token || !userId) {
+        const clientCookie = Cookies.get("auth-client");
+        if (clientCookie) {
+          const parsed = JSON.parse(clientCookie);
+          token = token || parsed.token || parsed.auth_token || parsed.authToken;
+          userId = userId || parsed.userId || parsed.user_id || parsed.id;
+        }
       }
-    }
 
-    if (!token || !userId) {
-      console.warn("No token/user_id found, attempting with cookies.");
-    }
+      const submitHeaders: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (token) submitHeaders["Authorization"] = `Bearer ${token}`;
 
-    const submitHeaders: Record<string, string> = {
-      "Content-Type": "application/json",
-    };
-    if (token) submitHeaders["Authorization"] = `Bearer ${token}`;
+      const response = await fetch(
+        "https://levelupbackend.supersheldon.online/api/questions/submit-answer",
+        {
+          method: "POST",
+          headers: submitHeaders,
+          body: JSON.stringify({
+            question_id: currentQuestion.question_id,
+            user_answer: selectedAnswer,
+            time_spent: timeSpent,
+            token,
+          }),
+        }
+      );
 
-    const response = await fetch(
-      "https://levelupbackend.supersheldon.online/api/questions/submit-answer",
-      {
-        method: "POST",
-        headers: submitHeaders,
-        body: JSON.stringify({
-          question_id: currentQuestion.question_id,
-          user_answer: selectedAnswer,
-          time_spent: timeSpent,
-          token,
-        }),
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data?.error || "Failed to submit answer");
       }
-    );
 
-    const data = await response.json();
+      setResult({
+        is_correct: data.is_correct,
+        correct_answer: data.correct_answer,
+        explanation: data.explanation,
+        question_id: currentQuestion.question_id,
+        user_answer: selectedAnswer,
+        time_spent: timeSpent,
+      });
 
-    if (!response.ok) {
-      // Log the response error message for better debugging
-      console.error(`Error: ${data?.error || 'Failed to submit answer'}`);
-      alert(`Failed to submit answer: ${data?.error || 'Unknown error'}`);
-      throw new Error(data?.error || "Failed to submit answer");
+      setShowResult(true);
+
+      setQuestionResults((prev) => ({
+        ...prev,
+        [currentQuestionIndex]: data.is_correct ? "correct" : "incorrect",
+      }));
+      setUserAnswers((prev) => ({
+        ...prev,
+        [currentQuestionIndex]: selectedAnswer,
+      }));
+    } catch (error) {
+      console.error(`❌ Error submitting answer: ${error}`);
+      alert("Failed to submit answer. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    // Successful submission
-    setResult({
-      is_correct: data.is_correct,
-      correct_answer: data.correct_answer,
-      explanation: data.explanation,
-      question_id: currentQuestion.question_id,
-      user_answer: selectedAnswer,
-      time_spent: timeSpent,
-    });
-
-    setShowResult(true);
-
-    setQuestionResults((prev) => ({
-      ...prev,
-      [currentQuestionIndex]: data.is_correct ? "correct" : "incorrect",
-    }));
-    setUserAnswers((prev) => ({
-      ...prev,
-      [currentQuestionIndex]: selectedAnswer,
-    }));
-  } catch (error) {
-    // Improved error logging
-    console.error(`❌ Error submitting answer: ${error}`);
-    alert(`Failed to submit answer. Please try again.\nError: ${error.message}`);
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+  };
 
   // Function to go to the next question
   const nextQuestion = async () => {
