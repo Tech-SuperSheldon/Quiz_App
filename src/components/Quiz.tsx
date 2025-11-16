@@ -168,7 +168,32 @@ export default function Quiz({}: QuizProps) {
     console.log(`🚀 QUIZ START: Starting quiz for user`);
     setIsLoading(true);
     try {
-      // Always start with stage 1, the generateQuestions function will handle stage progression
+      // 1) Ensure we have current auth/session info from the server
+      try {
+        console.log("📡 AUTH CHECK: Fetching /api/auth/status");
+        const authResp = await fetch("/api/auth/status", {
+          method: "GET",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+        });
+        const authData = await authResp.json().catch(() => null);
+        console.log("📡 AUTH CHECK: status", authResp.status, "body:", authData);
+        if (!authResp.ok) {
+          // If unauthenticated, surface a clear message
+          if (authResp.status === 401 || authResp.status === 403) {
+            console.warn("🔒 AUTH: User not authenticated according to /api/auth/status");
+            alert("You are not logged in. Please log in before starting the quiz.");
+            setIsLoading(false);
+            return;
+          }
+          // continue for other non-OK statuses but log them
+        }
+      } catch (err) {
+        console.warn("📡 AUTH CHECK: failed to call /api/auth/status", err);
+        // continue — generateQuestions already has fallbacks, but log will help
+      }
+
+      // 2) Always start with stage 1, the generateQuestions function will handle stage progression
       console.log(
         `🚀 QUIZ START: Calling generateQuestions(1) to get initial questions`
       );
@@ -199,7 +224,12 @@ export default function Quiz({}: QuizProps) {
       }
     } catch (error) {
       console.error("Error starting quiz:", error);
-      alert("Failed to start quiz. Please try again.");
+      // Show server error details when available
+      if (error instanceof Error) {
+        alert(`Failed to start quiz. ${error.message}`);
+      } else {
+        alert("Failed to start quiz. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }
