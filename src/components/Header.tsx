@@ -18,9 +18,21 @@ export default function Header() {
   const pathname = usePathname();
   const isDashboard = pathname.startsWith("/dashboard");
 
-  // Load user data from "auth-client" cookie
+  // Load user data from cookies on component mount
   useEffect(() => {
-    // Close dropdown if clicked outside
+    const email = Cookies.get("student_email");
+    const name = Cookies.get("student_name");
+    const profilePic = Cookies.get("student_profile_pic");
+
+    if (email) {
+      setUserEmail(email);
+      setUserName(name || email); // Use email if name is not available
+      setUserPic(profilePic || null);
+    }
+  }, []); // Empty dependency array means this runs once on mount
+
+  // Close dropdown if clicked outside
+  useEffect(() => {
     const handleOutsideClick = (event: MouseEvent) => {
       if (dropdownOpen && !(event.target as HTMLElement).closest(".profile-dropdown-container")) {
         setDropdownOpen(false);
@@ -41,6 +53,7 @@ export default function Header() {
     Cookies.remove("student_profile_pic");
     setUserEmail(null);
     setUserPic(null);
+    setUserName(null); // Clear username on logout
     setDropdownOpen(false); // Close dropdown on logout
     router.push("/");
   };
@@ -122,7 +135,7 @@ export default function Header() {
 
         {/* User Profile or Get Started Button */}
         {userEmail ? (
-          <div className="relative z-50">
+          <div className="relative z-50 profile-dropdown-container"> {/* Added a class for outside click detection */}
             <motion.button
               type="button"
               onClick={() => setDropdownOpen(!dropdownOpen)}
@@ -141,13 +154,8 @@ export default function Header() {
                     className="rounded-full border-2 border-purple-500 group-hover:border-pink-500 shadow-md transition-colors duration-300 ease-in-out"
                     onError={(e) => {
                       console.error("Header - Image failed to load:", userPic);
-                      console.error("Header - Error:", e);
-                    }}
-                    onLoad={() => {
-                      console.log(
-                        "Header - Image loaded successfully:",
-                        userPic
-                      );
+                      // Fallback to FaUserCircle if image fails to load
+                      setUserPic(null);
                     }}
                   />
                 ) : (
