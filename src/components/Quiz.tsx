@@ -3,10 +3,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { getAuthData } from "@/utils/authStorage";
 import Cookies from "js-cookie";
 import Image from "next/image";
-import { ObjectId } from "bson"; // Ensure this is imported for ObjectId validation
+import { ObjectId } from "bson";
 
 interface Question {
-  question_id: string;
+  _id: string; // UPDATED
   question_name: string;
   question_options: string[];
   correct_answer: string;
@@ -52,7 +52,7 @@ export default function Quiz({}: QuizProps) {
 
   const currentQuestion = questions[currentQuestionIndex];
 
-  // Timer effect
+  // Timer
   useEffect(() => {
     if (quizStarted && !showResult) {
       const timer = setInterval(() => {
@@ -62,7 +62,7 @@ export default function Quiz({}: QuizProps) {
     }
   }, [quizStarted, showResult]);
 
-  // Function to generate questions
+  // Generate Questions
   const generateQuestions = async (stageNumber: number = 1) => {
     try {
       let authData = getAuthData();
@@ -78,10 +78,6 @@ export default function Quiz({}: QuizProps) {
         }
       }
 
-      if (!token || !userId) {
-        console.warn("No token/user_id found, attempting with cookies.");
-      }
-
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
       };
@@ -91,7 +87,7 @@ export default function Quiz({}: QuizProps) {
         "https://levelupbackend.supersheldon.online/api/questions/generate",
         {
           method: "POST",
-          headers: headers,
+          headers,
           body: JSON.stringify({
             user_id: userId,
             course_type: "Naplap",
@@ -103,56 +99,50 @@ export default function Quiz({}: QuizProps) {
       );
 
       const data = await response.json();
+
       if (!response.ok) {
         throw new Error(data?.error || "Failed to generate questions");
       }
 
       return data.questions || [];
     } catch (error) {
-      console.error(`❌ Error generating questions: ${error}`);
+      console.error("❌ Error generating questions:", error);
       throw error;
     }
   };
 
-  // Start quiz function
+  // Start Quiz
   const startQuiz = async () => {
     setIsLoading(true);
     try {
-      const newQuestions = await generateQuestions(1); // Start with stage 1
-      if (newQuestions && newQuestions.length > 0) {
-        setQuestions(newQuestions); // Set the fetched questions
-        setQuizStarted(true); // Set quiz to started
+      const newQuestions = await generateQuestions(1);
+      if (newQuestions.length > 0) {
+        setQuestions(newQuestions);
+        setQuizStarted(true);
       } else {
-        alert("Unable to generate questions. Please try again later.");
+        alert("Unable to generate questions.");
       }
-    } catch (error) {
-      console.error("Error starting quiz:", error);
-      alert("Failed to start quiz. Please try again.");
-    } finally {
-      setIsLoading(false); // Set loading state to false
+    } catch {
+      alert("Failed to start quiz.");
     }
+    setIsLoading(false);
   };
 
-  // Submit answer function
+  // Submit Answer
   const submitAnswer = async () => {
     if (!selectedAnswer || !currentQuestion) {
-      alert("Please select an answer before submitting.");
+      alert("Please select an answer.");
       return;
     }
 
-    // Ensure question_id is valid
-    if (!ObjectId.isValid(currentQuestion.question_id)) {
-      console.error("Invalid question ID");
-      alert("Invalid question. Please try again.");
+    // Validate ObjectId
+    if (!ObjectId.isValid(currentQuestion._id)) {
+      alert("Invalid question ID.");
       return;
     }
-
-    // Log the question ID before submission to check if it's correctly formatted
-    console.log("Submitting answer...");
-    console.log("Question ID:", currentQuestion.question_id); // Log question ID
-    console.log("Selected Answer:", selectedAnswer); // Log selected answer
 
     setIsSubmitting(true);
+
     try {
       let authData = getAuthData();
       let token = authData?.token;
@@ -162,14 +152,10 @@ export default function Quiz({}: QuizProps) {
         const clientCookie = Cookies.get("auth-client");
         if (clientCookie) {
           const parsed = JSON.parse(clientCookie);
-          token = token || parsed.token || parsed.auth_token || parsed.authToken;
-          userId = userId || parsed.userId || parsed.user_id || parsed.id;
+          token = token || parsed.token;
+          userId = userId || parsed.userId;
         }
       }
-
-      console.log("Token:", token);
-      console.log("User ID:", userId);
-      console.log("Question ID:", currentQuestion.question_id);
 
       const submitHeaders: Record<string, string> = {
         "Content-Type": "application/json",
@@ -182,7 +168,7 @@ export default function Quiz({}: QuizProps) {
           method: "POST",
           headers: submitHeaders,
           body: JSON.stringify({
-            question_id: currentQuestion.question_id,
+            question_id: currentQuestion._id, // FIXED
             user_answer: selectedAnswer,
             time_spent: timeSpent,
             token,
@@ -191,53 +177,52 @@ export default function Quiz({}: QuizProps) {
       );
 
       const data = await response.json();
-      console.log(data);
-      if (!response.ok) {
-        throw new Error(data?.error || "Failed to submit answer");
-      }
+      if (!response.ok) throw new Error(data?.error);
 
       setResult({
         is_correct: data.is_correct,
         correct_answer: data.correct_answer,
         explanation: data.explanation,
-        question_id: currentQuestion.question_id,
+        question_id: currentQuestion._id, // FIXED
         user_answer: selectedAnswer,
         time_spent: timeSpent,
       });
-
-      setShowResult(true);
 
       setQuestionResults((prev) => ({
         ...prev,
         [currentQuestionIndex]: data.is_correct ? "correct" : "incorrect",
       }));
+
       setUserAnswers((prev) => ({
         ...prev,
         [currentQuestionIndex]: selectedAnswer,
       }));
+
+      setShowResult(true);
     } catch (error) {
-      console.error("Error submitting answer:", error);
-      alert("Failed to submit answer. Please try again.");
-    } finally {
-      setIsSubmitting(false);
+      alert("Error submitting answer.");
     }
+
+    setIsSubmitting(false);
   };
 
-  // Function to go to the next question
-  const nextQuestion = async () => {
+  // Next Question
+  const nextQuestion = () => {
     const nextIndex = currentQuestionIndex + 1;
-
     setCurrentQuestionIndex(nextIndex);
 
     if (userAnswers[nextIndex]) {
-      setSelectedAnswer(userAnswers[nextIndex]);
+      const ans = userAnswers[nextIndex];
+      const nextQ = questions[nextIndex];
       const nextResult = questionResults[nextIndex];
+
+      setSelectedAnswer(ans);
       setResult({
         is_correct: nextResult === "correct",
-        correct_answer: questions[nextIndex].correct_answer,
-        explanation: questions[nextIndex].explanation,
-        question_id: questions[nextIndex].question_id,
-        user_answer: userAnswers[nextIndex],
+        correct_answer: nextQ.correct_answer,
+        explanation: nextQ.explanation,
+        question_id: nextQ._id, // FIXED
+        user_answer: ans,
         time_spent: 0,
       });
       setShowResult(true);
@@ -246,176 +231,132 @@ export default function Quiz({}: QuizProps) {
       setShowResult(false);
       setResult(null);
     }
+
     setTimeSpent(0);
   };
 
-  // Function to get the color of the answer options
+  // Option Colors
   const getOptionColor = (option: string) => {
     if (!showResult || !result) return "bg-white hover:bg-gray-50";
 
-    if (option === result.correct_answer) {
+    if (option === result.correct_answer)
       return "bg-green-100 border-green-500 text-green-800";
-    }
 
-    if (option === selectedAnswer && !result.is_correct) {
+    if (option === selectedAnswer && !result.is_correct)
       return "bg-red-100 border-red-500 text-red-800";
-    }
 
     return "bg-gray-100";
   };
 
+  // Start screen
   if (!quizStarted) {
     return (
       <div className="max-w-4xl mx-auto p-6">
-        <div className="bg-white rounded-xl shadow-lg p-8">
-          <div className="text-center">
-            <Image
-              src="/Yellow and Blue Gradient Virtual Assistant Course Facebook Cover (5).jpg"
-              alt="Super Sheldon Quiz"
-              width={100}
-              height={100}
-              className="w-full object-contain"
-              priority
-            />
-            <motion.button
-              onClick={startQuiz}
-              disabled={isLoading}
-              className="px-8 py-4 bg-indigo-600 text-white text-lg font-semibold rounded-xl hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              {isLoading ? (
-                <div className="flex items-center gap-3">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                  Starting Quiz...
-                </div>
-              ) : (
-                "Start Quiz"
-              )}
-            </motion.button>
-          </div>
+        <div className="bg-white rounded-xl shadow-lg p-8 text-center">
+          <Image
+            src="/Yellow and Blue Gradient Virtual Assistant Course Facebook Cover (5).jpg"
+            alt="Super Sheldon Quiz"
+            width={100}
+            height={100}
+            className="w-full object-contain"
+          />
+          <motion.button
+            onClick={startQuiz}
+            disabled={isLoading}
+            className="px-8 py-4 bg-indigo-600 text-white rounded-xl"
+          >
+            {isLoading ? "Starting..." : "Start Quiz"}
+          </motion.button>
         </div>
       </div>
     );
   }
 
-  if (questions.length === 0) {
+  // Loading
+  if (questions.length === 0)
     return (
-      <div className="max-w-2xl mx-auto p-8 bg-white rounded-xl shadow-lg text-center">
-        <p className="text-gray-600">Loading questions...</p>
+      <div className="max-w-2xl mx-auto p-8 bg-white rounded-xl text-center">
+        <p>Loading questions...</p>
       </div>
     );
-  }
 
   return (
     <div className="max-w-7xl mx-auto p-6">
       <div className="flex gap-6">
-        {/* Main Quiz Content */}
         <div className="flex-1">
-          {/* Timer */}
-          <div className="mb-8 text-right">
-            <span className="text-sm text-gray-500">Time: {timeSpent}s</span>
+          <div className="mb-8 text-right text-sm text-gray-500">
+            Time: {timeSpent}s
           </div>
 
-          {/* Question Card */}
-          <motion.div
-            key={currentQuestionIndex}
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -50 }}
-            className="bg-white rounded-xl shadow-lg p-8 mb-6"
-          >
+          <motion.div className="bg-white rounded-xl shadow-lg p-8 mb-6">
             <div className="mb-6">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="px-3 py-1 bg-indigo-100 text-indigo-800 text-sm font-medium rounded-full">
+              <div className="flex gap-2 mb-4">
+                <span className="px-3 py-1 bg-indigo-100 rounded-full">
                   Question {currentQuestionIndex + 1}
                 </span>
-                <span className="px-3 py-1 bg-indigo-100 text-indigo-800 text-sm font-medium rounded-full">
+                <span className="px-3 py-1 bg-indigo-100 rounded-full">
                   {currentQuestion.question_category}
                 </span>
-                <span className="px-3 py-1 bg-purple-100 text-purple-800 text-sm font-medium rounded-full">
+                <span className="px-3 py-1 bg-purple-100 rounded-full">
                   {currentQuestion.difficulty_level}
                 </span>
               </div>
-              <h3 className="text-xl font-semibold text-gray-800 leading-relaxed">
+              <h3 className="text-xl font-semibold">
                 {currentQuestion.question_name}
               </h3>
             </div>
 
-            {/* Options */}
             <div className="space-y-3 mb-8">
               {currentQuestion.question_options.map((option, index) => (
                 <motion.button
                   key={index}
                   onClick={() => !showResult && setSelectedAnswer(option)}
                   disabled={showResult}
-                  className={`w-full p-4 text-left border-2 rounded-lg transition-all duration-200 ${getOptionColor(
+                  className={`w-full p-4 border-2 rounded-lg ${getOptionColor(
                     option
-                  )} ${selectedAnswer === option && !showResult ? "border-indigo-500 bg-indigo-50" : ""}`}
-                  whileHover={!showResult ? { scale: 1.02 } : {}}
-                  whileTap={!showResult ? { scale: 0.98 } : {}}
+                  )}`}
                 >
-                  <span className="font-medium">{option}</span>
+                  {option}
                 </motion.button>
               ))}
             </div>
 
-            {/* Result Display */}
+            {/* Result */}
             <AnimatePresence>
               {showResult && result && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mb-6 p-4 rounded-lg border-l-4 border-indigo-500 bg-indigo-50"
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    <span
-                      className={`px-2 py-1 rounded text-sm font-medium ${
-                        result.is_correct
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
-                      }`}
-                    >
-                      {result.is_correct ? "Correct!" : "Incorrect"}
-                    </span>
-                  </div>
-                  <p className="text-gray-700 text-sm">{result.explanation}</p>
+                <motion.div className="mb-6 p-4 rounded-lg bg-indigo-50 border-l-4 border-indigo-500">
+                  <span
+                    className={`px-2 py-1 rounded text-sm ${
+                      result.is_correct
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800"
+                    }`}
+                  >
+                    {result.is_correct ? "Correct!" : "Incorrect"}
+                  </span>
+                  <p className="text-gray-700 mt-2">{result.explanation}</p>
                 </motion.div>
               )}
             </AnimatePresence>
 
-            {/* Action Buttons */}
-            <div className="flex justify-between">
-              <div>
-                {isGeneratingMore && (
-                  <div className="flex items-center gap-2 text-sm text-blue-600">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                    Generating more questions...
-                  </div>
-                )}
-              </div>
-              <div className="flex gap-3">
-                {!showResult ? (
-                  <motion.button
-                    onClick={submitAnswer}
-                    disabled={!selectedAnswer || isSubmitting || !!userAnswers[currentQuestionIndex]}
-                    className="px-6 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    {isSubmitting ? "Submitting..." : userAnswers[currentQuestionIndex] ? "Already Attempted" : "Submit Answer"}
-                  </motion.button>
-                ) : (
-                  <motion.button
-                    onClick={nextQuestion}
-                    className="px-6 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    Next Question
-                  </motion.button>
-                )}
-              </div>
+            {/* Buttons */}
+            <div className="flex justify-end gap-3">
+              {!showResult ? (
+                <motion.button
+                  onClick={submitAnswer}
+                  disabled={!selectedAnswer || isSubmitting}
+                  className="px-6 py-2 bg-indigo-600 text-white rounded-lg"
+                >
+                  {isSubmitting ? "Submitting..." : "Submit Answer"}
+                </motion.button>
+              ) : (
+                <motion.button
+                  onClick={nextQuestion}
+                  className="px-6 py-2 bg-green-600 text-white rounded-lg"
+                >
+                  Next Question
+                </motion.button>
+              )}
             </div>
           </motion.div>
         </div>
