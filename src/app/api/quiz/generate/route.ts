@@ -1,9 +1,17 @@
+// app/api/questions/generate/route.ts
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { course_type, stage_number, num_questions, token, user_id, grade } = body;
+    const {
+      course_type,
+      stage_number,
+      num_questions,
+      token,
+      user_id,
+      grade,
+    } = body;
 
     if (!token || !user_id) {
       return NextResponse.json(
@@ -12,8 +20,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const base = process.env.BASE_URL || "";
+    const baseUrl = base.endsWith("/") ? base : `${base}/`;
+
     const backendResponse = await fetch(
-      `${process.env.BASE_URL}api/questions/generate`,
+      `${baseUrl}api/questions/generate`,
       {
         method: "POST",
         headers: {
@@ -21,7 +32,7 @@ export async function POST(req: NextRequest) {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          user_id: user_id,
+          user_id,
           course_type: course_type || "Naplap",
           stage_number: stage_number || 1,
           grade: grade || 5,
@@ -31,6 +42,7 @@ export async function POST(req: NextRequest) {
     );
 
     const data = await backendResponse.json();
+
     if (!backendResponse.ok) {
       return NextResponse.json(
         { error: data.message || "Failed to generate questions" },
