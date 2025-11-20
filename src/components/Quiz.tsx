@@ -1,12 +1,13 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getAuthData } from "@/utils/authStorage";
 import Cookies from "js-cookie";
 import Image from "next/image";
-import { ObjectId } from "bson";
 
 interface Question {
-  _id: string; // UPDATED
+  _id: string;
   question_name: string;
   question_options: string[];
   correct_answer: string;
@@ -30,11 +31,7 @@ interface QuizResult {
   time_spent: number;
 }
 
-interface QuizProps {
-  onComplete?: (results: QuizResult) => void;
-}
-
-export default function Quiz({}: QuizProps) {
+export default function Quiz() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
@@ -55,14 +52,12 @@ export default function Quiz({}: QuizProps) {
   // Timer
   useEffect(() => {
     if (quizStarted && !showResult) {
-      const timer = setInterval(() => {
-        setTimeSpent((prev) => prev + 1);
-      }, 1000);
+      const timer = setInterval(() => setTimeSpent((prev) => prev + 1), 1000);
       return () => clearInterval(timer);
     }
   }, [quizStarted, showResult]);
 
-  // Generate Questions
+  // Fetch questions
   const generateQuestions = async (stageNumber: number = 1) => {
     try {
       let authData = getAuthData();
@@ -70,20 +65,18 @@ export default function Quiz({}: QuizProps) {
       let userId = authData?.userId;
 
       if (!token || !userId) {
-        const clientCookie = Cookies.get("auth-client");
-        if (clientCookie) {
-          const parsed = JSON.parse(clientCookie);
-          token = token || parsed.token || parsed.auth_token || parsed.authToken;
-          userId = userId || parsed.userId || parsed.user_id || parsed.id;
+        const cookie = Cookies.get("auth-client");
+        if (cookie) {
+          const parsed = JSON.parse(cookie);
+          token = token || parsed.token;
+          userId = userId || parsed.userId;
         }
       }
 
-      const headers: Record<string, string> = {
-        "Content-Type": "application/json",
-      };
-      if (token) headers["Authorization"] = `Bearer ${token}`;
+      const headers: any = { "Content-Type": "application/json" };
+      if (token) headers.Authorization = `Bearer ${token}`;
 
-      const response = await fetch(
+      const res = await fetch(
         "https://levelupbackend.supersheldon.online/api/questions/generate",
         {
           method: "POST",
@@ -98,46 +91,36 @@ export default function Quiz({}: QuizProps) {
         }
       );
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data?.error || "Failed to generate questions");
-      }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error);
 
       return data.questions || [];
-    } catch (error) {
-      console.error("❌ Error generating questions:", error);
-      throw error;
+    } catch (err) {
+      console.error("❌ Generation error:", err);
+      return [];
     }
   };
 
-  // Start Quiz
+  // Start quiz
   const startQuiz = async () => {
     setIsLoading(true);
-    try {
-      const newQuestions = await generateQuestions(1);
-      if (newQuestions.length > 0) {
-        setQuestions(newQuestions);
-        setQuizStarted(true);
-      } else {
-        alert("Unable to generate questions.");
-      }
-    } catch {
-      alert("Failed to start quiz.");
+    const q = await generateQuestions();
+    if (q.length > 0) {
+      setQuestions(q);
+      setQuizStarted(true);
+    } else {
+      alert("Unable to load questions");
     }
     setIsLoading(false);
   };
 
-  // Submit Answer
+  // Submit answer
   const submitAnswer = async () => {
-    if (!selectedAnswer || !currentQuestion) {
-      alert("Please select an answer.");
-      return;
-    }
+    if (!selectedAnswer) return alert("Please select an answer");
 
-    // Validate ObjectId
-    if (!ObjectId.isValid(currentQuestion._id)) {
-      alert("Invalid question ID.");
+    // Safe ID validation (no bson)
+    if (!currentQuestion._id || currentQuestion._id.length < 10) {
+      alert("Invalid question ID");
       return;
     }
 
@@ -149,26 +132,24 @@ export default function Quiz({}: QuizProps) {
       let userId = authData?.userId;
 
       if (!token || !userId) {
-        const clientCookie = Cookies.get("auth-client");
-        if (clientCookie) {
-          const parsed = JSON.parse(clientCookie);
+        const cookie = Cookies.get("auth-client");
+        if (cookie) {
+          const parsed = JSON.parse(cookie);
           token = token || parsed.token;
           userId = userId || parsed.userId;
         }
       }
 
-      const submitHeaders: Record<string, string> = {
-        "Content-Type": "application/json",
-      };
-      if (token) submitHeaders["Authorization"] = `Bearer ${token}`;
+      const headers: any = { "Content-Type": "application/json" };
+      if (token) headers.Authorization = `Bearer ${token}`;
 
-      const response = await fetch(
+      const res = await fetch(
         "https://levelupbackend.supersheldon.online/api/questions/submit-answer",
         {
           method: "POST",
-          headers: submitHeaders,
+          headers,
           body: JSON.stringify({
-            question_id: currentQuestion._id, // FIXED
+            question_id: currentQuestion._id,
             user_answer: selectedAnswer,
             time_spent: timeSpent,
             token,
@@ -176,55 +157,54 @@ export default function Quiz({}: QuizProps) {
         }
       );
 
-      const data = await response.json();
-      if (!response.ok) throw new Error(data?.error);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error);
 
       setResult({
         is_correct: data.is_correct,
         correct_answer: data.correct_answer,
         explanation: data.explanation,
-        question_id: currentQuestion._id, // FIXED
+        question_id: currentQuestion._id,
         user_answer: selectedAnswer,
         time_spent: timeSpent,
       });
 
-      setQuestionResults((prev) => ({
-        ...prev,
+      setQuestionResults((p) => ({
+        ...p,
         [currentQuestionIndex]: data.is_correct ? "correct" : "incorrect",
       }));
 
-      setUserAnswers((prev) => ({
-        ...prev,
-        [currentQuestionIndex]: selectedAnswer,
-      }));
+      setUserAnswers((p) => ({ ...p, [currentQuestionIndex]: selectedAnswer }));
 
       setShowResult(true);
-    } catch (error) {
-      alert("Error submitting answer.");
+    } catch (err) {
+      alert("Submit error");
+      console.error(err);
     }
 
     setIsSubmitting(false);
   };
 
-  // Next Question
+  // Next question
   const nextQuestion = () => {
-    const nextIndex = currentQuestionIndex + 1;
-    setCurrentQuestionIndex(nextIndex);
+    const next = currentQuestionIndex + 1;
+    setCurrentQuestionIndex(next);
 
-    if (userAnswers[nextIndex]) {
-      const ans = userAnswers[nextIndex];
-      const nextQ = questions[nextIndex];
-      const nextResult = questionResults[nextIndex];
+    if (userAnswers[next]) {
+      const q = questions[next];
+      const ans = userAnswers[next];
+      const status = questionResults[next];
 
       setSelectedAnswer(ans);
       setResult({
-        is_correct: nextResult === "correct",
-        correct_answer: nextQ.correct_answer,
-        explanation: nextQ.explanation,
-        question_id: nextQ._id, // FIXED
+        is_correct: status === "correct",
+        correct_answer: q.correct_answer,
+        explanation: q.explanation,
+        question_id: q._id,
         user_answer: ans,
         time_spent: 0,
       });
+
       setShowResult(true);
     } else {
       setSelectedAnswer(null);
@@ -235,7 +215,7 @@ export default function Quiz({}: QuizProps) {
     setTimeSpent(0);
   };
 
-  // Option Colors
+  // Option color
   const getOptionColor = (option: string) => {
     if (!showResult || !result) return "bg-white hover:bg-gray-50";
 
@@ -249,118 +229,113 @@ export default function Quiz({}: QuizProps) {
   };
 
   // Start screen
-  if (!quizStarted) {
+  if (!quizStarted)
     return (
       <div className="max-w-4xl mx-auto p-6">
-        <div className="bg-white rounded-xl shadow-lg p-8 text-center">
+        <div className="bg-white shadow-lg rounded-xl p-8 text-center">
           <Image
             src="/Yellow and Blue Gradient Virtual Assistant Course Facebook Cover (5).jpg"
-            alt="Super Sheldon Quiz"
-            width={100}
-            height={100}
-            className="w-full object-contain"
+            width={150}
+            height={150}
+            alt="Quiz"
           />
           <motion.button
             onClick={startQuiz}
             disabled={isLoading}
-            className="px-8 py-4 bg-indigo-600 text-white rounded-xl"
+            className="mt-6 px-8 py-4 bg-indigo-600 text-white rounded-xl"
           >
-            {isLoading ? "Starting..." : "Start Quiz"}
+            {isLoading ? "Loading..." : "Start Quiz"}
           </motion.button>
         </div>
       </div>
     );
-  }
 
-  // Loading
+  // Loading state
   if (questions.length === 0)
     return (
-      <div className="max-w-2xl mx-auto p-8 bg-white rounded-xl text-center">
+      <div className="p-8 text-center">
         <p>Loading questions...</p>
       </div>
     );
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
-      <div className="flex gap-6">
-        <div className="flex-1">
-          <div className="mb-8 text-right text-sm text-gray-500">
-            Time: {timeSpent}s
+    <div className="max-w-4xl mx-auto p-6">
+      <div className="text-right text-gray-500 mb-4 text-sm">
+        Time: {timeSpent}s
+      </div>
+
+      <motion.div className="bg-white p-8 shadow-lg rounded-xl">
+        <div className="mb-5">
+          <div className="flex gap-3 mb-3">
+            <span className="px-3 py-1 rounded bg-indigo-100">
+              Question {currentQuestionIndex + 1}
+            </span>
+            <span className="px-3 py-1 rounded bg-indigo-100">
+              {currentQuestion.question_category}
+            </span>
+            <span className="px-3 py-1 rounded bg-purple-100">
+              {currentQuestion.difficulty_level}
+            </span>
           </div>
 
-          <motion.div className="bg-white rounded-xl shadow-lg p-8 mb-6">
-            <div className="mb-6">
-              <div className="flex gap-2 mb-4">
-                <span className="px-3 py-1 bg-indigo-100 rounded-full">
-                  Question {currentQuestionIndex + 1}
-                </span>
-                <span className="px-3 py-1 bg-indigo-100 rounded-full">
-                  {currentQuestion.question_category}
-                </span>
-                <span className="px-3 py-1 bg-purple-100 rounded-full">
-                  {currentQuestion.difficulty_level}
-                </span>
-              </div>
-              <h3 className="text-xl font-semibold">
-                {currentQuestion.question_name}
-              </h3>
-            </div>
-
-            <div className="space-y-3 mb-8">
-              {currentQuestion.question_options.map((option, index) => (
-                <motion.button
-                  key={index}
-                  onClick={() => !showResult && setSelectedAnswer(option)}
-                  disabled={showResult}
-                  className={`w-full p-4 border-2 rounded-lg ${getOptionColor(
-                    option
-                  )}`}
-                >
-                  {option}
-                </motion.button>
-              ))}
-            </div>
-
-            {/* Result */}
-            <AnimatePresence>
-              {showResult && result && (
-                <motion.div className="mb-6 p-4 rounded-lg bg-indigo-50 border-l-4 border-indigo-500">
-                  <span
-                    className={`px-2 py-1 rounded text-sm ${
-                      result.is_correct
-                        ? "bg-green-100 text-green-800"
-                        : "bg-red-100 text-red-800"
-                    }`}
-                  >
-                    {result.is_correct ? "Correct!" : "Incorrect"}
-                  </span>
-                  <p className="text-gray-700 mt-2">{result.explanation}</p>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Buttons */}
-            <div className="flex justify-end gap-3">
-              {!showResult ? (
-                <motion.button
-                  onClick={submitAnswer}
-                  disabled={!selectedAnswer || isSubmitting}
-                  className="px-6 py-2 bg-indigo-600 text-white rounded-lg"
-                >
-                  {isSubmitting ? "Submitting..." : "Submit Answer"}
-                </motion.button>
-              ) : (
-                <motion.button
-                  onClick={nextQuestion}
-                  className="px-6 py-2 bg-green-600 text-white rounded-lg"
-                >
-                  Next Question
-                </motion.button>
-              )}
-            </div>
-          </motion.div>
+          <h3 className="text-xl font-semibold">
+            {currentQuestion.question_name}
+          </h3>
         </div>
-      </div>
+
+        <div className="space-y-3 mb-6">
+          {currentQuestion.question_options.map((option, index) => (
+            <motion.button
+              key={index}
+              onClick={() => !showResult && setSelectedAnswer(option)}
+              disabled={showResult}
+              className={`w-full p-4 border-2 rounded-lg ${getOptionColor(
+                option
+              )}`}
+            >
+              {option}
+            </motion.button>
+          ))}
+        </div>
+
+        {/* Result */}
+        <AnimatePresence>
+          {showResult && result && (
+            <motion.div className="p-4 mb-6 rounded bg-indigo-50 border-l-4 border-indigo-500">
+              <span
+                className={`px-2 py-1 rounded text-sm ${
+                  result.is_correct
+                    ? "bg-green-100 text-green-700"
+                    : "bg-red-100 text-red-700"
+                }`}
+              >
+                {result.is_correct ? "Correct!" : "Incorrect"}
+              </span>
+              <p className="mt-2">{result.explanation}</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Buttons */}
+        <div className="flex justify-end">
+          {!showResult ? (
+            <button
+              onClick={submitAnswer}
+              disabled={!selectedAnswer || isSubmitting}
+              className="px-6 py-3 bg-indigo-600 text-white rounded-xl"
+            >
+              {isSubmitting ? "Submitting..." : "Submit Answer"}
+            </button>
+          ) : (
+            <button
+              onClick={nextQuestion}
+              className="px-6 py-3 bg-green-600 text-white rounded-xl"
+            >
+              Next Question
+            </button>
+          )}
+        </div>
+      </motion.div>
     </div>
   );
 }
