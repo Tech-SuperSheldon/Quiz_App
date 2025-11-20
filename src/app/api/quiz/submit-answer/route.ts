@@ -1,11 +1,11 @@
+// app/api/questions/submit-answer/route.ts
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
-    // Parse request body
     const body = await req.json();
     let { question_id, user_answer, time_spent, token } = body;
-    // fallback to Authorization header if token not in body
+
     if (!token) {
       const authHeader = req.headers.get("authorization");
       if (authHeader && authHeader.startsWith("Bearer ")) {
@@ -13,7 +13,6 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Check for missing required fields
     if (!token || !question_id || !user_answer) {
       return NextResponse.json(
         { error: "Missing required fields (token, question_id, user_answer)" },
@@ -21,9 +20,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Fetch request to the backend
+    const base = process.env.BASE_URL || "";
+    const baseUrl = base.endsWith("/") ? base : `${base}/`;
+
     const backendResponse = await fetch(
-      `${process.env.BASE_URL}api/questions/submit-answer`,
+      `${baseUrl}api/questions/submit-answer`,
       {
         method: "POST",
         headers: {
@@ -33,15 +34,13 @@ export async function POST(req: NextRequest) {
         body: JSON.stringify({
           question_id,
           user_answer,
-          time_spent: time_spent ?? 0, // Handle undefined time_spent
+          time_spent: time_spent ?? 0,
         }),
       }
     );
 
-    // Parse response from backend
     const data = await backendResponse.json();
 
-    // Handle unsuccessful backend response
     if (!backendResponse.ok) {
       console.error("Failed to submit answer:", data);
       return NextResponse.json(
@@ -50,10 +49,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Return successful response
     return NextResponse.json(data);
   } catch (error) {
-    // Log error and return 500
     console.error("Submit answer error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
