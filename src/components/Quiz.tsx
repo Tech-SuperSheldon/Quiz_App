@@ -142,7 +142,7 @@ export default function Quiz() {
         return [];
       }
 
-      const res = await fetch("/api/questions/generate", {
+      const res = await fetch("api/questions/generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -230,7 +230,7 @@ export default function Quiz() {
         return;
       }
 
-      const res = await fetch("/api/questions/submit-answer", {
+      const res = await fetch("api/questions/submit-answer", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
