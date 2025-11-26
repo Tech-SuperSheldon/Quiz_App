@@ -30,7 +30,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   };
 
   return (
-    <div className="flex mt-22 min-h-screen bg-white/95 dark:bg-slate-900 overflow-hidden">
+    <div className="flex mt-22 min-h-screen bg-white/95 overflow-hidden">
       {/* Animated Background Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-32 w-80 h-80 bg-purple-300/20 rounded-full blur-3xl animate-pulse-slow"></div>
@@ -55,7 +55,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
               initial="initial"
               animate="animate"
               exit="exit"
-              className="h-full bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/50 dark:border-slate-700/50 shadow-xl p-4 lg:p-6 w-full hover:shadow-xl transition-all duration-500"
+              className="h-full bg-white/80 backdrop-blur-xl border border-white/50 shadow-xl p-4 lg:p-6 w-full hover:shadow-xl transition-all duration-500"
             >
               {/* Content Container with Scroll - Full Height */}
               <div className="h-full overflow-y-auto custom-scrollbar">

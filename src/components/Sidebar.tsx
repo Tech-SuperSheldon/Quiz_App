@@ -72,7 +72,7 @@ export default function Sidebar() {
 
   return (
     <div
-      className={`h-full bg-gradient-to-b from-purple-700 via-indigo-700 to-blue-800 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 shadow-2xl flex flex-col relative transition-all duration-500 ${
+      className={`h-full bg-gradient-to-b from-purple-700 via-indigo-700 to-blue-800 shadow-2xl flex flex-col relative transition-all duration-500 ${
         collapsed ? "w-16" : "w-64"
       }`}
     >

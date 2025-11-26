@@ -101,22 +101,22 @@ const Footer: React.FC = () => {
             {/* Company */}
             <motion.div
               variants={itemVariants}
-              className="bg-white/95 dark:bg-slate-800/80 backdrop-blur-lg  p-3  dark:border-slate-700/50"
+              className="bg-white/95 backdrop-blur-lg p-3"
             >
               <h3 className="font-bold text-red-400 mb-2 text-sm uppercase tracking-wide">Company</h3>
-              <ul className="space-y-1 text-gray-700 dark:text-gray-300 text-xs">
+              <ul className="space-y-1 text-gray-700 text-xs">
                 <li>
-                  <Link href="/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-gray-900 dark:hover:text-white transition-colors">
+                  <Link href="/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-gray-900 transition-colors">
                     Privacy Policy
                   </Link>
                 </li>
                 <li>
-                  <Link href="/refund" target="_blank" rel="noopener noreferrer" className="hover:text-gray-900 dark:hover:text-white transition-colors">
+                  <Link href="/refund" target="_blank" rel="noopener noreferrer" className="hover:text-gray-900 transition-colors">
                     Refund Policy
                   </Link>
                 </li>
                 <li>
-                  <Link href="/terms" target="_blank" rel="noopener noreferrer" className="hover:text-gray-900 dark:hover:text-white transition-colors">
+                  <Link href="/terms" target="_blank" rel="noopener noreferrer" className="hover:text-gray-900 transition-colors">
                     Terms & Conditions
                   </Link>
                 </li>
@@ -126,26 +126,26 @@ const Footer: React.FC = () => {
             {/* Courses */}
             <motion.div
               variants={itemVariants}
-              className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg p-3 border-gray-200/50 dark:border-slate-700/50 "
+              className="bg-white/80 backdrop-blur-lg p-3 border-gray-200/50"
             >
               <Link href="/courses">
                 <h3 className="font-bold text-orange-600 mb-2 text-sm uppercase tracking-wide hover:text-orange-700 transition-colors">
                   Courses
                 </h3>
               </Link>
-              <ul className="space-y-1 text-gray-700 dark:text-gray-300 text-xs">
+              <ul className="space-y-1 text-gray-700 text-xs">
                 <li>
-                  <Link href="/courses" className="hover:text-gray-900 dark:hover:text-white transition-colors">
+                  <Link href="/courses" className="hover:text-gray-900 transition-colors">
                     Naplan Exam
                   </Link>
                 </li>
                 <li>
-                  <Link href="/courses" className="hover:text-gray-900 dark:hover:text-white transition-colors">
+                  <Link href="/courses" className="hover:text-gray-900 transition-colors">
                     ICAS
                   </Link>
                 </li>
                 <li>
-                  <Link href="/courses" className="hover:text-gray-900 dark:hover:text-white transition-colors">
+                  <Link href="/courses" className="hover:text-gray-900 transition-colors">
                     HCS
                   </Link>
                 </li>
@@ -155,20 +155,20 @@ const Footer: React.FC = () => {
             {/* Support */}
             <motion.div
               variants={itemVariants}
-              className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg p-3 border-gray-200/50 dark:border-slate-700/50 "
+              className="bg-white/80 backdrop-blur-lg p-3 border-gray-200/50"
             >
               <h3 className="font-bold text-red-600 mb-2 text-sm uppercase tracking-wide">Support</h3>
-              <ul className="space-y-1 text-gray-700 dark:text-gray-300 text-xs">
+              <ul className="space-y-1 text-gray-700 text-xs">
                 <li>
-                  <Link href="#" className="hover:text-gray-900 dark:hover:text-white transition-colors">
+                  <Link href="#" className="hover:text-gray-900 transition-colors">
                     FAQ
                   </Link>
                 </li>
                 <li>
-                  <Link 
+                  <Link
                     href="https://api.whatsapp.com/send/?phone=917974695618&text&type=phone_number&app_absent=0" 
-                    target="_blank" 
-                    className="hover:text-gray-900 dark:hover:text-white transition-colors"
+                    target="_blank"
+                    className="hover:text-gray-900 transition-colors"
                   >
                     Support
                   </Link>
@@ -181,7 +181,7 @@ const Footer: React.FC = () => {
         {/* Bottom Note */}
         <motion.div
           variants={itemVariants}
-          className="mt-4 border-t border-gray-300 dark:border-slate-600 pt-3 text-center text-xs text-gray-600 dark:text-gray-400"
+          className="mt-4 border-t border-gray-300 pt-3 text-center text-xs text-gray-600"
         >
           © {new Date().getFullYear()} Supersheldon LLP. All rights reserved.
         </motion.div>

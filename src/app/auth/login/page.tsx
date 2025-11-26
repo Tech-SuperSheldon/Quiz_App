@@ -64,7 +64,7 @@ export default function LoginPage() {
     }
   };
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-blue-900/20 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
       {/* Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-20 -right-20 w-40 h-40 bg-indigo-500/10 rounded-full blur-3xl"></div>
@@ -104,7 +104,7 @@ export default function LoginPage() {
           <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2">
             Welcome Back
           </h1>
-          <p className="text-gray-600 dark:text-gray-300">
+          <p className="text-gray-600">
             Sign in to continue your learning journey
           </p>
         </motion.div>
@@ -114,15 +114,15 @@ export default function LoginPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.5 }}
-          className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 dark:border-slate-700/50 p-8"
+          className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 p-8"
         >
           {/* Email Sign-in Section */}
           <div className="space-y-6">
             <div className="text-center">
-              <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-2">
+              <h2 className="text-xl font-semibold text-gray-800 mb-2">
                 Sign in with Email
               </h2>
-              <p className="text-sm text-gray-600 dark:text-gray-300">
+              <p className="text-sm text-gray-600">
                 Enter your email to access your account
               </p>
             </div>
@@ -132,7 +132,7 @@ export default function LoginPage() {
               <div>
                 <label
                   htmlFor="email"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                  className="block text-sm font-medium text-gray-700 mb-2"
                 >
                   Email Address
                 </label>
@@ -142,7 +142,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email address"
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white text-gray-900 placeholder-gray-500 transition-all duration-200"
                   disabled={isLoading}
                 />
               </div>
@@ -203,10 +203,10 @@ export default function LoginPage() {
             {/* Divider */}
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200 dark:border-slate-700"></div>
+                <div className="w-full border-t border-gray-200"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white dark:bg-slate-800 text-gray-500 dark:text-gray-400">
+                <span className="px-4 bg-white text-gray-500">
                   Or
                 </span>
               </div>
@@ -214,10 +214,10 @@ export default function LoginPage() {
 
             {/* Google Auth Section */}
             <div className="text-center">
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">
                 Sign in with Google
               </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+              <p className="text-sm text-gray-600 mb-4">
                 Quick and secure access to your account
               </p>
             </div>
@@ -227,10 +227,10 @@ export default function LoginPage() {
             {/* Divider */}
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200 dark:border-slate-700"></div>
+                <div className="w-full border-t border-gray-200"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white dark:bg-slate-800 text-gray-500 dark:text-gray-400">
+                <span className="px-4 bg-white text-gray-500">
                   Secure & Fast
                 </span>
               </div>
@@ -238,10 +238,10 @@ export default function LoginPage() {
 
             {/* Features */}
             <div className="grid grid-cols-2 gap-4 text-center">
-              <div className="p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg">
-                <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-2">
+              <div className="p-3 bg-gray-50 rounded-lg">
+                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
                   <svg
-                    className="w-4 h-4 text-green-600 dark:text-green-400"
+                    className="w-4 h-4 text-green-600"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -254,14 +254,14 @@ export default function LoginPage() {
                     />
                   </svg>
                 </div>
-                <p className="text-xs text-gray-600 dark:text-gray-300">
+                <p className="text-xs text-gray-600">
                   Secure
                 </p>
               </div>
-              <div className="p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg">
-                <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-2">
+              <div className="p-3 bg-gray-50 rounded-lg">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
                   <svg
-                    className="w-4 h-4 text-blue-600 dark:text-blue-400"
+                    className="w-4 h-4 text-blue-600"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -274,7 +274,7 @@ export default function LoginPage() {
                     />
                   </svg>
                 </div>
-                <p className="text-xs text-gray-600 dark:text-gray-300">Fast</p>
+                <p className="text-xs text-gray-600">Fast</p>
               </div>
             </div>
           </div>
@@ -287,7 +287,7 @@ export default function LoginPage() {
           transition={{ delay: 0.8, duration: 0.5 }}
           className="text-center mt-8"
         >
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-gray-500">
             By signing in, you agree to our{" "}
             <a
               href="#"
@@ -317,7 +317,7 @@ export default function LoginPage() {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-        toastClassName="bg-white dark:bg-slate-800 text-gray-800 dark:text-white border border-gray-200 dark:border-slate-700"
+        toastClassName="bg-white text-gray-800 border border-gray-200"
         progressClassName="bg-gradient-to-r from-indigo-600 to-purple-600"
       />
     </div>

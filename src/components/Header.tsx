@@ -85,8 +85,8 @@ export default function Header() {
     <header
       className={`fixed top-0 left-0 right-0 mx-auto z-50 transition-all duration-500
         ${scrolling
-          ? "w-11/12 bg-gradient-to-r from-white/80 via-white/50 to-white/80 dark:from-slate-900/80 dark:to-slate-800/80 backdrop-blur-xl shadow-2xl border border-white/30 rounded-xl"
-          : "w-full bg-white/90 dark:bg-slate-900/90 shadow-md rounded-xl"
+          ? "w-11/12 bg-gradient-to-r from-white/80 via-white/50 to-white/80 backdrop-blur-xl shadow-2xl border border-white/30 rounded-xl"
+          : "w-full bg-white/90 shadow-md rounded-xl"
         }`}
     >
       <nav className="flex items-center justify-between px-6 py-3 transition-all duration-500">
@@ -108,30 +108,30 @@ export default function Header() {
         >
           <Link
             href="/"
-            className="text-gray-800 dark:text-white hover:text-purple-600 transition-colors duration-300"
+            className="text-gray-800 hover:text-purple-600 transition-colors duration-300"
           >
             Home
           </Link>
           <Link
             href="/dashboard"
-            className="text-gray-800 dark:text-white hover:text-purple-600 transition-colors duration-300"
+            className="text-gray-800 hover:text-purple-600 transition-colors duration-300"
           >
             Dashboard
           </Link>
           <Link
             href="#contact"
-            className="text-gray-800 dark:text-white hover:text-purple-600 transition-colors duration-300"
+            className="text-gray-800 hover:text-purple-600 transition-colors duration-300"
           >
             Contact Us
           </Link>
         </div>
 
-        {/* User Profile or Get Started Button */}
+        {/* User Profile or Auth CTA Buttons */}
         {userEmail ? (
           <div className="relative">
             <motion.button
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="flex items-center gap-2 px-2 py-1 rounded-full bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg border border-gray-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-xl transition-all duration-300 group"
+              className="flex items-center gap-2 px-2 py-1 rounded-full bg-white/80 backdrop-blur-lg border border-gray-200/50 shadow-lg hover:shadow-xl transition-all duration-300 group"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
             >
@@ -166,7 +166,7 @@ export default function Header() {
               <motion.div
                 animate={{ rotate: dropdownOpen ? 180 : 0 }}
                 transition={{ duration: 0.2 }}
-                className="text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300"
+                className="text-gray-400 group-hover:text-gray-600"
               >
                 <FaChevronDown className="w-3 h-3" />
               </motion.div>
@@ -185,13 +185,13 @@ export default function Header() {
                     initial="hidden"
                     animate="visible"
                     exit="exit"
-                    className="absolute right-0 mt-2 min-w-[220px] bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border border-gray-200/50 dark:border-slate-700/50 rounded-2xl shadow-2xl z-50 overflow-hidden"
+                    className="absolute right-0 mt-2 min-w-[220px] bg-white/95 backdrop-blur-xl border border-gray-200/50 rounded-2xl shadow-2xl z-50 overflow-hidden"
                   >
-                    <div className="px-4 py-3 border-b border-gray-200/50 dark:border-slate-700/50">
-                      <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                    <div className="px-4 py-3 border-b border-gray-200/50">
+                      <p className="text-sm font-semibold text-gray-900 truncate">
                         {userName || "User"}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-1">
+                      <p className="text-xs text-gray-500 truncate mt-1">
                         {userEmail}
                       </p>
                     </div>
@@ -199,7 +199,7 @@ export default function Header() {
                     <div className="p-2">
                       <motion.button
                         onClick={handleLogout}
-                        className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200 group"
+                        className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-red-600 rounded-lg hover:bg-red-50 transition-all duration-200 group"
                         whileHover={{ x: 2 }}
                       >
                         <FaSignOutAlt className="group-hover:scale-110 transition-transform" />
@@ -207,8 +207,8 @@ export default function Header() {
                       </motion.button>
                     </div>
 
-                    <div className="px-4 py-3 border-t border-gray-200/50 dark:border-slate-700/50 bg-gray-50/50 dark:bg-slate-700/30">
-                      <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                    <div className="px-4 py-3 border-t border-gray-200/50 bg-gray-50/50">
+                      <div className="flex justify-between text-xs text-gray-500">
                         <span>Member since</span>
                         <span>{new Date().getFullYear()}</span>
                       </div>
@@ -219,15 +219,26 @@ export default function Header() {
             </AnimatePresence>
           </div>
         ) : (
-          <Link href="/auth/login">
-            <motion.button
-              className="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:from-indigo-700 hover:to-purple-700"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Get Started
-            </motion.button>
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link href="/auth/login">
+              <motion.button
+                className="px-4 py-2 rounded-xl border border-indigo-600 text-indigo-600 font-medium bg-white/80 hover:bg-indigo-50 shadow-sm hover:shadow-md transition-all duration-300"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                Log in
+              </motion.button>
+            </Link>
+            <Link href="/auth/register">
+              <motion.button
+                className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:from-indigo-700 hover:to-purple-700"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                Sign up
+              </motion.button>
+            </Link>
+          </div>
         )}
       </nav>
     </header>

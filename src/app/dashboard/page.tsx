@@ -78,7 +78,7 @@ export default function DashboardPage() {
             Welcome Back 👋
           </h1>
         </div>
-        <p className="text-sm text-gray-600 dark:text-gray-300 max-w-2xl">
+        <p className="text-sm text-gray-600 max-w-2xl">
           {" "}
           {/* Smaller text */}
           Continue your learning journey with personalized quizzes and
@@ -108,7 +108,7 @@ export default function DashboardPage() {
               className={`absolute inset-0 ${section.gradient} opacity-0 group-hover:opacity-5 blur-xl transition-opacity duration-500`}
             ></div>
 
-            <div className="relative p-4 rounded-xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-lg border border-gray-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-xl transition-all duration-500">
+            <div className="relative p-4 rounded-xl bg-white/90 backdrop-blur-lg border border-gray-200/50 shadow-lg hover:shadow-xl transition-all duration-500">
               {/* Header with Icon */}
               <div className="flex items-center justify-between mb-3">
                 <div
@@ -120,12 +120,12 @@ export default function DashboardPage() {
                   {/* Smaller icon */}
                 </div>
                 <div className="text-right">
-                  <span className="text-lg font-bold text-gray-800 dark:text-white">
+                  <span className="text-lg font-bold text-gray-800">
                     {" "}
                     {/* Smaller text */}
                     {section.progress}%
                   </span>
-                  <div className="w-12 h-1 bg-gray-200 dark:bg-slate-700 rounded-full mt-1 overflow-hidden">
+                  <div className="w-12 h-1 bg-gray-200 rounded-full mt-1 overflow-hidden">
                     {" "}
                     {/* Smaller progress bar */}
                     <div
@@ -137,7 +137,7 @@ export default function DashboardPage() {
               </div>
 
               {/* Title */}
-              <h3 className="text-base font-bold mb-2 text-gray-800 dark:text-gray-100 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-indigo-600 group-hover:to-purple-600 group-hover:bg-clip-text transition-all duration-300">
+              <h3 className="text-base font-bold mb-2 text-gray-800 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-indigo-600 group-hover:to-purple-600 group-hover:bg-clip-text transition-all duration-300">
                 {section.title}
               </h3>
 
@@ -151,7 +151,7 @@ export default function DashboardPage() {
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: i * 0.1 + j * 0.1 }}
-                    className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white transition-colors duration-200"
+                    className="flex items-center gap-2 text-xs text-gray-600 hover:text-gray-800 transition-colors duration-200"
                   >
                     <div
                       className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${section.color}`}
