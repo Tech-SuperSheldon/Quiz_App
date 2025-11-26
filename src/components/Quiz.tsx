@@ -146,10 +146,10 @@ export default function Quiz() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
         },
         body: JSON.stringify({
-          token: authData.token,     
-          user_id: authData.userId,
+          user_id: userId,
           course_type: "Naplap",
           stage_number: stageNumber,
           grade: 5,
