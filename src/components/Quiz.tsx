@@ -142,14 +142,14 @@ export default function Quiz() {
         return [];
       }
 
-      const res = await fetch("api/questions/generate", {
+      const res = await fetch("https://levelupbackend.supersheldon.online/api/questions/generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          token,
-          user_id: userId,
+          token: authData.token,     
+          user_id: authData.userId,
           course_type: "Naplap",
           stage_number: stageNumber,
           grade: 5,
@@ -230,7 +230,7 @@ export default function Quiz() {
         return;
       }
 
-      const res = await fetch("api/questions/submit-answer", {
+      const res = await fetch("https://levelupbackend.supersheldon.online/api/questions/submit-answer", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

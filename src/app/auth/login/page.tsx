@@ -47,10 +47,31 @@ export default function LoginPage() {
       } else if (response.ok) {
         // User found, redirect to dashboard
         const data = await response.json();
+
+
+        if (data.token) {
+          localStorage.setItem(
+            "authData",
+            JSON.stringify({
+              token: data.token,
+              userId: data.user.id   // store only the ID string
+            })
+          );
+
+          // Set cookie for backup
+          document.cookie = `auth-client=${JSON.stringify({
+            token: data.token,
+            userId: data.user.id
+          })}; path=/; max-age=86400; SameSite=Lax`;
+        }
+       
+        
+        
+
         toast.success("Login successful! Redirecting to dashboard...");
         setTimeout(() => {
           router.push("/dashboard");
-        }, 1500);
+        }, 1000);
       } else {
         // Other error
         const errorData = await response.json();
