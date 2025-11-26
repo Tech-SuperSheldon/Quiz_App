@@ -8,7 +8,7 @@ import LandingPage from "./LandingPage";
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
-  const noLayoutPages = ["/auth/login", "/auth/signup"];
+  const noLayoutPages = ["/auth/login", "/auth/register"];
   const showLayout = !noLayoutPages.includes(pathname);
 
   return (

@@ -31,7 +31,6 @@ const GlossyButton: React.FC<GlossyButtonProps> = ({
       transition-all duration-300 ease-out
       backdrop-blur-[2px]
       before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/25 before:to-transparent before:opacity-40 before:rounded-full
-      dark:bg-gradient-to-r dark:from-[#a855f7] dark:via-[#d946ef] dark:to-[#8b5cf6]
       ${className}`}
     >
       <span className="relative z-10">{children}</span>
