@@ -118,7 +118,7 @@ export default function GoogleAuthWrapper({
       <ToastContainer
         position="top-right"
         autoClose={3000}
-        toastClassName="bg-white dark:bg-slate-800 text-gray-800 dark:text-white border border-gray-200 dark:border-slate-700"
+        toastClassName="bg-white text-gray-800 border border-gray-200"
         progressClassName="bg-gradient-to-r from-indigo-600 to-purple-600"
       />
     </GoogleOAuthProvider>
