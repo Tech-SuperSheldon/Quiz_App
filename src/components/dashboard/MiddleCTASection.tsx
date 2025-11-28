@@ -18,7 +18,7 @@ export default function MiddleCTASection() {
       </div>
       </ScrollAnimation>
       {/* Decorative Circle */}
-      <div className="absolute right-0 top-1/2 -translate-y-1/2 w-64 h-64 bg-orange-500/20 rounded-full blur-3xl -z-0"></div>
+      
     </section>
   );
 }
