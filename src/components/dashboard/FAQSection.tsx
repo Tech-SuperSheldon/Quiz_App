@@ -24,7 +24,7 @@ export default function FAQSection() {
   ];
 
   return (
-    <section id="faq" className="py-16 px-6 bg-gray-50">
+    <section id="faq" className="py-16 px-6 ">
       <div className="max-w-4xl mx-auto">
         <ScrollAnimation direction="up" delay={0.1}>
           <h2 className="text-4xl font-bold text-black mb-12 text-center">
