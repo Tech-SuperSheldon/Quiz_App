@@ -7,6 +7,7 @@ import {
   BookOpenIcon,
   SparklesIcon,
 } from "@heroicons/react/24/outline";
+import { DashboardLanding } from "../../components/dashboard_landing";
 
 export default function DashboardPage() {
   const sections = [
@@ -196,6 +197,10 @@ export default function DashboardPage() {
           </p>
         </div>
       </motion.div>
+      {/* New landing UI (light theme) */}
+      <div className="pt-2">
+        <DashboardLanding />
+      </div>
     </div>
   );
 }
