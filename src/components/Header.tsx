@@ -71,13 +71,13 @@ export default function Header() {
       opacity: 1,
       y: 0,
       scale: 1,
-      transition: { duration: 0.2, ease: "easeOut" },
+      transition: { duration: 0.2 },
     },
     exit: {
       opacity: 0,
       y: -10,
       scale: 0.95,
-      transition: { duration: 0.15, ease: "easeIn" },
+      transition: { duration: 0.15 },
     },
   };
 
@@ -85,8 +85,8 @@ export default function Header() {
     <header
       className={`fixed top-0 left-0 right-0 mx-auto z-50 transition-all duration-500
         ${scrolling
-          ? "w-11/12 bg-gradient-to-r from-white/80 via-white/50 to-white/80 backdrop-blur-xl shadow-2xl border border-white/30 rounded-xl"
-          : "w-full bg-white/90 shadow-md rounded-xl"
+          ? "w-10/12 bg-gradient-to-r from-white/80 via-white/50 to-white/80 backdrop-blur-xl shadow-2xl border border-white/30 rounded-xl"
+          : "w-full backdrop-blur-lg shadow-md rounded-xl"
         }`}
     >
       <nav className="flex items-center justify-between px-6 py-3 transition-all duration-500">
@@ -94,8 +94,8 @@ export default function Header() {
           <Image
             src="/Final-Logo-bg-removed.png"
             alt="Super Sheldon Quiz"
-            width={50}
-            height={50}
+            width={70}
+            height={70}
             className="w-full object-contain"
             priority
           />
@@ -131,11 +131,10 @@ export default function Header() {
           <div className="relative">
             <motion.button
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="flex items-center gap-2 px-2 py-1 rounded-full bg-white/80 backdrop-blur-lg border border-gray-200/50 shadow-lg hover:shadow-xl transition-all duration-300 group"
+              className="flex items-center gap-2 px-2 py-1 rounded-full backdrop-blur-lg border border-gray-200/50 shadow-lg hover:shadow-xl transition-all duration-300 group"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
             >
-              {/* Profile Picture */}
               <div className="relative">
                 {userPic ? (
                   <Image
@@ -161,9 +160,7 @@ export default function Header() {
                   </div>
                 )}
               </div>
-
-              {/* Dropdown Arrow */}
-              <motion.div
+            <motion.div
                 animate={{ rotate: dropdownOpen ? 180 : 0 }}
                 transition={{ duration: 0.2 }}
                 className="text-gray-400 group-hover:text-gray-600"
