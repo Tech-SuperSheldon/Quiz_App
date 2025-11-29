@@ -124,15 +124,27 @@ export default function DummyRegister() {
   }
 
   return (
-    <div className="max-w-md mx-auto mt-20 bg-white/95 p-8 shadow-xl rounded-xl border border-gray-200 text-center">
+  <div className="min-h-screen w-full bg-gradient-to-br from-orange-50 via-orange-100 to-orange-200 flex items-center justify-center p-4 relative overflow-hidden">
+
+    {/* Background Decorative Blobs */}
+    <div className="absolute inset-0 pointer-events-none overflow-hidden">
+      <div className="absolute -top-32 -right-32 w-64 h-64 bg-orange-300/20 rounded-full blur-3xl"></div>
+      <div className="absolute -bottom-32 -left-32 w-64 h-64 bg-yellow-300/20 rounded-full blur-3xl"></div>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-orange-200/30 rounded-full blur-3xl"></div>
+    </div>
+
+    {/* Card Container */}
+    <div className="relative z-10 w-full max-w-md bg-white/50 backdrop-blur-2xl p-8 rounded-2xl shadow-xl border border-white/40 text-center">
+
       <ToastContainer position="top-right" autoClose={2500} />
+
       {/* Profile Picture */}
-      <div className="w-24 h-24 mx-auto mb-4 shadow rounded-full overflow-hidden">
+      <div className="w-24 h-24 mx-auto mb-4 shadow-lg rounded-full overflow-hidden border border-white/60 bg-white/40 backdrop-blur-lg">
         <Image
           src={picture || "/Final-Logo-bg-removed.png"}
           alt="Profile"
-          width={96}
-          height={96}
+          width={80}
+          height={80}
           className="object-cover w-full h-full"
           priority
           onError={(e) => {
@@ -146,45 +158,49 @@ export default function DummyRegister() {
       </div>
 
       {/* Greeting */}
-      <p className="text-gray-600 mb-2">
+      <p className="text-orange-800 mb-3">
         Hi, <span className="font-semibold">{name}</span>
       </p>
 
-      {/* Registration Form */}
+      {/* Form */}
       <form className="space-y-5" onSubmit={handleSubmit}>
         {errorMessage && (
-          <div className="text-sm text-red-600 bg-red-50 p-2 rounded">
+          <div className="text-sm text-red-700 bg-red-100 border border-red-200 p-2 rounded-lg">
             {errorMessage}
           </div>
         )}
+
         <input
           type="text"
           placeholder="Full Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full border border-gray-300 px-4 py-3 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+          className="w-full border border-orange-300 px-4 py-3 rounded-lg bg-white/70 backdrop-blur-md focus:ring-2 focus:ring-orange-400 focus:outline-none text-orange-900 placeholder-orange-700/40"
           required
         />
+
         <input
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full border border-gray-300 px-4 py-3 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+          className="w-full border border-orange-300 px-4 py-3 rounded-lg bg-white/70 backdrop-blur-md focus:ring-2 focus:ring-orange-400 focus:outline-none text-orange-900 placeholder-orange-700/40"
           required
         />
+
         <input
           type="tel"
           placeholder="Mobile Number (Optional)"
           value={mobile}
           onChange={(e) => setMobile(e.target.value)}
-          className="w-full border border-gray-300 px-4 py-3 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+          className="w-full border border-orange-300 px-4 py-3 rounded-lg bg-white/70 backdrop-blur-md focus:ring-2 focus:ring-orange-400 focus:outline-none text-orange-900 placeholder-orange-700/40"
         />
+
         <select
           title="Grade"
           value={grade}
           onChange={(e) => setGrade(e.target.value)}
-          className="w-full border border-gray-300 px-4 py-3 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white"
+          className="w-full border border-orange-300 px-4 py-3 rounded-lg bg-white/70 backdrop-blur-md focus:ring-2 focus:ring-orange-400 focus:outline-none text-orange-900"
           required
         >
           <option value="">Select Grade</option>
@@ -194,31 +210,41 @@ export default function DummyRegister() {
             </option>
           ))}
         </select>
+
         <label
           htmlFor="course"
-          className="block text-left font-semibold text-gray-700"
+          className="block text-left font-semibold text-orange-800"
         >
           Course
         </label>
+
         <select
           id="course"
           value={course}
           onChange={(e) => setCourse(e.target.value as "NAPLAN" | "ICAS")}
-          className="w-full border border-gray-300 px-4 py-3 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white"
+          className="w-full border border-orange-300 px-4 py-3 rounded-lg bg-white/70 backdrop-blur-md focus:ring-2 focus:ring-orange-400 focus:outline-none text-orange-900"
           required
         >
           <option value="">Select Course</option>
           <option value="NAPLAN">NAPLAN</option>
           <option value="ICAS">ICAS</option>
         </select>
+
+        {/* Submit Button */}
         <button
           type="submit"
-          className="w-full py-3 rounded-lg text-white font-semibold transition duration-300 ease-in-out bg-[#e66e37] shadow-[0_4px_10px_rgba(230,110,55,0.4)] hover:bg-[#e68355]"
+          className="w-full py-3 rounded-lg text-white font-semibold bg-gradient-to-r from-orange-500 to-orange-400 shadow-lg hover:shadow-xl transition-all duration-300"
           disabled={isSubmitting}
         >
           {isSubmitting ? "Registering..." : "Complete Registration"}
         </button>
       </form>
     </div>
-  );
+  </div>
+);
+
+
+
+
+
 }
