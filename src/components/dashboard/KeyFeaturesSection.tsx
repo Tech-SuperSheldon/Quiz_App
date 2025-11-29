@@ -148,10 +148,10 @@ export default function KeyFeaturesSection() {
 
           {/* Text */}
           <div className="flex-1 text-center md:text-right">
-            <h3 className="text-2xl font-bold text-black mb-3">Smart Matching</h3>
+            <h3 className="text-2xl font-bold text-black mb-3">Intelligent Question Builder</h3>
             <p className="text-gray-600 text-lg leading-relaxed">
-              Our algorithm pairs you with opponents at your skill level,
-              ensuring every match is a fair and engaging challenge.
+              We create well-structured, skill-appropriate questions designed to accelerate your development process.
+
             </p>
           </div>
         </div>
