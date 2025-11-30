@@ -71,13 +71,13 @@ export default function Header() {
       opacity: 1,
       y: 0,
       scale: 1,
-      transition: { duration: 0.2, ease: "easeOut" },
+      transition: { duration: 0.2 },
     },
     exit: {
       opacity: 0,
       y: -10,
       scale: 0.95,
-      transition: { duration: 0.15, ease: "easeIn" },
+      transition: { duration: 0.15 },
     },
   };
 
@@ -85,17 +85,18 @@ export default function Header() {
     <header
       className={`fixed top-0 left-0 right-0 mx-auto z-50 transition-all duration-500
         ${scrolling
-          ? "w-11/12 bg-gradient-to-r from-white/80 via-white/50 to-white/80 backdrop-blur-xl shadow-2xl border border-white/30 rounded-xl"
-          : "w-full bg-white/90 shadow-md rounded-xl"
+          ? "w-10/12 bg-gradient-to-r from-white/80 via-white/50 to-white/80 backdrop-blur-xl shadow-2xl border border-white/30 rounded-xl"
+          : "w-full backdrop-blur-lg shadow-md rounded-xl"
         }`}
     >
       <nav className="flex items-center justify-between px-6 py-3 transition-all duration-500">
         <Link href="/" className="flex items-center gap-2">
+          {/* Friend's Change: Increased Logo Size to 70 */}
           <Image
             src="/Final-Logo-bg-removed.png"
             alt="Super Sheldon Quiz"
-            width={50}
-            height={50}
+            width={70}
+            height={70}
             className="w-full object-contain"
             priority
           />
@@ -108,19 +109,19 @@ export default function Header() {
         >
           <Link
             href="/"
-            className="text-gray-800 hover:text-purple-600 transition-colors duration-300"
+            className="text-gray-800 hover:text-orange-600 transition-colors duration-300"
           >
             Home
           </Link>
           <Link
             href="/dashboard"
-            className="text-gray-800 hover:text-purple-600 transition-colors duration-300"
+            className="text-gray-800 hover:text-orange-600 transition-colors duration-300"
           >
             Dashboard
           </Link>
           <Link
             href="#contact"
-            className="text-gray-800 hover:text-purple-600 transition-colors duration-300"
+            className="text-gray-800 hover:text-orange-600 transition-colors duration-300"
           >
             Contact Us
           </Link>
@@ -131,11 +132,11 @@ export default function Header() {
           <div className="relative">
             <motion.button
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="flex items-center gap-2 px-2 py-1 rounded-full bg-white/80 backdrop-blur-lg border border-gray-200/50 shadow-lg hover:shadow-xl transition-all duration-300 group"
+              // Friend's Change: Cleaner backdrop blur instead of solid white
+              className="flex items-center gap-2 px-2 py-1 rounded-full backdrop-blur-lg border border-gray-200/50 shadow-lg hover:shadow-xl transition-all duration-300 group"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
             >
-              {/* Profile Picture */}
               <div className="relative">
                 {userPic ? (
                   <Image
@@ -143,26 +144,17 @@ export default function Header() {
                     alt="Profile"
                     width={36}
                     height={36}
-                    className="rounded-full border-2 border-purple-400 group-hover:border-pink-400 transition-colors duration-300"
+                    className="rounded-full border-2 border-orange-400 group-hover:border-orange-500 transition-colors duration-300"
                     onError={(e) => {
                       console.error("Header - Image failed to load:", userPic);
-                      console.error("Header - Error:", e);
-                    }}
-                    onLoad={() => {
-                      console.log(
-                        "Header - Image loaded successfully:",
-                        userPic
-                      );
                     }}
                   />
                 ) : (
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-r from-orange-400 to-orange-600 flex items-center justify-center">
                     <FaUserCircle className="text-white text-lg" />
                   </div>
                 )}
               </div>
-
-              {/* Dropdown Arrow */}
               <motion.div
                 animate={{ rotate: dropdownOpen ? 180 : 0 }}
                 transition={{ duration: 0.2 }}
@@ -222,7 +214,7 @@ export default function Header() {
           <div className="flex items-center gap-3">
             <Link href="/auth/login">
               <motion.button
-                className="px-4 py-2 rounded-xl border border-indigo-600 text-indigo-600 font-medium bg-white/80 hover:bg-indigo-50 shadow-sm hover:shadow-md transition-all duration-300"
+                className="px-4 py-2 rounded-xl border border-orange-500 text-orange-600 font-medium bg-white/80 hover:bg-orange-50 shadow-sm hover:shadow-md transition-all duration-300"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -231,7 +223,7 @@ export default function Header() {
             </Link>
             <Link href="/auth/register">
               <motion.button
-                className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:from-indigo-700 hover:to-purple-700"
+                className="px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:from-orange-600 hover:to-orange-700"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >

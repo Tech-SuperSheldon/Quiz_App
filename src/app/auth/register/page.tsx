@@ -7,7 +7,6 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { storeRegistrationData } from "@/utils/authStorage";
 
-
 const BASE_BACKEND_URL = "https://92c52865-c657-478a-b2e0-625fc822f55b-00-23crg2t5cyi67.pike.replit.dev:5000";
 
 // Data Mapping based on your requirements
@@ -111,7 +110,6 @@ export default function DummyRegister() {
       const res = await fetch(`${BASE_BACKEND_URL}/api/users/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-
         body: JSON.stringify({ name, email, mobile, grade, course, subject }),
       });
 
@@ -149,149 +147,162 @@ export default function DummyRegister() {
 
   if (submitted) {
     return (
-      <div className="max-w-md mx-auto mt-20 bg-white/95 p-8 shadow-xl rounded-xl border border-gray-200 text-center">
-        <h2 className="text-2xl font-bold text-green-600 mb-4">
-          Registration Successful!
-        </h2>
-        <p className="text-gray-700">
-          Welcome, <span className="font-semibold">{name}</span>! You have
-          successfully registered for{" "}
-          <span className="font-semibold">{course}</span> ({subject}) in {grade}.
-        </p>
-        <p className="mt-4 text-gray-500">Redirecting to your dashboard...</p>
+      <div className="min-h-screen w-full bg-gradient-to-br from-orange-50 via-orange-100 to-orange-200 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white/50 backdrop-blur-2xl p-8 shadow-xl rounded-2xl border border-white/40 text-center">
+          <h2 className="text-2xl font-bold text-green-600 mb-4">
+            Registration Successful!
+          </h2>
+          <p className="text-gray-700">
+            Welcome, <span className="font-semibold">{name}</span>! You have
+            successfully registered for{" "}
+            <span className="font-semibold">{course}</span> ({subject}) in {grade}.
+          </p>
+          <p className="mt-4 text-orange-800/60">Redirecting to your dashboard...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-md mx-auto mt-20 bg-white/95 p-8 shadow-xl rounded-xl border border-gray-200 text-center">
-      <ToastContainer position="top-right" autoClose={2500} />
+    <div className="min-h-screen w-full bg-gradient-to-br from-orange-50 via-orange-100 to-orange-200 flex items-center justify-center p-4 relative overflow-hidden">
 
-      {/* Profile Picture */}
-      <div className="w-24 h-24 mx-auto mb-4 shadow rounded-full overflow-hidden">
-        <Image
-          src={picture || "/Final-Logo-bg-removed.png"}
-          alt="Profile"
-          width={96}
-          height={96}
-          className="object-cover w-full h-full"
-          priority
-          onError={(e) => {
-            console.error("Image failed to load:", picture);
-          }}
-        />
+      {/* Background Decorative Blobs */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute -top-32 -right-32 w-64 h-64 bg-orange-300/20 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-32 -left-32 w-64 h-64 bg-yellow-300/20 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-orange-200/30 rounded-full blur-3xl"></div>
       </div>
 
-      {/* Greeting */}
-      <p className="text-gray-600 mb-2">
-        Hi, <span className="font-semibold">{name}</span>
-      </p>
+      {/* Card Container */}
+      <div className="relative z-10 w-full max-w-md bg-white/50 backdrop-blur-2xl p-8 rounded-2xl shadow-xl border border-white/40 text-center">
+        <ToastContainer position="top-right" autoClose={2500} />
 
-      {/* Registration Form */}
-      <form className="space-y-5" onSubmit={handleSubmit}>
-        {errorMessage && (
-          <div className="text-sm text-red-600 bg-red-50 p-2 rounded">
-            {errorMessage}
-          </div>
-        )}
+        {/* Profile Picture */}
+        <div className="w-24 h-24 mx-auto mb-4 shadow-lg rounded-full overflow-hidden border border-white/60 bg-white/40 backdrop-blur-lg">
+          <Image
+            src={picture || "/Final-Logo-bg-removed.png"}
+            alt="Profile"
+            width={96}
+            height={96}
+            className="object-cover w-full h-full"
+            priority
+            onError={(e) => {
+              console.error("Image failed to load:", picture);
+            }}
+          />
+        </div>
 
-        {/* Name */}
-        <input
-          type="text"
-          placeholder="Full Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="w-full border border-gray-300 px-4 py-3 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-          required
-        />
+        {/* Greeting */}
+        <p className="text-orange-800 mb-3">
+          Hi, <span className="font-semibold">{name}</span>
+        </p>
 
-        {/* Email */}
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full border border-gray-300 px-4 py-3 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-          required
-        />
+        {/* Registration Form */}
+        <form className="space-y-5" onSubmit={handleSubmit}>
+          {errorMessage && (
+            <div className="text-sm text-red-700 bg-red-100 border border-red-200 p-2 rounded-lg">
+              {errorMessage}
+            </div>
+          )}
 
-        {/* Mobile */}
-        <input
-          type="tel"
-          placeholder="Mobile Number (Optional)"
-          value={mobile}
-          onChange={(e) => setMobile(e.target.value)}
-          className="w-full border border-gray-300 px-4 py-3 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-        />
+          {/* Name */}
+          <input
+            type="text"
+            placeholder="Full Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full border border-orange-300 px-4 py-3 rounded-lg bg-white/70 backdrop-blur-md focus:ring-2 focus:ring-orange-400 focus:outline-none text-orange-900 placeholder-orange-700/40"
+            required
+          />
 
-        {/* Grade Selection */}
-        <select
-          title="Grade"
-          value={grade}
-          onChange={(e) => setGrade(e.target.value)}
-          className="w-full border border-gray-300 px-4 py-3 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white"
-          required
-        >
-          <option value="">Select Grade</option>
-          {Array.from({ length: 12 }, (_, i) => (
-            <option key={i + 1} value={`Grade ${i + 1}`}>
-              Grade {i + 1}
-            </option>
-          ))}
-        </select>
+          {/* Email */}
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full border border-orange-300 px-4 py-3 rounded-lg bg-white/70 backdrop-blur-md focus:ring-2 focus:ring-orange-400 focus:outline-none text-orange-900 placeholder-orange-700/40"
+            required
+          />
 
-        {/* Course Selection */}
-        <div>
-            <label htmlFor="course" className="block text-left font-semibold text-gray-700 mb-1">
-                Course
+          {/* Mobile */}
+          <input
+            type="tel"
+            placeholder="Mobile Number (Optional)"
+            value={mobile}
+            onChange={(e) => setMobile(e.target.value)}
+            className="w-full border border-orange-300 px-4 py-3 rounded-lg bg-white/70 backdrop-blur-md focus:ring-2 focus:ring-orange-400 focus:outline-none text-orange-900 placeholder-orange-700/40"
+          />
+
+          {/* Grade Selection */}
+          <select
+            title="Grade"
+            value={grade}
+            onChange={(e) => setGrade(e.target.value)}
+            className="w-full border border-orange-300 px-4 py-3 rounded-lg bg-white/70 backdrop-blur-md focus:ring-2 focus:ring-orange-400 focus:outline-none text-orange-900"
+            required
+          >
+            <option value="">Select Grade</option>
+            {Array.from({ length: 12 }, (_, i) => (
+              <option key={i + 1} value={`Grade ${i + 1}`}>
+                Grade {i + 1}
+              </option>
+            ))}
+          </select>
+
+          {/* Course Selection */}
+          <div className="text-left">
+            <label htmlFor="course" className="block text-sm font-semibold text-orange-800 mb-1 ml-1">
+              Course
             </label>
             <select
-            id="course"
-            value={course}
-            onChange={handleCourseChange}
-            className="w-full border border-gray-300 px-4 py-3 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white"
-            required
+              id="course"
+              value={course}
+              onChange={handleCourseChange}
+              className="w-full border border-orange-300 px-4 py-3 rounded-lg bg-white/70 backdrop-blur-md focus:ring-2 focus:ring-orange-400 focus:outline-none text-orange-900"
+              required
             >
-            <option value="">Select Course</option>
-            {Object.keys(COURSE_SUBJECTS).map((courseName) => (
+              <option value="">Select Course</option>
+              {Object.keys(COURSE_SUBJECTS).map((courseName) => (
                 <option key={courseName} value={courseName}>
-                {courseName}
+                  {courseName}
                 </option>
-            ))}
+              ))}
             </select>
-        </div>
+          </div>
 
-        {/* Subject Selection (Dependent on Course) */}
-        <div className={`transition-all duration-300 ${course ? 'opacity-100' : 'opacity-50'}`}>
-            <label htmlFor="subject" className="block text-left font-semibold text-gray-700 mb-1">
-                Subject
+          {/* Subject Selection (Dependent on Course) */}
+          <div className={`text-left transition-all duration-300 ${course ? 'opacity-100' : 'opacity-50'}`}>
+            <label htmlFor="subject" className="block text-sm font-semibold text-orange-800 mb-1 ml-1">
+              Subject
             </label>
             <select
-            id="subject"
-            value={subject}
-            onChange={(e) => setSubject(e.target.value)}
-            className="w-full border border-gray-300 px-4 py-3 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
-            required
-            disabled={!course}
+              id="subject"
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              className="w-full border border-orange-300 px-4 py-3 rounded-lg bg-white/70 backdrop-blur-md focus:ring-2 focus:ring-orange-400 focus:outline-none text-orange-900 disabled:cursor-not-allowed disabled:bg-white/40"
+              required
+              disabled={!course}
             >
-            <option value="">Select Subject</option>
-            {course && COURSE_SUBJECTS[course]?.map((sub) => (
+              <option value="">Select Subject</option>
+              {course && COURSE_SUBJECTS[course]?.map((sub) => (
                 <option key={sub} value={sub}>
-                {sub}
+                  {sub}
                 </option>
-            ))}
+              ))}
             </select>
-        </div>
+          </div>
 
-        {/* Submit Button */}
-        <button
-          type="submit"
-          className="w-full py-3 rounded-lg text-white font-semibold transition duration-300 ease-in-out bg-[#e66e37] shadow-[0_4px_10px_rgba(230,110,55,0.4)] hover:bg-[#e68355] disabled:opacity-70 disabled:cursor-not-allowed"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? "Registering..." : "Complete Registration"}
-        </button>
-      </form>
+          {/* Submit Button */}
+          <button
+            type="submit"
+            className="w-full py-3 rounded-lg text-white font-semibold bg-gradient-to-r from-orange-500 to-orange-400 shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Registering..." : "Complete Registration"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
