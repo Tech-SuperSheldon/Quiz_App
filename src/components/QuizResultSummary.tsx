@@ -34,15 +34,30 @@ interface QuizResultSummaryProps {
 export default function QuizResultSummary({
   stage,
   stats,
-  history, // <--- We need this actual history data
+  history,
   onRetake,
   onContinue,
   isGeneratingNext,
   hasMoreStages,
 }: QuizResultSummaryProps) {
 
-  // Filter history to ONLY show questions from the current stage
-  const currentStageHistory = history.filter((h) => h.stage_number === stage);
+  // --- 1. DEBUGGING: Check what is actually arriving ---
+  console.log("--- SUMMARY DEBUG ---");
+  console.log("Current Stage Prop:", stage);
+  console.log("Full History:", history);
+  
+  // --- 2. FIX: Convert both to numbers to ensure they match ---
+  // We also check if the history item belongs to 'stage' OR 'stage - 1' 
+  // (In case the parent already incremented the stage counter)
+  const currentStageHistory = history.filter((h) => {
+    const historyStage = Number(h.stage_number);
+    const targetStage = Number(stage);
+    return historyStage === targetStage;
+  });
+
+  console.log("Filtered History:", currentStageHistory);
+  console.log("Stats Received:", stats);
+  // -----------------------------------------------------
 
   return (
     <div className="max-w-3xl mx-auto p-6">

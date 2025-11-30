@@ -262,6 +262,19 @@ export default function Quiz() {
         setResult(localResult);
         setShowResult(true);
         setUserAnswers((prev) => ({ ...prev, [currentQuestionIndex]: selectedAnswer }));
+        pushHistory({
+            question_id: currentQuestion._id,
+            question_name: currentQuestion.question_name,
+            correct_answer: currentQuestion.correct_answer,
+            explanation: currentQuestion.explanation || "",
+            user_answer: selectedAnswer,
+            is_correct: isCorrect,
+            stage_number: Number(currentStage), // Force Number type
+            time_spent: timeSpent,
+            attempted_at: new Date().toISOString(),
+        });
+
+
         setIsSubmitting(false);
         return; 
     }
@@ -310,14 +323,14 @@ export default function Quiz() {
 
       setUserAnswers((prev) => ({ ...prev, [currentQuestionIndex]: selectedAnswer }));
 
-      pushHistory({
+pushHistory({
         question_id: currentQuestion._id,
         question_name: currentQuestion.question_name,
         correct_answer: data.correct_answer,
         explanation: data.explanation, 
         user_answer: selectedAnswer, 
         is_correct: data.is_correct,
-        stage_number: currentStage,
+        stage_number: Number(currentStage), 
         time_spent: timeSpent,
         attempted_at: new Date().toISOString(),
       });
@@ -329,8 +342,16 @@ export default function Quiz() {
     setIsSubmitting(false);
   };
 
-  const calculateStageStats = () => {
-    const currentStageHistory = quizHistory.filter((h) => h.stage_number === currentStage);
+const calculateStageStats = () => {
+    // FIX: Convert both to Number to prevent "1" === 1 failures
+const currentStageHistory = quizHistory.filter(
+      (h) => Number(h.stage_number) === Number(currentStage)
+    );
+
+    console.log("--- STATS DEBUG ---");
+    console.log("Current Stage:", currentStage);
+    console.log("Found History Items:", currentStageHistory.length);
+
     const correct = currentStageHistory.filter((h) => h.is_correct).length;
     const total = currentStageHistory.length;
     const wrong = total - correct;
@@ -346,21 +367,21 @@ export default function Quiz() {
     });
   };
 
-  const nextQuestion = async () => {
+const nextQuestion = async () => {
     const nextIndex = currentQuestionIndex + 1;
-    if (nextIndex % QUESTIONS_PER_STAGE === 0 && nextIndex === questions.length) {
-        calculateStageStats();
-        setShowStageResult(true);
-        return;
-    }
-    if (nextIndex < questions.length) {
-      setCurrentQuestionIndex(nextIndex);
-      setSelectedAnswer(null);
-      setShowResult(false);
-      setResult(null);
-      setTimeSpent(0);
+
+    // FIX: Simply check if we have reached the end of the questions array
+    if (nextIndex >= questions.length) {
+      calculateStageStats();
+      setShowStageResult(true);
       return;
     }
+    
+    setCurrentQuestionIndex(nextIndex);
+    setSelectedAnswer(null);
+    setShowResult(false);
+    setResult(null);
+    setTimeSpent(0);
   };
 
   const continueToNextStage = async () => {
