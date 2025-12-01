@@ -9,7 +9,7 @@ import MiddleCTASection from "@/components/dashboard/MiddleCTASection";
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-white overflow-x-hidden">
+    <div className="bg-white overflow-x-hidden">
       <main className="relative">
         <HeroSection />
         <GameDescriptionSection />

@@ -108,19 +108,19 @@ export default function Header() {
         >
           <Link
             href="/"
-            className="text-gray-800 hover:text-purple-600 transition-colors duration-300"
+            className="text-gray-800 hover:text-orange-600 transition-colors duration-300"
           >
             Home
           </Link>
           <Link
             href="/dashboard"
-            className="text-gray-800 hover:text-purple-600 transition-colors duration-300"
+            className="text-gray-800 hover:text-orange-600 transition-colors duration-300"
           >
             Dashboard
           </Link>
           <Link
             href="#contact"
-            className="text-gray-800 hover:text-purple-600 transition-colors duration-300"
+            className="text-gray-800 hover:text-orange-600 transition-colors duration-300"
           >
             Contact Us
           </Link>
@@ -219,7 +219,12 @@ export default function Header() {
           <div className="flex items-center gap-3">
             <Link href="/auth/login">
               <motion.button
-                className="px-4 py-2 rounded-xl border border-indigo-600 text-indigo-600 font-medium bg-white/80 hover:bg-indigo-50 shadow-sm hover:shadow-md transition-all duration-300"
+                className="px-4 py-2 rounded-xl border border-orange-500 text-orange-600 font-medium bg-orange-50/80 hover:bg-orange-100 shadow-sm hover:shadow-md transition-all duration-300"
+                style={{
+                  backdropFilter: "blur(10px)",
+                  WebkitBackdropFilter: "blur(10px)",
+                  background: "linear-gradient(90deg, rgba(255,165,0,0.10) 0%, rgba(255,140,0,0.10) 100%)"
+                }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -228,7 +233,12 @@ export default function Header() {
             </Link>
             <Link href="/auth/register">
               <motion.button
-                className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:from-indigo-700 hover:to-purple-700"
+                className="px-4 py-2 font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-white bg-gradient-to-r from-orange-500 to-orange-400 hover:from-orange-600 hover:to-orange-500 border border-orange-500"
+                style={{
+                  backdropFilter: "blur(10px)",
+                  WebkitBackdropFilter: "blur(10px)",
+                  background: "linear-gradient(90deg, rgba(255,140,0,0.92) 0%, rgba(255,165,0,0.92) 100%)"
+                }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
