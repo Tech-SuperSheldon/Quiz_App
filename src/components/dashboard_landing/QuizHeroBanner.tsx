@@ -22,7 +22,7 @@ export default function QuizHeroBanner() {
 				</div>
 			</div>
 			<div className="hidden md:block">
-				<img alt="hero" src="/hero-illustration.png" className="w-40 h-40 object-cover" />
+				<img alt="hero" src="/1.png" className="w-50 h-50 object-cover -mb-6" />
 			</div>
 		</div>
 	);
