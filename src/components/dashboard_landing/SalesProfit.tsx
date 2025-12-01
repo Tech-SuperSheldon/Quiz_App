@@ -18,7 +18,7 @@ export default function SalesProfit() {
       <div className="mt-4 flex items-center justify-between">
         <div>
           <div className="text-sm text-slate-500">Quizzes Completed This Year</div>
-          <div className="text-lg font-semibold text-slate-900">22 <span className="text-green-600 text-sm">+8%</span></div>
+          <div className="text-lg font-semibold text-slate-900">2 <span className="text-green-600 text-sm">+8%</span></div>
         </div>
         <button className="bg-blue-600 text-white px-4 py-2 rounded-full">View Details</button>
       </div>

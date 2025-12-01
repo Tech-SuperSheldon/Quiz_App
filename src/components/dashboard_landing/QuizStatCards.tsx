@@ -1,10 +1,10 @@
 "use client";
 import React from "react";
 const stats = [
-  { title: "Quizzes Taken", value: "24", change: "+4 this week", color: "bg-blue-50 text-blue-600" },
-  { title: "Quizzes Completed", value: "22", change: "+3 this week", color: "bg-green-50 text-green-600" },
-  { title: "Average Score", value: "88%", change: "+2%", color: "bg-yellow-50 text-yellow-600" },
-  { title: "Current Streak", value: "7 days", change: "+1", color: "bg-purple-50 text-purple-600" },
+  { title: "Quizzes Taken", value: "01", change: "+4 this week", color: "bg-blue-50 text-blue-600" },
+  { title: "Quizzes Completed", value: "01", change: "+3 this week", color: "bg-green-50 text-green-600" },
+  { title: "Average Score", value: "72%", change: "+2%", color: "bg-yellow-50 text-yellow-600" },
+  { title: "Current Streak", value: "1 days", change: "+1", color: "bg-purple-50 text-purple-600" },
 ];
 export default function QuizStatCards() {
   return (

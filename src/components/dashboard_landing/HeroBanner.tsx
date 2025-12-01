@@ -13,11 +13,11 @@ export default function HeroBanner() {
           <div className="mt-4 flex gap-4">
             <div className="bg-slate-50 p-3 rounded-lg text-center">
               <div className="text-sm text-slate-500">Quizzes Taken</div>
-              <div className="text-xl font-semibold text-slate-900">24</div>
+              <div className="text-xl font-semibold text-slate-900">1</div>
             </div>
             <div className="bg-slate-50 p-3 rounded-lg text-center">
               <div className="text-sm text-slate-500">Completion Rate</div>
-              <div className="text-xl font-semibold text-slate-900">92%</div>
+              <div className="text-xl font-semibold text-slate-900">100%</div>
             </div>
           </div>
         </div>

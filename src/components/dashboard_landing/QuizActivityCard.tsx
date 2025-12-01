@@ -1,6 +1,6 @@
 "use client";
 export default function QuizActivityCard() {
-  const quizActivity = [2, 3, 1, 4, 5, 2, 3];
+  const quizActivity = [1, 0, 0, 0, 0, 0, 0];
   const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
   return (
     <div className="bg-white rounded-2xl shadow p-4">
