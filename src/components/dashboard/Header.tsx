@@ -21,11 +21,11 @@ export default function Header() {
           : "mx-0 mt-0 rounded-none"
       }`}
       style={{
-        backgroundColor: isScrolled
-          ? "rgba(255, 255, 255, 0.85)"
-          : "rgba(255, 255, 255, 0.95)",
-        backdropFilter: "blur(10px)",
-        WebkitBackdropFilter: "blur(10px)",
+        background: isScrolled
+          ? "linear-gradient(90deg, rgba(255,165,0,0.18) 0%, rgba(255,140,0,0.18) 100%)"
+          : "linear-gradient(90deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%)",
+        backdropFilter: "blur(14px)",
+        WebkitBackdropFilter: "blur(14px)",
         transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
       }}
     >
@@ -36,10 +36,18 @@ export default function Header() {
       >
         {/* Logo */}
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 border-2 border-orange-500 rounded flex items-center justify-center">
-            <span className="text-orange-500 text-lg">🏠</span>
+          <div
+            className={`w-8 h-8 border-2 rounded flex items-center justify-center transition-colors duration-200 ${
+              isScrolled
+                ? "border-white bg-white/10"
+                : "border-orange-500 bg-transparent"
+            }`}
+          >
+            <span className={`${isScrolled ? "text-white" : "text-orange-500"} text-lg`}>🏠</span>
           </div>
-          <span className="text-black font-bold text-xl">ROOM</span>
+          <span className={`font-bold text-xl ${isScrolled ? "text-white" : "text-orange-600"}`}>
+            ROOM
+          </span>
         </div>
 
         {/* Navigation Links */}
@@ -74,13 +82,21 @@ export default function Header() {
         <div className="flex items-center gap-4">
           <a
             href="/login"
-            className="text-black hover:text-orange-500 transition text-sm font-medium"
+            className="px-4 py-2 bg-orange-500 text-white rounded-full text-sm font-medium hover:bg-orange-600 transition shadow-md"
+            style={{
+              boxShadow: "0 2px 8px 0 rgba(255, 140, 0, 0.10)",
+              border: "1px solid rgba(255, 140, 0, 0.18)"
+            }}
           >
             Log in
           </a>
           <a
             href="/signup"
-            className="px-4 py-2 bg-orange-500 text-white rounded-full text-sm font-medium hover:bg-orange-600 transition"
+            className="px-4 py-2 bg-orange-500 text-white rounded-full text-sm font-medium hover:bg-orange-600 transition shadow-md"
+            style={{
+              boxShadow: "0 2px 8px 0 rgba(255, 140, 0, 0.10)",
+              border: "1px solid rgba(255, 140, 0, 0.18)"
+            }}
           >
             Sign up
           </a>
