@@ -1,397 +1,208 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { Question, QuestionStatus, ExamState } from '../types';
-import { Clock, AlertTriangle, ChevronDown } from 'lucide-react';
-import { Button } from '../../components/uinew/button';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { AlertTriangle, Loader2 } from 'lucide-react';
+import Cookies from "js-cookie";
+import { getAuthData } from "@/utils/authStorage"; 
+import { Button } from '@/components/uinew/button'; 
 
-const MOCK_QUESTIONS: Question[] = [
-  {
-    id: 1,
-    question: "What is the SI unit of force?",
-    options: ["Joule", "Newton", "Watt", "Pascal"],
-    correctAnswer: 1,
-    explanation: "The SI unit of force is Newton (N). It is named after Sir Isaac Newton and is defined as the force required to accelerate a mass of one kilogram at a rate of one meter per second squared.",
-    subject: "Physics"
-  },
-  {
-    id: 2,
-    question: "What is the speed of light in vacuum?",
-    options: ["3 × 10⁸ m/s", "3 × 10⁶ m/s", "3 × 10⁷ m/s", "3 × 10⁹ m/s"],
-    correctAnswer: 0,
-    explanation: "The speed of light in vacuum is approximately 3 × 10⁸ meters per second (299,792,458 m/s). This is a fundamental constant of nature.",
-    subject: "Physics"
-  },
-  {
-    id: 3,
-    question: "What is Newton's First Law of Motion?",
-    options: [
-      "F = ma",
-      "An object at rest stays at rest unless acted upon by a force",
-      "Action and reaction are equal and opposite",
-      "Energy cannot be created or destroyed"
-    ],
-    correctAnswer: 1,
-    explanation: "Newton's First Law, also known as the Law of Inertia, states that an object at rest will remain at rest, and an object in motion will remain in motion with constant velocity unless acted upon by an external force.",
-    subject: "Physics"
-  },
-  {
-    id: 4,
-    question: "What is the unit of electric current?",
-    options: ["Volt", "Ampere", "Ohm", "Coulomb"],
-    correctAnswer: 1,
-    explanation: "The unit of electric current is Ampere (A). It is defined as one coulomb of charge passing through a point in one second.",
-    subject: "Physics"
-  },
-  {
-    id: 5,
-    question: "What is the acceleration due to gravity on Earth?",
-    options: ["9.8 m/s²", "10 m/s²", "9.8 km/s²", "8.9 m/s²"],
-    correctAnswer: 0,
-    explanation: "The acceleration due to gravity on Earth is approximately 9.8 m/s² (or 9.81 m/s² to be more precise). This value varies slightly depending on location.",
-    subject: "Physics"
-  },
-  {
-    id: 6,
-    question: "What is Ohm's Law?",
-    options: ["V = IR", "P = VI", "F = ma", "E = mc²"],
-    correctAnswer: 0,
-    explanation: "Ohm's Law states that V = IR, where V is voltage, I is current, and R is resistance. It describes the relationship between voltage, current, and resistance in an electrical circuit.",
-    subject: "Physics"
-  },
-  {
-    id: 7,
-    question: "What type of lens is used to correct myopia?",
-    options: ["Convex", "Concave", "Bifocal", "Cylindrical"],
-    correctAnswer: 1,
-    explanation: "A concave (diverging) lens is used to correct myopia (nearsightedness). It helps to diverge the light rays before they enter the eye, allowing the image to form on the retina.",
-    subject: "Physics"
-  },
-  {
-    id: 8,
-    question: "What is the principle of conservation of energy?",
-    options: [
-      "Energy can be created but not destroyed",
-      "Energy can be destroyed but not created",
-      "Energy cannot be created or destroyed, only transformed",
-      "Energy is always constant"
-    ],
-    correctAnswer: 2,
-    explanation: "The principle of conservation of energy states that energy cannot be created or destroyed, only transformed from one form to another. The total energy in an isolated system remains constant.",
-    subject: "Physics"
-  },
-  {
-    id: 9,
-    question: "What is the formula for kinetic energy?",
-    options: ["KE = mgh", "KE = ½mv²", "KE = mc²", "KE = Fd"],
-    correctAnswer: 1,
-    explanation: "The formula for kinetic energy is KE = ½mv², where m is mass and v is velocity. This represents the energy possessed by an object due to its motion.",
-    subject: "Physics"
-  },
-  {
-    id: 10,
-    question: "What is the SI unit of power?",
-    options: ["Joule", "Newton", "Watt", "Volt"],
-    correctAnswer: 2,
-    explanation: "The SI unit of power is Watt (W). One watt is defined as one joule of energy transferred or converted per second (1 W = 1 J/s).",
-    subject: "Physics"
-  },
-  {
-    id: 11,
-    question: "What is the relationship between frequency and wavelength?",
-    options: [
-      "Directly proportional",
-      "Inversely proportional",
-      "No relationship",
-      "Exponentially related"
-    ],
-    correctAnswer: 1,
-    explanation: "Frequency and wavelength are inversely proportional. The relationship is given by c = fλ, where c is the speed of light, f is frequency, and λ is wavelength.",
-    subject: "Physics"
-  },
-  {
-    id: 12,
-    question: "What is the charge of an electron?",
-    options: ["-1.6 × 10⁻¹⁹ C", "+1.6 × 10⁻¹⁹ C", "-1.6 × 10⁻¹⁸ C", "0 C"],
-    correctAnswer: 0,
-    explanation: "The charge of an electron is -1.6 × 10⁻¹⁹ coulombs. This is a fundamental constant in physics and represents the elementary charge.",
-    subject: "Physics"
-  },
-  {
-    id: 13,
-    question: "What is the capital of France?",
-    options: ["Paris", "Berlin", "Madrid", "Rome"],
-    correctAnswer: 0,
-    explanation: "Paris is the capital and most populous city of France. It has been the capital since the 12th century and is known for its art, culture, and history.",
-    subject: "General Knowledge"
-  },
-  {
-    id: 14,
-    question: "What is Planck's constant used for?",
-    options: [
-      "Classical mechanics",
-      "Quantum mechanics",
-      "Thermodynamics",
-      "Electromagnetism"
-    ],
-    correctAnswer: 1,
-    explanation: "Planck's constant (h ≈ 6.626 × 10⁻³⁴ J·s) is fundamental in quantum mechanics. It relates the energy of a photon to its frequency (E = hf).",
-    subject: "Physics"
-  },
-  {
-    id: 15,
-    question: "What is the first law of thermodynamics?",
-    options: [
-      "Energy conservation",
-      "Entropy always increases",
-      "Absolute zero is unattainable",
-      "Heat flows from hot to cold"
-    ],
-    correctAnswer: 0,
-    explanation: "The first law of thermodynamics is the law of energy conservation: the total energy of an isolated system is constant. Energy can be transformed but not created or destroyed.",
-    subject: "Physics"
-  },
-  {
-    id: 16,
-    question: "What is the SI unit of frequency?",
-    options: ["Hertz", "Second", "Meter", "Radian"],
-    correctAnswer: 0,
-    explanation: "The SI unit of frequency is Hertz (Hz). One hertz equals one cycle per second.",
-    subject: "Physics"
-  },
-  {
-    id: 17,
-    question: "What is the refractive index of water?",
-    options: ["1.0", "1.33", "1.5", "2.0"],
-    correctAnswer: 1,
-    explanation: "The refractive index of water is approximately 1.33. This means light travels 1.33 times slower in water than in vacuum.",
-    subject: "Physics"
-  },
-  {
-    id: 18,
-    question: "What is Archimedes' principle?",
-    options: [
-      "Buoyant force equals weight of displaced fluid",
-      "Force equals mass times acceleration",
-      "Energy is conserved",
-      "Pressure is force per unit area"
-    ],
-    correctAnswer: 0,
-    explanation: "Archimedes' principle states that the buoyant force on an object submerged in a fluid is equal to the weight of the fluid displaced by the object.",
-    subject: "Physics"
-  },
-  {
-    id: 19,
-    question: "What is the unit of magnetic field strength?",
-    options: ["Tesla", "Weber", "Henry", "Gauss"],
-    correctAnswer: 0,
-    explanation: "The SI unit of magnetic field strength is Tesla (T). One tesla is a very strong magnetic field; Earth's magnetic field is about 0.00005 T.",
-    subject: "Physics"
-  },
-  {
-    id: 20,
-    question: "What is the Doppler effect?",
-    options: [
-      "Change in frequency due to relative motion",
-      "Bending of light",
-      "Splitting of light into colors",
-      "Interference of waves"
-    ],
-    correctAnswer: 0,
-    explanation: "The Doppler effect is the change in frequency or wavelength of a wave in relation to an observer moving relative to the wave source. Common examples include the changing pitch of a siren as it passes.",
-    subject: "Physics"
-  },
-  {
-    id: 21,
-    question: "What is the mass of a proton?",
-    options: [
-      "1.67 × 10⁻²⁷ kg",
-      "9.11 × 10⁻³¹ kg",
-      "1.67 × 10⁻²⁴ kg",
-      "1.0 kg"
-    ],
-    correctAnswer: 0,
-    explanation: "The mass of a proton is approximately 1.67 × 10⁻²⁷ kg. This is about 1836 times the mass of an electron.",
-    subject: "Physics"
-  },
-  {
-    id: 22,
-    question: "What is Hooke's Law?",
-    options: ["F = -kx", "F = ma", "V = IR", "P = F/A"],
-    correctAnswer: 0,
-    explanation: "Hooke's Law states that F = -kx, where F is the restoring force, k is the spring constant, and x is the displacement. The negative sign indicates the force opposes the displacement.",
-    subject: "Physics"
-  },
-  {
-    id: 23,
-    question: "What is the critical angle?",
-    options: [
-      "Angle of minimum deviation",
-      "Angle of total internal reflection",
-      "Angle of incidence equals angle of reflection",
-      "90 degrees"
-    ],
-    correctAnswer: 1,
-    explanation: "The critical angle is the angle of incidence beyond which total internal reflection occurs when light travels from a denser to a rarer medium.",
-    subject: "Physics"
-  },
-  {
-    id: 24,
-    question: "What is specific heat capacity?",
-    options: [
-      "Heat required to raise 1 kg by 1°C",
-      "Heat required to melt a substance",
-      "Heat required to boil a substance",
-      "Total heat in a substance"
-    ],
-    correctAnswer: 0,
-    explanation: "Specific heat capacity is the amount of heat energy required to raise the temperature of 1 kilogram of a substance by 1 degree Celsius.",
-    subject: "Physics"
-  },
-  {
-    id: 25,
-    question: "What is Young's modulus?",
-    options: [
-      "Stress/Strain",
-      "Force/Area",
-      "Mass/Volume",
-      "Work/Time"
-    ],
-    correctAnswer: 0,
-    explanation: "Young's modulus is the ratio of stress to strain in elastic materials. It measures the stiffness of a solid material.",
-    subject: "Physics"
-  },
-  {
-    id: 26,
-    question: "What is the escape velocity from Earth?",
-    options: ["11.2 km/s", "9.8 m/s", "3 × 10⁸ m/s", "7.9 km/s"],
-    correctAnswer: 0,
-    explanation: "The escape velocity from Earth is approximately 11.2 km/s. This is the minimum speed needed for an object to escape Earth's gravitational field.",
-    subject: "Physics"
-  },
-  {
-    id: 27,
-    question: "What is Faraday's law of electromagnetic induction?",
-    options: [
-      "Induced EMF is proportional to rate of change of magnetic flux",
-      "Voltage equals current times resistance",
-      "Magnetic field is perpendicular to electric field",
-      "Like charges repel"
-    ],
-    correctAnswer: 0,
-    explanation: "Faraday's law states that the induced electromotive force (EMF) in a circuit is proportional to the rate of change of magnetic flux through the circuit.",
-    subject: "Physics"
-  },
-  {
-    id: 28,
-    question: "What is the Heisenberg Uncertainty Principle?",
-    options: [
-      "Cannot measure position and momentum precisely simultaneously",
-      "Energy is quantized",
-      "Wave-particle duality",
-      "Matter waves exist"
-    ],
-    correctAnswer: 0,
-    explanation: "The Heisenberg Uncertainty Principle states that it is impossible to simultaneously measure the exact position and exact momentum of a particle with absolute precision.",
-    subject: "Physics"
-  },
-  {
-    id: 29,
-    question: "What is the coefficient of friction?",
-    options: [
-      "Ratio of frictional force to normal force",
-      "Force per unit area",
-      "Work done against friction",
-      "Heat generated by friction"
-    ],
-    correctAnswer: 0,
-    explanation: "The coefficient of friction is the ratio of the frictional force between two surfaces to the normal force pressing them together. It is dimensionless.",
-    subject: "Physics"
-  },
-  {
-    id: 30,
-    question: "What is Boyle's Law?",
-    options: [
-      "PV = constant (at constant temperature)",
-      "V/T = constant",
-      "P/T = constant",
-      "PV/T = constant"
-    ],
-    correctAnswer: 0,
-    explanation: "Boyle's Law states that at constant temperature, the pressure of a gas is inversely proportional to its volume (PV = constant).",
-    subject: "Physics"
-  }
-];
+// --- CONSTANTS ---
+const BASE_BACKEND_URL = "https://92c52865-c657-478a-b2e0-625fc822f55b-00-23crg2t5cyi67.pike.replit.dev:5000";
+const QUESTIONS_PER_STAGE = 10;
 
-interface ExamPageProps {
-  onSubmit: (state: ExamState, questions: Question[]) => void;
+// --- TYPES ---
+interface ApiQuestion {
+  _id: string;
+  question_name: string;
+  question_options: string[];
+  correct_answer: string;
+  explanation: string;
+  question_category: string;
+  difficulty_level: string;
+  stage_number: number;
 }
 
-export default function ExamPage({ onSubmit }: ExamPageProps) {
-  const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [questionStatuses, setQuestionStatuses] = useState<QuestionStatus[]>(
-    MOCK_QUESTIONS.map(q => ({
-      questionId: q.id,
-      status: 'unattempted' as const,
-      selectedAnswer: null
-    }))
-  );
-  const [timeLeft, setTimeLeft] = useState(7200); // 2 hours in seconds
+export interface UIQuestion {
+  id: string;
+  question: string;
+  options: string[];
+  correctAnswer: number;
+  explanation: string;
+  subject: string;
+}
+
+export interface QuestionStatus {
+  questionId: string;
+  status: 'attempted' | 'unattempted' | 'marked' | 'answered-marked';
+  selectedAnswer: number | null;
+}
+
+export interface ExamState {
+  currentQuestion: number;
+  questionStatuses: QuestionStatus[];
+  timeLeft: number;
+  warnings: number;
+  notes: string;
+}
+
+interface ExamPageProps {
+  // FIX: Explicitly defining the two arguments expected by the parent
+  onSubmit: (state: ExamState, questions: UIQuestion[]) => void;
+  initialStage?: number;
+}
+
+export default function ExamPage({ onSubmit, initialStage = 1 }: ExamPageProps) {
+  // --- STATE ---
+  const [questions, setQuestions] = useState<UIQuestion[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [currentStage, setCurrentStage] = useState(initialStage);
+
+  // UI State
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [questionStatuses, setQuestionStatuses] = useState<QuestionStatus[]>([]);
+  const [timeLeft, setTimeLeft] = useState(1800); 
   const [warnings, setWarnings] = useState(0);
   const [notes, setNotes] = useState('');
-  const [selectedSubject, setSelectedSubject] = useState('All Subjects');
   const [showSubmitDialog, setShowSubmitDialog] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Timer
+  // --- AUTH HELPER ---
+  const getTokenAndUserId = useCallback(() => {
+    const authData = getAuthData();
+    let token = authData?.token;
+    let userId = authData?.userId;
+    let subject = authData?.subject || authData?.user?.subject;
+    let year = authData?.year || authData?.grade || authData?.user?.year || authData?.user?.grade;
+    let rawCourse = authData?.course || authData?.course_type || authData?.user?.course || authData?.user?.course_type;
+    let course = Array.isArray(rawCourse) ? rawCourse[0] : rawCourse;
+
+    if (!token || !userId || !course) {
+      const cookie = Cookies.get("auth-client");
+      if (cookie) {
+        try {
+          const parsed = JSON.parse(cookie);
+          token = token || parsed.token || parsed.auth_token;
+          userId = userId || parsed.userId || parsed.user_id;
+          subject = subject || parsed.subject;
+          year = year || parsed.year || parsed.grade;
+          let cookieCourse = parsed.course || parsed.course_type;
+          if (parsed.user) {
+            subject = subject || parsed.user.subject;
+            year = year || parsed.user.grade || parsed.user.year;
+            cookieCourse = cookieCourse || parsed.user.course || parsed.user.course_type;
+          }
+          if (!course && cookieCourse) {
+             course = Array.isArray(cookieCourse) ? cookieCourse[0] : cookieCourse;
+          }
+        } catch (e) {
+          console.error("Error parsing auth cookie", e);
+        }
+      }
+    }
+    return { token, userId, course, subject, year };
+  }, []);
+
+  // --- API: GENERATE QUESTIONS ---
+  const fetchQuestions = useCallback(async (stage: number) => {
+    setLoading(true);
+    try {
+      const { token, userId, course, subject, year } = getTokenAndUserId();
+
+      if (!token || !userId) {
+        alert("Authentication missing. Please log in.");
+        setLoading(false);
+        return;
+      }
+
+      console.log(`Generating questions for Stage ${stage}...`);
+
+      const res = await fetch(`${BASE_BACKEND_URL}/api/questions/generate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          course_type: course,
+          stage_number: stage,
+          grade: year,
+          subject: subject,
+          num_questions: QUESTIONS_PER_STAGE,
+        }),
+      });
+
+      if (res.status === 409) {
+        alert("Stage already completed! Moving to next...");
+        fetchQuestions(stage + 1); 
+        setCurrentStage(stage + 1);
+        return;
+      }
+
+      const data = await res.json();
+      const apiQuestions: ApiQuestion[] = data.questions || [];
+
+      const uiQuestions: UIQuestion[] = apiQuestions.map((q) => {
+        const correctIndex = q.question_options.findIndex(opt => 
+           opt.trim().toLowerCase() === q.correct_answer.trim().toLowerCase()
+        );
+
+        return {
+          id: q._id,
+          question: q.question_name,
+          options: q.question_options,
+          correctAnswer: correctIndex !== -1 ? correctIndex : 0, 
+          explanation: q.explanation,
+          subject: q.question_category
+        };
+      });
+
+      setQuestions(uiQuestions);
+      setQuestionStatuses(uiQuestions.map(q => ({
+        questionId: q.id,
+        status: 'unattempted',
+        selectedAnswer: null
+      })));
+
+    } catch (err) {
+      console.error("Error fetching questions:", err);
+      alert("Failed to load questions from AI.");
+    } finally {
+      setLoading(false);
+    }
+  }, [getTokenAndUserId]);
+
   useEffect(() => {
+    fetchQuestions(currentStage);
+  }, [fetchQuestions, currentStage]);
+
+  useEffect(() => {
+    if (loading) return;
     const timer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
           clearInterval(timer);
-          handleAutoSubmit();
+          handleFinalSubmit(); 
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
-
     return () => clearInterval(timer);
-  }, []);
+  }, [loading]);
 
-  // Visibility change detection for warnings
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.hidden) {
-        setWarnings(prev => prev + 1);
-      }
+      if (document.hidden) setWarnings(prev => prev + 1);
     };
-
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
-  const handleAutoSubmit = () => {
-    const examState: ExamState = {
-      currentQuestion,
-      questionStatuses,
-      timeLeft,
-      warnings,
-      notes
-    };
-    onSubmit(examState, MOCK_QUESTIONS);
-  };
-
-  const formatTime = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-    return { hours, minutes, seconds: secs };
-  };
-
   const handleSelectAnswer = (optionIndex: number) => {
     setQuestionStatuses(prev => prev.map(qs => {
-      if (qs.questionId === MOCK_QUESTIONS[currentQuestion].id) {
+      if (qs.questionId === questions[currentQuestionIndex].id) {
         return {
           ...qs,
           selectedAnswer: optionIndex,
@@ -404,7 +215,7 @@ export default function ExamPage({ onSubmit }: ExamPageProps) {
 
   const handleClearResponse = () => {
     setQuestionStatuses(prev => prev.map(qs => {
-      if (qs.questionId === MOCK_QUESTIONS[currentQuestion].id) {
+      if (qs.questionId === questions[currentQuestionIndex].id) {
         return {
           ...qs,
           selectedAnswer: null,
@@ -417,7 +228,7 @@ export default function ExamPage({ onSubmit }: ExamPageProps) {
 
   const handleMarkForReview = () => {
     setQuestionStatuses(prev => prev.map(qs => {
-      if (qs.questionId === MOCK_QUESTIONS[currentQuestion].id) {
+      if (qs.questionId === questions[currentQuestionIndex].id) {
         return {
           ...qs,
           status: qs.selectedAnswer !== null ? 'answered-marked' : 'marked'
@@ -427,35 +238,68 @@ export default function ExamPage({ onSubmit }: ExamPageProps) {
     }));
   };
 
-  const handlePrevious = () => {
-    if (currentQuestion > 0) {
-      setCurrentQuestion(currentQuestion - 1);
-    }
-  };
+  // --- SUBMISSION LOGIC (FIXED) ---
+  const handleFinalSubmit = async () => {
+    setIsSubmitting(true);
+    setShowSubmitDialog(false);
+    const { token } = getTokenAndUserId();
 
-  const handleNext = () => {
-    if (currentQuestion < MOCK_QUESTIONS.length - 1) {
-      setCurrentQuestion(currentQuestion + 1);
-    }
-  };
+    const answeredQuestions = questionStatuses.filter(qs => qs.selectedAnswer !== null);
 
-  const handleQuestionClick = (index: number) => {
-    setCurrentQuestion(index);
-  };
+    const submissionPromises = answeredQuestions.map(async (qs) => {
+        const questionObj = questions.find(q => q.id === qs.questionId);
+        if(!questionObj || qs.selectedAnswer === null) return null;
 
-  const handleSubmitTest = () => {
-    setShowSubmitDialog(true);
-  };
+        const answerText = questionObj.options[qs.selectedAnswer]; 
 
-  const confirmSubmit = () => {
+        try {
+            const res = await fetch(`${BASE_BACKEND_URL}/api/questions/submit-answer`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    question_id: qs.questionId,
+                    user_answer: answerText,
+                    time_spent: 60,
+                    token,
+                }),
+            });
+
+            // HANDLE 409: Ignore if already submitted
+            if (res.status === 409) return { status: 'already_submitted' };
+
+            return await res.json();
+        } catch (e) {
+            console.error("Submission failed for Q:", qs.questionId);
+            return null;
+        }
+    });
+
+    await Promise.all(submissionPromises);
+
+    // Construct State Object
     const examState: ExamState = {
-      currentQuestion,
-      questionStatuses,
-      timeLeft,
-      warnings,
-      notes
+        currentQuestion: currentQuestionIndex,
+        questionStatuses: questionStatuses,
+        timeLeft: timeLeft,
+        warnings: warnings,
+        notes: notes
     };
-    onSubmit(examState, MOCK_QUESTIONS);
+
+    setIsSubmitting(false);
+
+    // FIX: Pass examState as 1st arg, questions array as 2nd arg
+    onSubmit(examState, questions);
+  };
+
+  // --- RENDER ---
+  const formatTime = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    return { hours, minutes, seconds: secs };
   };
 
   const getStatusColor = (status: string) => {
@@ -468,18 +312,29 @@ export default function ExamPage({ onSubmit }: ExamPageProps) {
     }
   };
 
-  const getStatusCounts = () => {
-    const attempted = questionStatuses.filter(qs => qs.status === 'attempted').length;
-    const unattempted = questionStatuses.filter(qs => qs.status === 'unattempted').length;
-    const marked = questionStatuses.filter(qs => qs.status === 'marked').length;
-    const answeredMarked = questionStatuses.filter(qs => qs.status === 'answered-marked').length;
-    return { attempted, unattempted, marked, answeredMarked };
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 gap-4">
+         <Loader2 className="w-12 h-12 text-indigo-600 animate-spin" />
+         <div className="text-center">
+            <h2 className="text-xl font-semibold text-gray-800">Generating Exam Stage {currentStage}</h2>
+            <p className="text-gray-500">Our AI is preparing your unique questions...</p>
+         </div>
+      </div>
+    );
+  }
 
-  const time = formatTime(timeLeft);
-  const counts = getStatusCounts();
-  const currentQ = MOCK_QUESTIONS[currentQuestion];
+  if (questions.length === 0) return <div className="p-10 text-center">No questions loaded.</div>;
+
+  const currentQ = questions[currentQuestionIndex];
   const currentStatus = questionStatuses.find(qs => qs.questionId === currentQ.id);
+  const time = formatTime(timeLeft);
+  const counts = {
+    attempted: questionStatuses.filter(qs => qs.status === 'attempted').length,
+    unattempted: questionStatuses.filter(qs => qs.status === 'unattempted').length,
+    marked: questionStatuses.filter(qs => qs.status === 'marked').length,
+    answeredMarked: questionStatuses.filter(qs => qs.status === 'answered-marked').length,
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 p-4">
@@ -488,7 +343,7 @@ export default function ExamPage({ onSubmit }: ExamPageProps) {
         <motion.div
           className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"
           initial={{ width: 0 }}
-          animate={{ width: `${((currentQuestion + 1) / MOCK_QUESTIONS.length) * 100}%` }}
+          animate={{ width: `${((currentQuestionIndex + 1) / questions.length) * 100}%` }}
           transition={{ duration: 0.3 }}
         />
       </div>
@@ -499,16 +354,13 @@ export default function ExamPage({ onSubmit }: ExamPageProps) {
           {/* Header */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-gradient-to-br from-indigo-200 to-indigo-300 rounded-lg p-4 shadow-sm">
-              <div className="text-sm text-indigo-700">Batch - 1</div>
-              <div className="font-semibold text-indigo-900">UPSC - Physics Exam Online</div>
+              <div className="text-sm text-indigo-700">Stage {currentStage}</div>
+              <div className="font-semibold text-indigo-900 line-clamp-1">{currentQ.subject || 'General'} Exam</div>
               <div className="text-xs text-indigo-600 mt-1">
-                Question {currentQuestion + 1} of {MOCK_QUESTIONS.length}
+                Question {currentQuestionIndex + 1} of {questions.length}
               </div>
             </div>
-            <div className="bg-gradient-to-br from-indigo-200 to-indigo-300 rounded-lg p-4 flex items-center justify-between cursor-pointer shadow-sm hover:shadow-md transition-shadow">
-              <span className="font-semibold text-indigo-900">Select Subject</span>
-              <ChevronDown className="w-4 h-4 text-indigo-700" />
-            </div>
+
             <div className={`rounded-lg p-4 flex items-center gap-2 shadow-sm ${
               warnings >= 4 ? 'bg-red-200 animate-pulse' : warnings >= 2 ? 'bg-orange-100' : 'bg-yellow-50'
             }`}>
@@ -524,31 +376,27 @@ export default function ExamPage({ onSubmit }: ExamPageProps) {
           </div>
 
           {/* Status Bar */}
-          <div className="bg-white rounded-lg p-4 shadow-sm">
-            <div className="flex flex-wrap gap-4 text-sm">
+          <div className="bg-white rounded-lg p-4 shadow-sm hidden md:block">
+            <div className="flex flex-wrap gap-4 text-xs lg:text-sm">
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-full bg-green-500"></div>
+                <div className="w-3 h-3 rounded-full bg-green-500"></div>
                 <span>Attempted : {counts.attempted}</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-full bg-gray-300"></div>
+                <div className="w-3 h-3 rounded-full bg-gray-300"></div>
                 <span>Unattempted : {counts.unattempted}</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-full bg-yellow-500"></div>
-                <span>Mark As Review : {counts.marked}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-full bg-orange-500"></div>
-                <span>Answered & Mark As Review : {counts.answeredMarked}</span>
+                <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                <span>Marked : {counts.marked}</span>
               </div>
             </div>
           </div>
 
           {/* Question Card */}
           <div className="bg-white rounded-lg p-6 shadow-sm min-h-[400px]">
-            <h2 className="text-xl mb-6">
-              Q {currentQ.id}. {currentQ.question}
+            <h2 className="text-xl mb-6 font-medium text-gray-800">
+              Q {currentQuestionIndex + 1}. {currentQ.question}
             </h2>
 
             <div className="space-y-3">
@@ -572,7 +420,7 @@ export default function ExamPage({ onSubmit }: ExamPageProps) {
                   </div>
                   <div>
                     <span className="font-semibold mr-2">{String.fromCharCode(65 + index)}.</span>
-                    <span>{option}</span>
+                    <span className="text-gray-700">{option}</span>
                   </div>
                 </div>
               ))}
@@ -582,8 +430,8 @@ export default function ExamPage({ onSubmit }: ExamPageProps) {
           {/* Action Buttons */}
           <div className="flex flex-wrap gap-3">
             <Button
-              onClick={handlePrevious}
-              disabled={currentQuestion === 0}
+              onClick={() => setCurrentQuestionIndex(prev => Math.max(0, prev - 1))}
+              disabled={currentQuestionIndex === 0}
               className="bg-indigo-600 hover:bg-indigo-700"
             >
               Previous
@@ -593,7 +441,7 @@ export default function ExamPage({ onSubmit }: ExamPageProps) {
               variant="outline"
               className="border-2 border-gray-300"
             >
-              Clear Response
+              Clear
             </Button>
             <Button
               onClick={handleMarkForReview}
@@ -603,17 +451,17 @@ export default function ExamPage({ onSubmit }: ExamPageProps) {
               Mark For Review
             </Button>
             <Button
-              onClick={handleNext}
-              disabled={currentQuestion === MOCK_QUESTIONS.length - 1}
+              onClick={() => setCurrentQuestionIndex(prev => Math.min(questions.length - 1, prev + 1))}
+              disabled={currentQuestionIndex === questions.length - 1}
               className="bg-indigo-600 hover:bg-indigo-700"
             >
               Next
             </Button>
             <Button
-              onClick={handleSubmitTest}
-              className="bg-indigo-700 hover:bg-indigo-800 ml-auto"
+              onClick={() => setShowSubmitDialog(true)}
+              className="bg-green-700 hover:bg-green-800 ml-auto"
             >
-              Submit Test
+              Submit Stage
             </Button>
           </div>
         </div>
@@ -622,38 +470,38 @@ export default function ExamPage({ onSubmit }: ExamPageProps) {
         <div className="space-y-4">
           {/* Time Left */}
           <div className="bg-indigo-100 rounded-lg p-4">
-            <div className="text-center mb-3 font-semibold">Time Left</div>
-            <div className="grid grid-cols-3 gap-2 text-center">
+            <div className="text-center mb-3 font-semibold text-indigo-900">Time Left</div>
+            <div className="grid grid-cols-3 gap-2 text-center text-indigo-800">
               <div>
                 <div className="text-2xl font-bold">{String(time.hours).padStart(2, '0')}</div>
-                <div className="text-xs text-gray-600">Hours</div>
+                <div className="text-[10px] uppercase">Hours</div>
               </div>
               <div>
                 <div className="text-2xl font-bold">{String(time.minutes).padStart(2, '0')}</div>
-                <div className="text-xs text-gray-600">Minutes</div>
+                <div className="text-[10px] uppercase">Min</div>
               </div>
               <div>
                 <div className="text-2xl font-bold">{String(time.seconds).padStart(2, '0')}</div>
-                <div className="text-xs text-gray-600">Seconds</div>
+                <div className="text-[10px] uppercase">Sec</div>
               </div>
             </div>
           </div>
 
-          {/* Question Overview */}
-          <div className="bg-indigo-100 rounded-lg p-4">
-            <div className="text-center mb-3 font-semibold">Question Overview</div>
-            <div className="grid grid-cols-7 gap-2">
-              {MOCK_QUESTIONS.map((q, index) => {
+          {/* Question Palette */}
+          <div className="bg-white border border-gray-200 rounded-lg p-4">
+            <div className="text-center mb-3 font-semibold text-sm">Question Palette</div>
+            <div className="grid grid-cols-5 gap-2">
+              {questions.map((q, index) => {
                 const status = questionStatuses.find(qs => qs.questionId === q.id);
                 return (
                   <button
                     key={q.id}
-                    onClick={() => handleQuestionClick(index)}
+                    onClick={() => setCurrentQuestionIndex(index)}
                     className={`aspect-square rounded-md flex items-center justify-center text-sm font-semibold transition-all ${
                       getStatusColor(status?.status || 'unattempted')
-                    } ${currentQuestion === index ? 'ring-2 ring-indigo-600 ring-offset-2' : ''}`}
+                    } ${currentQuestionIndex === index ? 'ring-2 ring-indigo-600 ring-offset-2' : ''}`}
                   >
-                    {q.id}
+                    {index + 1}
                   </button>
                 );
               })}
@@ -661,47 +509,54 @@ export default function ExamPage({ onSubmit }: ExamPageProps) {
           </div>
 
           {/* Notes */}
-          <div className="bg-indigo-100 rounded-lg p-4">
-            <div className="text-center mb-3 font-semibold">Notes</div>
+          <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-100">
+            <div className="text-center mb-3 font-semibold text-yellow-800 text-sm">Quick Notes</div>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full h-32 p-3 rounded-lg border-2 border-indigo-200 focus:border-indigo-400 outline-none resize-none"
-              placeholder="Add your notes here..."
+              className="w-full h-32 p-3 rounded-lg border border-yellow-200 bg-white focus:border-yellow-400 outline-none resize-none text-sm"
+              placeholder="Jot down formulas or hints..."
             />
           </div>
         </div>
       </div>
 
       {/* Submit Confirmation Dialog */}
+      <AnimatePresence>
       {showSubmitDialog && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="bg-white rounded-xl p-6 max-w-md w-full"
+            exit={{ scale: 0.9, opacity: 0 }}
+            className="bg-white rounded-xl p-6 max-w-md w-full shadow-2xl"
           >
-            <h3 className="text-xl font-bold mb-4">Confirm Submission</h3>
+            <h3 className="text-xl font-bold mb-4 text-gray-900">Submit Stage {currentStage}?</h3>
             <p className="text-gray-600 mb-6">
-              Are you sure you want to submit the test? You have attempted {counts.attempted} out of {MOCK_QUESTIONS.length} questions.
+              You have attempted <span className="font-bold text-indigo-600">{counts.attempted}</span> out of {questions.length} questions.
+              <br/><br/>
+              <span className="text-sm">Once submitted, you cannot change your answers for this stage.</span>
             </p>
             <div className="flex gap-3 justify-end">
               <Button
                 onClick={() => setShowSubmitDialog(false)}
                 variant="outline"
+                disabled={isSubmitting}
               >
                 Cancel
               </Button>
               <Button
-                onClick={confirmSubmit}
-                className="bg-indigo-600 hover:bg-indigo-700"
+                onClick={handleFinalSubmit}
+                className="bg-indigo-600 hover:bg-indigo-700 min-w-[100px]"
+                disabled={isSubmitting}
               >
-                Submit Test
+                {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin mx-auto"/> : "Submit"}
               </Button>
             </div>
           </motion.div>
         </div>
       )}
+      </AnimatePresence>
     </div>
   );
 }

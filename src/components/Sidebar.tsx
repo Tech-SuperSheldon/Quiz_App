@@ -6,27 +6,21 @@ import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   HomeIcon,
-  BookOpenIcon,
   AcademicCapIcon,
-  TrophyIcon,
   ArrowRightOnRectangleIcon,
 } from "@heroicons/react/24/outline";
 
 export default function Sidebar() {
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [userPic, setUserPic] = useState<string | null>(null);
-  const [userName, setUserName] = useState<string | null>(null);
   const [scrolling, setScrolling] = useState(false);
-  const [collapsed, setCollapsed] = useState(false); // State to control sidebar collapse
+  const [collapsed, setCollapsed] = useState(false); 
   const pathname = usePathname();
 
+  // UPDATED: Changed the href for Quizzes to "/quizpage"
   const navItems = [
-    { href: "/dashboard", label: "Dashboard", icon: HomeIcon },  
-    { href: "/dashboard/quizzes", label: "Quizzes", icon: AcademicCapIcon },
-      ];
+    { href: "/dashboard", label: "Dashboard", icon: HomeIcon },
+    { href: "/quizpage", label: "Quizzes", icon: AcademicCapIcon }, 
+  ];
 
-  // Handle scrolling for dynamic header size (optional)
   const handleScroll = () => {
     if (window.scrollY > 50) {
       setScrolling(true);
@@ -61,13 +55,9 @@ export default function Sidebar() {
     },
   };
 
-  // Toggle sidebar collapse
   const toggleSidebar = () => {
     setCollapsed((prev) => !prev);
   };
-
-  // Sidebar shrink for quiz page
-  const isQuizPage = pathname.includes("/quizzes/");
 
   return (
     <div
@@ -119,6 +109,7 @@ export default function Sidebar() {
           className="space-y-1 px-2"
         >
           {navItems.map(({ href, label, icon: Icon }) => {
+            // Logic to determine if the link is active based on the current path
             const isActive =
               pathname === href || (href !== "/dashboard" && pathname.startsWith(href));
 
