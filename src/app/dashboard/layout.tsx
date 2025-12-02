@@ -1,13 +1,15 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { usePathname } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
+import { Menu, X } from "lucide-react";
 // import Header from "@/components/Header";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const pageVariants = {
     initial: { opacity: 0, y: 20 },
@@ -38,13 +40,52 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-cyan-300/10 rounded-full blur-3xl animate-pulse-slow delay-500"></div>
       </div>
 
-      {/* Sidebar - Full Height */}
-      <div className="flex-shrink-0 min-h-screen sticky top-0">
+      {/* Sidebar - Hidden on mobile, shown on lg */}
+      <div className="hidden lg:flex flex-shrink-0 min-h-screen sticky top-0">
         <Sidebar />
       </div>
 
+      {/* Mobile Sidebar Overlay */}
+      <AnimatePresence>
+        {sidebarOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSidebarOpen(false)}
+              className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            />
+            {/* Mobile Sidebar */}
+            <motion.div
+              initial={{ x: -300 }}
+              animate={{ x: 0 }}
+              exit={{ x: -300 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="fixed left-0 top-0 h-screen w-64 z-50 lg:hidden"
+            >
+              <Sidebar />
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
       {/* Main Content - Full Height */}
       <div className="flex flex-col flex-1 relative z-10 min-h-screen">
+        {/* Mobile Menu Button */}
+        <div className="lg:hidden p-4 border-b border-white/10 bg-white/50 backdrop-blur-sm">
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="p-2 hover:bg-orange-100 rounded-lg transition-colors duration-300"
+          >
+            {sidebarOpen ? (
+              <X className="w-6 h-6 text-orange-600" />
+            ) : (
+              <Menu className="w-6 h-6 text-orange-600" />
+            )}
+          </button>
+        </div>
         {/* <Header /> */}
 
         <main className="flex-1 px-4 lg:px-6 overflow-hidden">

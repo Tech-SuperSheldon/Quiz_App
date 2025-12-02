@@ -56,11 +56,11 @@ const Footer: React.FC = () => {
              
             </div>
 
-            <p className="text-gray-600 text-sm leading-relaxed">
+            <p className="text-gray-600 text-base leading-relaxed">
               Supersheldon is a trusted global learning platform offering expert-led exam preparation for UK, US, and Australian students.
             </p>
 
-            <div className="space-y-1 text-gray-700 text-xs">
+            <div className="space-y-1 text-gray-700 text-sm">
               <p>📞 <span className="font-medium">Phone:</span> +91 91370 53875</p>
               <p>✉️ <span className="font-medium">Email:</span> support@supersheldon.com</p>
               <p>📍 <span className="font-medium">Address:</span> Om Chambers 648/A 4th Flr, Binnamangala 1st Stage, Bangalore- 560038, Karnataka, India</p>
@@ -102,8 +102,8 @@ const Footer: React.FC = () => {
               variants={itemVariants}
               className="bg-white/95 backdrop-blur-lg p-3"
             >
-              <h3 className="font-bold text-red-400 mb-2 text-sm uppercase tracking-wide">Company</h3>
-              <ul className="space-y-1 text-gray-700 text-xs">
+              <h3 className="font-bold text-red-400 mb-2 text-base uppercase tracking-wide">Company</h3>
+              <ul className="space-y-1 text-gray-700 text-sm">
                 <li>
                   <Link href="/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-gray-900 transition-colors">
                     Privacy Policy
@@ -128,11 +128,11 @@ const Footer: React.FC = () => {
               className="bg-white/80 backdrop-blur-lg p-3 border-gray-200/50"
             >
               <Link href="/courses">
-                <h3 className="font-bold text-orange-600 mb-2 text-sm uppercase tracking-wide hover:text-orange-700 transition-colors">
+                <h3 className="font-bold text-orange-600 mb-2 text-base uppercase tracking-wide hover:text-orange-700 transition-colors">
                   Courses
                 </h3>
               </Link>
-              <ul className="space-y-1 text-gray-700 text-xs">
+              <ul className="space-y-1 text-gray-700 text-sm">
                 <li>
                   <Link href="/courses" className="hover:text-gray-900 transition-colors">
                     Naplan Exam
@@ -156,8 +156,8 @@ const Footer: React.FC = () => {
               variants={itemVariants}
               className="bg-white/80 backdrop-blur-lg p-3 border-gray-200/50"
             >
-              <h3 className="font-bold text-red-600 mb-2 text-sm uppercase tracking-wide">Support</h3>
-              <ul className="space-y-1 text-gray-700 text-xs">
+              <h3 className="font-bold text-red-600 mb-2 text-base uppercase tracking-wide">Support</h3>
+              <ul className="space-y-1 text-gray-700 text-sm">
                 <li>
                   <Link href="#" className="hover:text-gray-900 transition-colors">
                     FAQ
@@ -180,7 +180,7 @@ const Footer: React.FC = () => {
         {/* Bottom Note */}
         <motion.div
           variants={itemVariants}
-          className="mt-4 border-t border-gray-300 pt-3 text-center text-xs text-gray-600"
+          className="mt-4 border-t border-gray-300 pt-3 text-center text-sm text-gray-600"
         >
           © {new Date().getFullYear()} Supersheldon LLP. All rights reserved.
         </motion.div>
