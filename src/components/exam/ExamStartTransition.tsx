@@ -28,7 +28,7 @@ export default function ExamStartTransition({ onComplete }: ExamStartTransitionP
   }, [countdown, onComplete]);
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-gradient-to-br from-orange-600 via-orange-500 to-amber-600 flex items-center justify-center z-50">
       <AnimatePresence mode="wait">
         {!showReady ? (
           <motion.div

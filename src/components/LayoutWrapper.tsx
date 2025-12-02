@@ -9,7 +9,9 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
   const pathname = usePathname();
 
   const noLayoutPages = ["/auth/login", "/auth/register"];
+  const dashboardPages = pathname.startsWith("/dashboard") || pathname.startsWith("/quizpage");
   const showLayout = !noLayoutPages.includes(pathname);
+  const showFooter = showLayout && !dashboardPages;
 
   return (
     <>
@@ -18,7 +20,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
         {pathname === "/" && <LandingPage />}
         {children}
       </main>
-      {showLayout && <Footer />}
+      {showFooter && <Footer />}
     </>
   );
 }

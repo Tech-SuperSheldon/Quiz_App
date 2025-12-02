@@ -61,14 +61,14 @@ export default function Sidebar() {
 
   return (
     <div
-      className={`h-full bg-gradient-to-b from-purple-700 via-indigo-700 to-blue-800 shadow-2xl flex flex-col relative transition-all duration-500 ${
+      className={`h-full bg-gradient-to-b from-orange-600 via-orange-500 to-amber-600 shadow-2xl flex flex-col relative transition-all duration-500 ${
         collapsed ? "w-16" : "w-64"
       }`}
     >
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-20 -right-20 w-40 h-40 bg-white/5 rounded-full blur-xl"></div>
-        <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-blue-400/10 rounded-full blur-xl"></div>
+        <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-orange-300/10 rounded-full blur-xl"></div>
       </div>
 
       {/* Sidebar Header */}
@@ -82,23 +82,23 @@ export default function Sidebar() {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
         >
-          <div
+          {/* <div
             className={`${
               collapsed ? "w-8 h-8" : "w-12 h-12"
             } p-1.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg shadow-lg`}
           >
-            <AcademicCapIcon className="h-4 w-4 text-white" />
-          </div>
+             <AcademicCapIcon className="h-4 w-4 text-white" />
+          </div> */}
         </motion.div>
       </div>
 
       {/* Toggle Sidebar Button */}
-      <button
+      {/* <button
         className="absolute top-4 right-4 p-2 bg-gradient-to-r from-pink-400 to-purple-400 text-white rounded-full shadow-md transition-all duration-300 hover:scale-110"
         onClick={toggleSidebar}
       >
         <ArrowRightOnRectangleIcon className="h-5 w-5" />
-      </button>
+      </button> */}
 
       {/* Sidebar Navigation */}
       <nav className="flex-1 py-3 relative z-10 overflow-y-auto custom-scrollbar">
@@ -120,13 +120,13 @@ export default function Sidebar() {
                   className={`flex items-center gap-3 p-3 rounded-lg text-sm font-semibold transition-all duration-300 group relative overflow-hidden ${
                     isActive
                       ? "bg-white/20 text-white shadow-lg backdrop-blur-sm"
-                      : "text-blue-100 hover:bg-white/15 hover:text-white hover:shadow-md"
+                      : "text-orange-100 hover:bg-white/15 hover:text-white hover:shadow-md"
                   }`}
                 >
                   {/* Active Indicator */}
                   {isActive && (
                     <motion.div
-                      className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-pink-400 to-purple-400 rounded-r shadow-lg"
+                      className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-yellow-300 to-orange-300 rounded-r shadow-lg"
                       layoutId="activeIndicator"
                       transition={{
                         type: "spring",
@@ -150,7 +150,7 @@ export default function Sidebar() {
                       className={`h-4 w-4 transition-transform duration-300 ${
                         isActive
                           ? "text-white scale-110"
-                          : "text-blue-200 group-hover:scale-110 group-hover:text-white"
+                          : "text-orange-200 group-hover:scale-110 group-hover:text-white"
                       }`}
                     />
                   </div>
@@ -172,7 +172,7 @@ export default function Sidebar() {
         <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
           <Link
             href="/auth/login"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-blue-100 hover:bg-red-500/30 hover:text-white transition-all duration-300 group border border-white/10 hover:border-red-400/30"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-orange-100 hover:bg-orange-400/30 hover:text-white transition-all duration-300 group border border-white/10 hover:border-orange-300/30"
           >
             <ArrowRightOnRectangleIcon className="h-4 w-4 group-hover:scale-110 transition-transform duration-300" />
             {!collapsed && <span className="font-semibold text-sm">Logout</span>}

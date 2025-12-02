@@ -36,7 +36,7 @@ export default function StartPage({
             className="inline-block mb-4"
           >
             <div className="relative">
-              <Brain className="w-24 h-24 text-indigo-600" />
+              {/* <Brain className="w-24 h-24 text-indigo-600" /> */}
               <motion.div
                 animate={{ 
                   scale: [1, 1.2, 1],
@@ -61,14 +61,14 @@ export default function StartPage({
             {courseName} {subject} Exam
           </motion.h1>
 
-          <motion.p
+          {/* <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
             className="text-xl text-gray-600"
           >
             Online Assessment - Batch 1
-          </motion.p>
+          </motion.p> */}
         </div>
 
         {/* Main Card */}
@@ -282,7 +282,7 @@ export default function StartPage({
                   w-full sm:w-auto px-8 py-6 text-lg font-bold rounded-xl
                   transition-all duration-300 transform
                   ${termsAccepted 
-                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 hover:scale-105 shadow-lg hover:shadow-xl' 
+                    ? 'bg-gradient-to-r from-orange-600 to-orange-600 hover:from-orange-700 hover:to-orange-700 hover:scale-105 shadow-lg hover:shadow-xl' 
                     : 'bg-gray-300 cursor-not-allowed'
                   }
                 `}
@@ -308,7 +308,7 @@ export default function StartPage({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1.7 }}
-            className="bg-gradient-to-r from-indigo-50 to-purple-50 p-6 border-t-2 border-gray-100"
+            className="bg-gradient-to-r from-orange-50 to-orange-50 p-6 border-t-2 border-gray-100"
           >
             <div className="flex items-start gap-3">
               <TrendingUp className="w-5 h-5 text-indigo-600 flex-shrink-0 mt-1" />

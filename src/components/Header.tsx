@@ -81,6 +81,15 @@ export default function Header() {
     },
   };
 
+  // ✅ Handle WhatsApp contact
+  const handleContactWhatsApp = () => {
+    const phoneNumber = "917974695618";
+    const message = "Hello, I need some help regarding the quiz app.";
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+    window.open(whatsappUrl, "_blank");
+  };
+
   return (
     <header
       className={`fixed top-0 left-0 right-0 mx-auto z-50 transition-all duration-500
@@ -121,6 +130,10 @@ export default function Header() {
           </Link>
           <Link
             href="#contact"
+            onClick={(e) => {
+              e.preventDefault();
+              handleContactWhatsApp();
+            }}
             className="text-gray-800 hover:text-orange-600 transition-colors duration-300"
           >
             Contact Us
