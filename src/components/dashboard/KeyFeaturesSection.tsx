@@ -151,7 +151,6 @@ export default function KeyFeaturesSection() {
             <h3 className="text-2xl font-bold text-black mb-3">Intelligent Question Builder</h3>
             <p className="text-gray-600 text-lg leading-relaxed">
               We create well-structured, skill-appropriate questions designed to accelerate your development process.
-
             </p>
           </div>
         </div>

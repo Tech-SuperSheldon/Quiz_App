@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import ScrollAnimation from "./ScrollAnimation";
@@ -75,60 +73,59 @@ export default function HowToCompeteSection() {
           </ScrollAnimation>
 
           {/* ============ STEP 2 ============ */}
-<ScrollAnimation direction="up" delay={0.3}>
-  <div className="
-    h-full flex flex-col
-    bg-white rounded-3xl p-8 shadow-[0_12px_40px_rgba(0,0,0,0.07)]
-    relative overflow-hidden
-  ">
-    {/* Fade */}
-    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white/80 pointer-events-none"></div>
+          <ScrollAnimation direction="up" delay={0.3}>
+            <div className="
+              h-full flex flex-col
+              bg-white rounded-3xl p-8 shadow-[0_12px_40px_rgba(0,0,0,0.07)]
+              relative overflow-hidden
+            ">
+              {/* Fade */}
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white/80 pointer-events-none"></div>
 
-    {/* Visual */}
-    <div className="relative mb-8 flex flex-col justify-between flex-1">
+              {/* Visual */}
+              <div className="relative mb-8 flex flex-col justify-between flex-1">
 
-      {/* Card 1 — top */}
-      <div className="
-        bg-white shadow-lg rounded-2xl px-6 py-6 
-        flex items-center gap-3
-        h-1/2
-      ">
-        <div className="flex gap-1 text-gray-400 text-xl">• • •</div>
-        <img
-          src="https://api.dicebear.com/8.x/notionists/svg?seed=Phoenix"
-          className="w-12 h-12 rounded-full"
-          alt=""
-        />
-      </div>
+                {/* Card 1 — top */}
+                <div className="
+                  bg-white shadow-lg rounded-2xl px-6 py-6 
+                  flex items-center gap-3
+                  h-1/2
+                ">
+                  <div className="flex gap-1 text-gray-400 text-xl">• • •</div>
+                  <img
+                    src="https://api.dicebear.com/8.x/notionists/svg?seed=Phoenix"
+                    className="w-12 h-12 rounded-full"
+                    alt=""
+                  />
+                </div>
 
-      {/* Card 2 — bottom */}
-      <div className="
-        bg-white shadow-lg rounded-2xl px-6 py-6 
-        flex items-center gap-3
-        h-1/2 mt-6
-      ">
-        <div className="flex gap-1 text-gray-400 text-xl">• • •</div>
-        <img
-          src="https://api.dicebear.com/8.x/notionists/svg?seed=Mohaimen"
-          className="w-12 h-12 rounded-full"
-          alt=""
-        />
-      </div>
-    </div>
+                {/* Card 2 — bottom */}
+                <div className="
+                  bg-white shadow-lg rounded-2xl px-6 py-6 
+                  flex items-center gap-3
+                  h-1/2 mt-6
+                ">
+                  <div className="flex gap-1 text-gray-400 text-xl">• • •</div>
+                  <img
+                    src="https://api.dicebear.com/8.x/notionists/svg?seed=Mohaimen"
+                    className="w-12 h-12 rounded-full"
+                    alt=""
+                  />
+                </div>
+              </div>
 
-    {/* Text */}
-    <div className="mt-auto text-center">
-      <h3 className="text-xl font-bold text-black mb-3">
-        Step 2: Answer Smart & Fast
-      </h3>
-      <p className="text-gray-600 leading-relaxed">
-        Face challenging questions where your speed and accuracy are key
-        to dominating the match.
-      </p>
-    </div>
-  </div>
-</ScrollAnimation>
-
+              {/* Text */}
+              <div className="mt-auto text-center">
+                <h3 className="text-xl font-bold text-black mb-3">
+                  Step 2: Answer Smart & Fast
+                </h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Face challenging questions where your speed and accuracy are key
+                  to dominating the match.
+                </p>
+              </div>
+            </div>
+          </ScrollAnimation>
 
           {/* ============ STEP 3 ============ */}
           <ScrollAnimation direction="up" delay={0.4}>

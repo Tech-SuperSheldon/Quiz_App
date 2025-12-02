@@ -56,7 +56,7 @@ export const storeAuthData = (authData: AuthData): void => {
 // Retrieve auth data from localStorage
 export const getAuthData = (): StoredAuthData | null => {
   try {
-    const stored = localStorage.getItem("quiz_auth_data");
+    const stored = localStorage.getItem("authData");
     if (!stored) return null;
 
     const authData: StoredAuthData = JSON.parse(stored);

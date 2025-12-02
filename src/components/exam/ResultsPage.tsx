@@ -1,20 +1,127 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react'; // 1. Import useEffect and useRef
 import { ExamResult } from '../types';
-import { Trophy, Clock, Target, TrendingUp, CheckCircle2, XCircle, AlertCircle, BookOpen, Award, Zap, RefreshCw } from 'lucide-react';
+import { Trophy, Clock, Target, TrendingUp, CheckCircle2, XCircle, AlertCircle, BookOpen, Award, Zap, RefreshCw, Loader2, Save } from 'lucide-react'; // Added Loader2 and Save icons
 import { Button } from '../../components/uinew/button';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+
+const BASE_BACKEND_URL = "https://92c52865-c657-478a-b2e0-625fc822f55b-00-23crg2t5cyi67.pike.replit.dev:5000";
 
 interface ResultsPageProps {
   result: ExamResult;
   onRetake: () => void;
+  userId?: string; // 2. Add userId prop (optional for now)
 }
 
-export default function ResultsPage({ result, onRetake }: ResultsPageProps) {
+export default function ResultsPage({ result, onRetake, userId = "guest_user" }: ResultsPageProps) {
   const [showExplanations, setShowExplanations] = useState(true);
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'correct' | 'wrong' | 'unattempted'>('all');
 
+  // 3. State to track the saving process
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
+
+  // 4. Ref to prevent React Strict Mode from saving twice
+  const hasSaved = useRef(false);
+
+  // 5. The Integration Logic
+  // useEffect(() => {
+  //   // If we already saved or are currently saving, stop.
+  //   if (hasSaved.current) return;
+
+  //   const saveToBackend = async () => {
+  //     hasSaved.current = true; // Mark as running
+  //     setSaveStatus('saving');
+
+  //     try {
+  //       const response = await fetch(`${BASE_BACKEND_URL}/api/exams/save-result`, {
+  //         method: 'POST',
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //         },
+  //         body: JSON.stringify({
+  //           userId: userId, // Passed from props or default
+  //           ...result, // Spreads: correct, wrong, accuracy, xp, etc.
+  //         }),
+  //       });
+
+  //       if (response.ok) {
+  //         setSaveStatus('success');
+  //         console.log("Exam result saved successfully!");
+  //       } else {
+  //         setSaveStatus('error');
+  //         console.error("Server returned an error");
+  //       }
+  //     } catch (error) {
+  //       setSaveStatus('error');
+  //       console.error("Network error:", error);
+  //     }
+  //   };
+
+  //   saveToBackend();
+  // }, [result, userId]);
+
+  // ... inside ResultsPage component
+
+  useEffect(() => {
+    // Prevent double saving in React Strict Mode
+    if (hasSaved.current) return;
+
+    const saveToBackend = async () => {
+      hasSaved.current = true;
+      setSaveStatus('saving');
+
+      let token = null;
+
+      // 1. Get Token from authData
+      try {
+        const storedAuthData = localStorage.getItem('authData');
+        if (storedAuthData) {
+          const parsedData = JSON.parse(storedAuthData);
+          if (parsedData.token) token = parsedData.token;
+        }
+      } catch (error) {
+        console.error("Error parsing authData:", error);
+      }
+
+      // CHECK: If no token, we cannot save (because backend is protected)
+      if (!token) {
+        console.warn("User is not logged in. Result cannot be saved.");
+        setSaveStatus('error'); // or 'idle' if you don't want to show an error icon
+        return;
+      }
+
+      // 2. Send Request
+      try {
+        const response = await fetch(`${BASE_BACKEND_URL}/api/exams/save-result`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` // Token is now mandatory
+          },
+          body: JSON.stringify({
+            // userId is REMOVED. The backend extracts it from the token.
+            ...result,
+          }),
+        });
+
+        if (response.ok) {
+          setSaveStatus('success');
+          console.log("Result saved successfully");
+        } else {
+          setSaveStatus('error');
+          console.error("Server error");
+        }
+      } catch (error) {
+        setSaveStatus('error');
+        console.error("Network error:", error);
+      }
+    };
+
+    saveToBackend();
+  }, [result]);
+
+  
   const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
@@ -48,7 +155,32 @@ export default function ResultsPage({ result, onRetake }: ResultsPageProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-4 pb-12">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-4 pb-12 relative">
+
+      {/* 6. Visual Status Indicator (Top Right) */}
+      <div className="fixed top-6 right-6 z-50">
+        <AnimatePresence>
+            {saveStatus === 'saving' && (
+                <motion.div initial={{opacity:0, y:-10}} animate={{opacity:1, y:0}} className="bg-white px-4 py-2 rounded-full shadow-lg flex items-center gap-2 text-indigo-600 border border-indigo-100">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span className="text-sm font-medium">Saving result...</span>
+                </motion.div>
+            )}
+            {saveStatus === 'success' && (
+                <motion.div initial={{opacity:0, y:-10}} animate={{opacity:1, y:0}} className="bg-green-50 px-4 py-2 rounded-full shadow-lg flex items-center gap-2 text-green-700 border border-green-200">
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span className="text-sm font-medium">Result Saved</span>
+                </motion.div>
+            )}
+             {saveStatus === 'error' && (
+                <motion.div initial={{opacity:0, y:-10}} animate={{opacity:1, y:0}} className="bg-red-50 px-4 py-2 rounded-full shadow-lg flex items-center gap-2 text-red-700 border border-red-200">
+                    <AlertCircle className="w-4 h-4" />
+                    <span className="text-sm font-medium">Save Failed</span>
+                </motion.div>
+            )}
+        </AnimatePresence>
+      </div>
+
       <div className="max-w-7xl mx-auto">
         {/* Header with Success Animation */}
         <motion.div

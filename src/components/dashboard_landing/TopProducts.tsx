@@ -1,7 +1,9 @@
+//this file is not used in the project
+
 "use client";
 export default function TopProducts() {
   const items = [
-    { name: 'Math Mastery Quiz', subject: 'Math', attempts: '12', bestScore: '98%' },
+    { name: 'Math Mastery Quiz', subject: 'Math', attempts: '120', bestScore: '98%' },
     { name: 'Science Challenge', subject: 'Science', attempts: '9', bestScore: '95%' },
     { name: 'World History Quiz', subject: 'History', attempts: '7', bestScore: '92%' },
   ];

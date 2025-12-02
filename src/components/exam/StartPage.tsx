@@ -2,14 +2,21 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Clock, BookOpen, AlertTriangle, CheckCircle2, Award, TrendingUp, Brain, Zap, Target } from 'lucide-react';
+import { Clock, BookOpen, Target, Zap, TrendingUp, Brain, Award } from 'lucide-react';
 import { Button } from '../../components/uinew/button';
 
 interface StartPageProps {
   onStartExam: () => void;
+  // Added these props for dynamic rendering
+  subject?: string;
+  courseName?: string;
 }
 
-export default function StartPage({ onStartExam }: StartPageProps) {
+export default function StartPage({ 
+  onStartExam, 
+  subject = "General", // Default fallback
+  courseName = "Assessment" // Default fallback
+}: StartPageProps) {
   const [termsAccepted, setTermsAccepted] = React.useState(false);
 
   return (
@@ -43,16 +50,17 @@ export default function StartPage({ onStartExam }: StartPageProps) {
               />
             </div>
           </motion.div>
-          
+
           <motion.h1
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="text-5xl font-bold text-gray-800 mb-2"
+            className="text-5xl font-bold text-gray-800 mb-2 capitalize"
           >
-            UPSC Physics Exam
+            {/* Dynamic Subject & Course Name */}
+            {courseName} {subject} Exam
           </motion.h1>
-          
+
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -79,7 +87,8 @@ export default function StartPage({ onStartExam }: StartPageProps) {
               className="bg-gradient-to-br from-indigo-500 to-indigo-600 p-6 text-white"
             >
               <Clock className="w-10 h-10 mb-3" />
-              <div className="text-3xl font-bold mb-1">2 Hours</div>
+              {/* UPDATED: Time */}
+              <div className="text-3xl font-bold mb-1">30 Mins</div>
               <div className="text-indigo-100">Total Duration</div>
             </motion.div>
 
@@ -90,7 +99,8 @@ export default function StartPage({ onStartExam }: StartPageProps) {
               className="bg-gradient-to-br from-purple-500 to-purple-600 p-6 text-white"
             >
               <BookOpen className="w-10 h-10 mb-3" />
-              <div className="text-3xl font-bold mb-1">30 Questions</div>
+              {/* UPDATED: Questions */}
+              <div className="text-3xl font-bold mb-1">10 Qs</div>
               <div className="text-purple-100">Multiple Choice</div>
             </motion.div>
 
@@ -101,7 +111,8 @@ export default function StartPage({ onStartExam }: StartPageProps) {
               className="bg-gradient-to-br from-pink-500 to-pink-600 p-6 text-white"
             >
               <Award className="w-10 h-10 mb-3" />
-              <div className="text-3xl font-bold mb-1">300 XP</div>
+              {/* UPDATED: XP (Assuming 10 XP per question) */}
+              <div className="text-3xl font-bold mb-1">100 XP</div>
               <div className="text-pink-100">Maximum Score</div>
             </motion.div>
           </div>
@@ -126,7 +137,8 @@ export default function StartPage({ onStartExam }: StartPageProps) {
                 <div>
                   <h3 className="font-semibold text-gray-800 mb-1">Time Management</h3>
                   <p className="text-gray-600 text-sm">
-                    You have <strong>2 hours (120 minutes)</strong> to complete 30 questions. The exam will auto-submit when time expires.
+                    {/* UPDATED: Instruction Text */}
+                    You have <strong>30 minutes</strong> to complete 10 questions. The exam will auto-submit when time expires.
                   </p>
                 </div>
               </motion.div>
@@ -303,10 +315,11 @@ export default function StartPage({ onStartExam }: StartPageProps) {
               <div>
                 <h4 className="font-semibold text-gray-800 mb-1">Pro Tips for Success</h4>
                 <p className="text-sm text-gray-600">
-                  • Read each question carefully before selecting an answer
-                  • Use the notes section to jot down important points
-                  • Manage your time - aim for 4 minutes per question
-                  • Review marked questions before submitting
+                  • Read each question carefully before selecting an answer<br/>
+                  • Use the notes section to jot down important points<br/>
+                  {/* UPDATED: Time management tip */}
+                  • Manage your time - aim for 3 minutes per question<br/>
+                  • Review marked questions before submitting<br/>
                   • Stay focused and don't switch tabs
                 </p>
               </div>
