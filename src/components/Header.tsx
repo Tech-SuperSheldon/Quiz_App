@@ -31,11 +31,11 @@ export default function Header() {
       try {
         const data = JSON.parse(clientCookie);
 
-        // CHECK: If the JSON object contains a 'token', the user is logged in.
-        if (data.token) {
-          setUserName(data.name || "User");   // Shreyansh Kushwaha
-          setUserEmail(data.email || "");     // shreyanshkushwaha23336@gmail.com
-          setUserPic(data.picture || null);   // If no pic in JSON, this becomes null (shows Icon)
+        // 🟢 FIX: Check for 'token' (OTP) OR 'email' (Google Auth)
+        if (data.token || data.email) {
+          setUserName(data.name || "User");   
+          setUserEmail(data.email || "");     
+          setUserPic(data.picture || null);   
         } else {
           handleLogoutCleanup();
         }
