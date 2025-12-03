@@ -10,54 +10,64 @@ import { FaUserCircle, FaSignOutAlt, FaChevronDown } from "react-icons/fa";
 
 export default function Header() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  // User Data State
   const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [userPic, setUserPic] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
+  const [userPic, setUserPic] = useState<string | null>(null);
+
   const [scrolling, setScrolling] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
-  const isDashboard = pathname.startsWith("/dashboard");
 
-  // ✅ Load user data from "auth-client" cookie
+  // 1. Identify if we are on Dashboard or Quiz Page
+  const isMinimalHeader = pathname.startsWith("/dashboard") || pathname.startsWith("/quizpage");
+
+  // ✅ Load user data from "auth-client" JSON
   useEffect(() => {
     const clientCookie = Cookies.get("auth-client");
+
     if (clientCookie) {
       try {
-        const user = JSON.parse(clientCookie);
-        setUserEmail(user.email || null);
-        setUserName(user.name || null);
-        setUserPic(user.picture || null);
+        const data = JSON.parse(clientCookie);
+
+        // CHECK: If the JSON object contains a 'token', the user is logged in.
+        if (data.token) {
+          setUserName(data.name || "User");   // Shreyansh Kushwaha
+          setUserEmail(data.email || "");     // shreyanshkushwaha23336@gmail.com
+          setUserPic(data.picture || null);   // If no pic in JSON, this becomes null (shows Icon)
+        } else {
+          handleLogoutCleanup();
+        }
       } catch (err) {
         console.error("Error parsing auth-client cookie:", err);
+        handleLogoutCleanup();
       }
     } else {
-      setUserEmail(null);
-      setUserName(null);
-      setUserPic(null);
+      handleLogoutCleanup();
     }
   }, [pathname]);
 
-  // ✅ Logout clears both frontend & backend cookies
+  // Helper to clear state
+  const handleLogoutCleanup = () => {
+    setUserEmail(null);
+    setUserName(null);
+    setUserPic(null);
+  };
+
+  // ✅ Logout Function
   const handleLogout = () => {
     Cookies.remove("auth-client");
     Cookies.remove("token");
-    Cookies.remove("auth-token");
-    Cookies.remove("temp-auth");
     Cookies.remove("user_id");
-    setUserEmail(null);
-    setUserPic(null);
-    setUserName(null);
+    handleLogoutCleanup();
     setDropdownOpen(false);
     router.push("/");
   };
 
-  // ✅ Scroll listener to shrink header on scroll
+  // ✅ Scroll listener
   const handleScroll = () => {
-    if (window.scrollY > 50) {
-      setScrolling(true);
-    } else {
-      setScrolling(false);
-    }
+    setScrolling(window.scrollY > 50);
   };
 
   useEffect(() => {
@@ -67,40 +77,38 @@ export default function Header() {
 
   const dropdownVariants = {
     hidden: { opacity: 0, y: -10, scale: 0.95 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: { duration: 0.2 },
-    },
-    exit: {
-      opacity: 0,
-      y: -10,
-      scale: 0.95,
-      transition: { duration: 0.15 },
-    },
+    visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.2 } },
+    exit: { opacity: 0, y: -10, scale: 0.95, transition: { duration: 0.15 } },
   };
 
-  // ✅ Handle WhatsApp contact
   const handleContactWhatsApp = () => {
     const phoneNumber = "917974695618";
     const message = "Hello, I need some help regarding the quiz app.";
-    const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
-    window.open(whatsappUrl, "_blank");
+    window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, "_blank");
+  };
+
+  // Helper to determine header classes
+  const getHeaderClasses = () => {
+    let classes = "top-0 left-0 right-0 mx-auto z-50 transition-all duration-500 ";
+
+    // IF Dashboard or Quiz Page: Use ABSOLUTE so it scrolls away with the page
+    if (isMinimalHeader) {
+      classes += "absolute w-full bg-white/80 backdrop-blur-xl shadow-md border-b border-white/30";
+    } 
+    // ELSE (Homepage): Use FIXED so it stays on screen
+    else {
+      classes += "fixed "; 
+      classes += scrolling
+        ? "w-10/12 bg-gradient-to-r from-white/80 via-white/50 to-white/80 backdrop-blur-xl shadow-2xl border border-white/30 rounded-xl"
+        : "w-full backdrop-blur-lg shadow-md rounded-xl";
+    }
+    return classes;
   };
 
   return (
-    <header
-      className={`fixed top-0 left-0 right-0 mx-auto z-50 transition-all duration-500
-        ${scrolling
-          ? "w-10/12 bg-gradient-to-r from-white/80 via-white/50 to-white/80 backdrop-blur-xl shadow-2xl border border-white/30 rounded-xl"
-          : "w-full backdrop-blur-lg shadow-md rounded-xl"
-        }`}
-    >
+    <header className={getHeaderClasses()}>
       <nav className="flex items-center justify-between px-6 py-3 transition-all duration-500">
         <Link href="/" className="flex items-center gap-2">
-          {/* Friend's Change: Increased Logo Size to 70 */}
           <Image
             src="/Final-Logo-bg-removed.png"
             alt="Super Sheldon Quiz"
@@ -111,41 +119,23 @@ export default function Header() {
           />
         </Link>
 
-        {/* Navbar Links Container with Blur Effect */}
-        <div
-          className={`flex space-x-8 justify-center flex-grow transition-all duration-500
+        {/* Navigation Links: Hidden on Dashboard/Quiz */}
+        {!isMinimalHeader && (
+          <div
+            className={`flex space-x-8 justify-center flex-grow transition-all duration-500
             ${scrolling ? "backdrop-blur-xl px-4" : "backdrop-blur-md px-6"}`}
-        >
-          <Link
-            href="/"
-            className="text-gray-800 hover:text-orange-600 transition-colors duration-300"
           >
-            Home
-          </Link>
-          <Link
-            href="/dashboard"
-            className="text-gray-800 hover:text-orange-600 transition-colors duration-300"
-          >
-            Dashboard
-          </Link>
-          <Link
-            href="#contact"
-            onClick={(e) => {
-              e.preventDefault();
-              handleContactWhatsApp();
-            }}
-            className="text-gray-800 hover:text-orange-600 transition-colors duration-300"
-          >
-            Contact Us
-          </Link>
-        </div>
+            <Link href="/" className="text-gray-800 hover:text-orange-600 transition-colors duration-300">Home</Link>
+            <Link href="/dashboard" className="text-gray-800 hover:text-orange-600 transition-colors duration-300">Dashboard</Link>
+            <Link href="#contact" onClick={(e) => { e.preventDefault(); handleContactWhatsApp(); }} className="text-gray-800 hover:text-orange-600 transition-colors duration-300">Contact Us</Link>
+          </div>
+        )}
 
-        {/* User Profile or Auth CTA Buttons */}
-        {userEmail ? (
+        {/* User Profile / Auth Buttons */}
+        {userName ? (
           <div className="relative">
             <motion.button
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              // Friend's Change: Cleaner backdrop blur instead of solid white
               className="flex items-center gap-2 px-2 py-1 rounded-full backdrop-blur-lg border border-gray-200/50 shadow-lg hover:shadow-xl transition-all duration-300 group"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
@@ -158,9 +148,6 @@ export default function Header() {
                     width={36}
                     height={36}
                     className="rounded-full border-2 border-orange-400 group-hover:border-orange-500 transition-colors duration-300"
-                    onError={(e) => {
-                      console.error("Header - Image failed to load:", userPic);
-                    }}
                   />
                 ) : (
                   <div className="w-9 h-9 rounded-full bg-gradient-to-r from-orange-400 to-orange-600 flex items-center justify-center">
@@ -181,10 +168,7 @@ export default function Header() {
             <AnimatePresence>
               {dropdownOpen && (
                 <>
-                  <div
-                    className="fixed inset-0 z-40"
-                    onClick={() => setDropdownOpen(false)}
-                  />
+                  <div className="fixed inset-0 z-40" onClick={() => setDropdownOpen(false)} />
                   <motion.div
                     variants={dropdownVariants}
                     initial="hidden"
@@ -194,7 +178,7 @@ export default function Header() {
                   >
                     <div className="px-4 py-3 border-b border-gray-200/50">
                       <p className="text-sm font-semibold text-gray-900 truncate">
-                        {userName || "User"}
+                        {userName}
                       </p>
                       <p className="text-xs text-gray-500 truncate mt-1">
                         {userEmail}
@@ -211,13 +195,6 @@ export default function Header() {
                         <span>Logout</span>
                       </motion.button>
                     </div>
-
-                    <div className="px-4 py-3 border-t border-gray-200/50 bg-gray-50/50">
-                      <div className="flex justify-between text-xs text-gray-500">
-                        <span>Member since</span>
-                        <span>{new Date().getFullYear()}</span>
-                      </div>
-                    </div>
                   </motion.div>
                 </>
               )}
@@ -228,11 +205,7 @@ export default function Header() {
             <Link href="/auth/login">
               <motion.button
                 className="px-4 py-2 rounded-xl border border-orange-500 text-orange-600 font-medium bg-orange-50/80 hover:bg-orange-100 shadow-sm hover:shadow-md transition-all duration-300"
-                style={{
-                  backdropFilter: "blur(10px)",
-                  WebkitBackdropFilter: "blur(10px)",
-                  background: "linear-gradient(90deg, rgba(255,165,0,0.10) 0%, rgba(255,140,0,0.10) 100%)"
-                }}
+                style={{ backdropFilter: "blur(10px)", background: "linear-gradient(90deg, rgba(255,165,0,0.10) 0%, rgba(255,140,0,0.10) 100%)" }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -242,11 +215,7 @@ export default function Header() {
             <Link href="/auth/register">
               <motion.button
                 className="px-4 py-2 font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-white bg-gradient-to-r from-orange-500 to-orange-400 hover:from-orange-600 hover:to-orange-500 border border-orange-500"
-                style={{
-                  backdropFilter: "blur(10px)",
-                  WebkitBackdropFilter: "blur(10px)",
-                  background: "linear-gradient(90deg, rgba(255,140,0,0.92) 0%, rgba(255,165,0,0.92) 100%)"
-                }}
+                style={{ backdropFilter: "blur(10px)", background: "linear-gradient(90deg, rgba(255,140,0,0.92) 0%, rgba(255,165,0,0.92) 100%)" }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >

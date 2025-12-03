@@ -85,7 +85,9 @@ export default function LoginPage() {
             userId: data.user.id,
             course: data.user.course,
             subject: data.user.subject,
-            year: data.user.grade
+            year: data.user.grade,
+            name: data.user.name,
+            email: data.user.email
           })
         );
 
@@ -95,7 +97,9 @@ export default function LoginPage() {
           userId: data.user.id,
           course: data.user.course,
           subject: data.user.subject,
-          year: data.user.grade
+          year: data.user.grade,
+          name: data.user.name,
+          email: data.user.email
         })}; path=/; max-age=86400; SameSite=Lax`;
 
         toast.success("Login successful!");
