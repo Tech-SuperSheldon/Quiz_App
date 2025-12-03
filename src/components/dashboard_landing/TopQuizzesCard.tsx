@@ -1,4 +1,8 @@
 "use client";
+
+import { BASE_BACKEND_URL } from "@/config";
+
+
 export default function TopQuizzesCard() {
   const items = [
     { name: 'Math Mastery Quiz', subject: 'Math', attempts: '1', bestScore: '98%' },

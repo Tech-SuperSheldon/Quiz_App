@@ -5,8 +5,8 @@ import { ExamResult } from '../types';
 import { Trophy, Clock, Target, TrendingUp, CheckCircle2, XCircle, AlertCircle, BookOpen, Award, Zap, RefreshCw, Loader2, Save } from 'lucide-react'; // Added Loader2 and Save icons
 import { Button } from '../../components/uinew/button';
 import { motion, AnimatePresence } from 'framer-motion';
+import { BASE_BACKEND_URL } from "@/config";
 
-const BASE_BACKEND_URL = "https://92c52865-c657-478a-b2e0-625fc822f55b-00-23crg2t5cyi67.pike.replit.dev:5000";
 
 interface ResultsPageProps {
   result: ExamResult;

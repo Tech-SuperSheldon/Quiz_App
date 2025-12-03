@@ -5,13 +5,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { getAuthData } from "@/utils/authStorage";
 import Cookies from "js-cookie";
 import Image from "next/image";
-// IMPORT THE NEW COMPONENT
 import QuizResultSummary from "@/components/QuizResultSummary";
+import { BASE_BACKEND_URL } from "@/config";
 
 // --- CONSTANTS ---
 const QUESTIONS_PER_STAGE = 10;
 const XP_PER_CORRECT = 5; 
-const BASE_BACKEND_URL = "https://92c52865-c657-478a-b2e0-625fc822f55b-00-23crg2t5cyi67.pike.replit.dev:5000";
+
 
 // INTERFACES 
 interface Question {

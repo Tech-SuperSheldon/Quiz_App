@@ -6,8 +6,7 @@ import "react-toastify/dist/ReactToastify.css";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { storeRegistrationData } from "@/utils/authStorage";
-
-const BASE_BACKEND_URL = "https://92c52865-c657-478a-b2e0-625fc822f55b-00-23crg2t5cyi67.pike.replit.dev:5000";
+import { BASE_BACKEND_URL } from "@/config";
 
 // Data Mapping based on your requirements
 const COURSE_SUBJECTS: { [key: string]: string[] } = {
@@ -57,6 +56,8 @@ export default function DummyRegister() {
   const [email, setEmail] = useState("");
   const [mobile, setMobile] = useState("");
   const [picture, setPicture] = useState<string | null>(null);
+
+  // State remains 'grade' to satisfy backend requirement
   const [grade, setGrade] = useState("");
 
   // Updated state for Course and Subject
@@ -98,7 +99,6 @@ export default function DummyRegister() {
     e.preventDefault();
     setErrorMessage(null);
 
-    // added 'subject' to validation
     if (!name || !email || !grade || !course || !subject) {
       setErrorMessage("Please fill all required fields!");
       return;
@@ -110,6 +110,7 @@ export default function DummyRegister() {
       const res = await fetch(`${BASE_BACKEND_URL}/api/users/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        // Sending 'grade' key with value like "Grade 1" (Backend Happy), but user saw "Year 1"
         body: JSON.stringify({ name, email, mobile, grade, course, subject }),
       });
 
@@ -155,7 +156,7 @@ export default function DummyRegister() {
           <p className="text-gray-700">
             Welcome, <span className="font-semibold">{name}</span>! You have
             successfully registered for{" "}
-            <span className="font-semibold">{course}</span> ({subject}) in {grade}.
+            <span className="font-semibold">{course}</span> ({subject}) in {grade.replace("Grade", "Year")}.
           </p>
           <p className="mt-4 text-orange-800/60">Redirecting to your dashboard...</p>
         </div>
@@ -178,7 +179,7 @@ export default function DummyRegister() {
         <ToastContainer position="top-right" autoClose={2500} />
 
         {/* Profile Picture */}
-        <div className="w-24 h-24 mx-auto mb-4 shadow-lg rounded-full overflow-hidden border border-white/60 bg-white/40 backdrop-blur-lg">
+        <div className="w-39 h-24 mx-auto mb-4 shadow-lg rounded-lg overflow-hidden border border-white/60 bg-white/40 backdrop-blur-lg">
           <Image
             src={picture || "/Final-Logo-bg-removed.png"}
             alt="Profile"
@@ -234,18 +235,19 @@ export default function DummyRegister() {
             className="w-full border border-orange-300 px-4 py-3 rounded-lg bg-white/70 backdrop-blur-md focus:ring-2 focus:ring-orange-400 focus:outline-none text-orange-900 placeholder-orange-700/40"
           />
 
-          {/* Grade Selection */}
+          {/* Year Selection (Value sent as Grade) */}
           <select
-            title="Grade"
+            title="Year"
             value={grade}
             onChange={(e) => setGrade(e.target.value)}
             className="w-full border border-orange-300 px-4 py-3 rounded-lg bg-white/70 backdrop-blur-md focus:ring-2 focus:ring-orange-400 focus:outline-none text-orange-900"
             required
           >
-            <option value="">Select Grade</option>
+            <option value="">Select Year</option>
             {Array.from({ length: 12 }, (_, i) => (
               <option key={i + 1} value={`Grade ${i + 1}`}>
-                Grade {i + 1}
+                {/* Visual Label says "Year", Value sent is "Grade" */}
+                Year {i + 1}
               </option>
             ))}
           </select>

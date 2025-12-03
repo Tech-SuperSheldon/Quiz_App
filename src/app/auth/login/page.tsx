@@ -6,9 +6,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import GoogleAuthWrapper from "./GoogleAuthWrapper";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { BASE_BACKEND_URL } from "@/config";
 
-// Your original backend URL
-const BASE_BACKEND_URL = "https://92c52865-c657-478a-b2e0-625fc822f55b-00-23crg2t5cyi67.pike.replit.dev:5000";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");

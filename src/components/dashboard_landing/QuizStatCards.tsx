@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
+import { BASE_BACKEND_URL } from "@/config";
 
 // Define the shape of the data we expect from the API
 interface DashboardStats {
@@ -15,8 +16,6 @@ export default function QuizStatCards() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Define your Backend URL
-  const BASE_BACKEND_URL = "https://92c52865-c657-478a-b2e0-625fc822f55b-00-23crg2t5cyi67.pike.replit.dev:5000";
 
   useEffect(() => {
     const fetchStats = async () => {
