@@ -1,21 +1,23 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/uinew/card";
+import { Loader2 } from "lucide-react";
 
-const topUsers = [
-  { name: "AlexR_21", avatar: "A", points: 1520, courses: 12, streak: "15 days", badge: "Monthly Champ" },
-  { name: "LearnWithMira", avatar: "M", points: 1340, courses: 10, streak: "18 days", badge: "Top Designer" },
-  { name: "CodeJunkie", avatar: "C", points: 1120, courses: 10, streak: "15 days", badge: "Quiz Master" },
-];
+// --- Types ---
+interface LeaderboardUser {
+  userId: string;
+  name: string;
+  email: string;
+  avatar: string;
+  points: number;
+  courses: number;
+  streak: string;
+  badge: string;
+  rank: number;
+}
 
-const leaderboardRows = [
-  { rank: 1, user: "DesignGuru", completed: 16, streak: "8 days", badge: "Top Designer", points: 980 },
-  { rank: 2, user: "MathMaster", completed: 15, streak: "7 days", badge: "Quiz Master", points: 890 },
-  { rank: 3, user: "GrowthHacker", completed: 14, streak: "10 days", badge: "Growth Hacker", points: 832 },
-  { rank: 4, user: "DevWizard", completed: 12, streak: "7 days", badge: "Code Streak", points: 791 },
-  { rank: 5, user: "You", completed: 11, streak: "4 days", badge: "Fast Learner", points: 790 },
-];
-
+// Keep Quiz Types static as they are part of the UI structure
 const quizTypes = [
   { name: "General Exam", duration: "30 mins", questions: "10 Qs", difficulty: "Easy", color: "from-indigo-500 to-purple-500" },
   { name: "Math Challenge", duration: "45 mins", questions: "20 Qs", difficulty: "Medium", color: "from-emerald-500 to-teal-500" },
@@ -23,6 +25,52 @@ const quizTypes = [
 ];
 
 export default function LeaderboardPage() {
+  // State for live data
+  const [leaderboardData, setLeaderboardData] = useState<LeaderboardUser[]>([]);
+  const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const BASE_BACKEND_URL = "https://92c52865-c657-478a-b2e0-625fc822f55b-00-23crg2t5cyi67.pike.replit.dev:5000";
+
+  useEffect(() => {
+    // 1. Identify "You"
+    const storedAuth = localStorage.getItem("authData");
+    if (storedAuth) {
+      const parsed = JSON.parse(storedAuth);
+      if (parsed.user && parsed.user.email) {
+        setCurrentUserEmail(parsed.user.email);
+      }
+    }
+
+    // 2. Fetch Live Data
+    const fetchLeaderboard = async () => {
+      try {
+        const res = await fetch(`${BASE_BACKEND_URL}/api/exams/leaderboard`);
+        if (res.ok) {
+          const data = await res.json();
+          setLeaderboardData(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch leaderboard", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLeaderboard();
+  }, []);
+
+  // Get Top 3 for the cards
+  const topThree = leaderboardData.slice(0, 3);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-96">
+        <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4 pb-2">
       {/* Hero / Highlight Card */}
@@ -42,11 +90,11 @@ export default function LeaderboardPage() {
         </CardContent>
       </Card>
 
-      {/* Top Cards */}
+      {/* Top Cards (Live Data) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        {topUsers.map((user, index) => (
+        {topThree.map((user, index) => (
           <Card
-            key={user.name}
+            key={user.userId}
             className="border-slate-100/80 bg-white/90 shadow-md shadow-slate-200/80"
           >
             <CardContent className="pt-5 flex items-center gap-4">
@@ -55,9 +103,11 @@ export default function LeaderboardPage() {
               </div>
               <div className="flex-1">
                 <div className="flex items-center justify-between">
-                  <p className="font-semibold text-slate-900">{user.name}</p>
+                  <p className="font-semibold text-slate-900">
+                    {user.email === currentUserEmail ? "You" : user.name}
+                  </p>
                   <span className="text-xs text-slate-500">
-                    #{index + 1}
+                    #{user.rank}
                   </span>
                 </div>
                 <p className="text-xs text-slate-500 mt-0.5">
@@ -75,9 +125,15 @@ export default function LeaderboardPage() {
             </CardContent>
           </Card>
         ))}
+        {/* Fallback if data is empty */}
+        {topThree.length === 0 && (
+           <div className="col-span-3 text-center py-4 text-slate-500 text-sm">
+             No leaderboard data available yet.
+           </div>
+        )}
       </div>
 
-      {/* Quiz Types / Modes */}
+      {/* Quiz Types / Modes (Static) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         {quizTypes.map((quiz) => (
           <Card
@@ -100,7 +156,7 @@ export default function LeaderboardPage() {
         ))}
       </div>
 
-      {/* Leaderboard Table */}
+      {/* Leaderboard Table (Live Data) */}
       <Card className="border-slate-100/80 bg-white/90 shadow-md shadow-slate-200/80">
         <CardHeader className="pb-3">
           <CardTitle className="text-base font-semibold text-slate-900">
@@ -121,21 +177,21 @@ export default function LeaderboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {leaderboardRows.map((row) => (
+                {leaderboardData.map((row) => (
                   <tr
-                    key={row.rank}
+                    key={row.userId}
                     className={`border-b border-slate-50 hover:bg-slate-50/60 transition-colors ${
-                      row.user === "You" ? "bg-indigo-50/60" : ""
+                      row.email === currentUserEmail ? "bg-indigo-50/60" : ""
                     }`}
                   >
                     <td className="py-3 text-slate-700 font-semibold">
                       {row.rank}
                     </td>
                     <td className="py-3 text-slate-800 font-medium">
-                      {row.user}
+                      {row.email === currentUserEmail ? "You" : row.name}
                     </td>
                     <td className="py-3 text-slate-600">
-                      {row.completed} quizzes
+                      {row.courses} quizzes
                     </td>
                     <td className="py-3 text-slate-600">
                       {row.streak}
@@ -158,5 +214,3 @@ export default function LeaderboardPage() {
     </div>
   );
 }
-
-
