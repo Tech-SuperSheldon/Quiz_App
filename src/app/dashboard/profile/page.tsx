@@ -1,34 +1,44 @@
-// app/dashboard/profile/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
-import { useRouter } from "next/navigation"; // Import useRouter for redirection
+import { useRouter } from "next/navigation";
+
 export default function ProfilePage() {
   const [studentName, setStudentName] = useState("N/A");
   const [studentClass, setStudentClass] = useState("N/A");
   const [studentEmail, setStudentEmail] = useState("N/A");
-  const [studentMobile, setStudentMobile] = useState("N/A"); // Assuming you'll add this to cookies
-  const [studentExam, setStudentExam] = useState("N/A"); // Assuming you'll add this to cookies
+  const [studentMobile, setStudentMobile] = useState("N/A"); 
+  const [studentExam, setStudentExam] = useState("N/A");
   const router = useRouter();
 
   useEffect(() => {
-    // Check if user is logged in before fetching profile data
-    const token = Cookies.get("token");
-    if (!token) {
-      router.replace("/auth/login"); // Redirect to login if not authenticated
+    const authCookie = Cookies.get("auth-client");
+
+    if (!authCookie) {
+      router.replace("/auth/login");
       return;
     }
 
-    // Retrieve data from cookies
-    setStudentName(Cookies.get("student_name") || "N/A");
-    setStudentClass(Cookies.get("student_class") || "N/A");
-    setStudentEmail(Cookies.get("student_email") || "N/A");
+    try {
+    
+      const data = JSON.parse(authCookie);
+      setStudentName(data.name || "N/A");
+      setStudentEmail(data.email || "N/A");
+      setStudentClass(data.year || "N/A");
 
-    // IMPORTANT: You need to ensure 'student_mobile' and 'student_exam'
-    // are also being set in cookies in your Register component if you want them here.
-    setStudentMobile(Cookies.get("student_mobile") || "N/A");
-    setStudentExam(Cookies.get("student_exam") || "N/A");
+      if (Array.isArray(data.course)) {
+        setStudentExam(data.course.join(", "));
+      } else {
+        setStudentExam(data.course || "N/A");
+      }
+      setStudentMobile(data.mobile || "N/A");
+
+    } catch (error) {
+      console.error("Failed to parse auth cookie:", error);
+      router.replace("/auth/login");
+    }
+
   }, [router]);
 
   return (
@@ -41,8 +51,9 @@ export default function ProfilePage() {
         <ProfileDetail label="Full Name" value={studentName} />
         <ProfileDetail label="Email Address" value={studentEmail} />
         <ProfileDetail label="Mobile Number" value={studentMobile} />
-        <ProfileDetail label="Class" value={`Class ${studentClass}`} />
-        <ProfileDetail label="Exam" value={studentExam} />
+        {/* Adjusted label slightly since data comes as 'Grade 10' */}
+        <ProfileDetail label="Class / Year" value={studentClass} />
+        <ProfileDetail label="Exam / Course" value={studentExam} />
       </div>
     </div>
   );

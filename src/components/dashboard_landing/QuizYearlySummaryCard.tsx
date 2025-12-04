@@ -62,7 +62,7 @@ export default function QuizYearlySummaryCard() {
     <Card className="h-full border-slate-100/80 bg-white/90 shadow-md shadow-slate-200/80">
       <CardHeader className="pb-3">
         <CardTitle className="text-base font-semibold text-slate-900">
-          Yearly Quiz Summary
+          Monthly Quiz Summary
         </CardTitle>
       </CardHeader>
 

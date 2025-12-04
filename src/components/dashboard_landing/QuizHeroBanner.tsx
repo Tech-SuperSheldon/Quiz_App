@@ -6,12 +6,11 @@ import { BASE_BACKEND_URL } from "@/config";
 export default function QuizHeroBanner() {
 	const [userName, setUserName] = useState("Student");
 	const [quizCount, setQuizCount] = useState(0);
-	const [avgTimeSeconds, setAvgTimeSeconds] = useState(0); // Store raw seconds
+	const [avgTimeSeconds, setAvgTimeSeconds] = useState(0);
 	const [loading, setLoading] = useState(true);
 
 	
 
-	// --- HELPER: Format Seconds to "MMm SSs" ---
 	const formatTime = (totalSeconds: number) => {
 		if (!totalSeconds || isNaN(totalSeconds) || totalSeconds === 0) return "0m 0s";
 
@@ -31,8 +30,8 @@ export default function QuizHeroBanner() {
 				if (storedAuthData) {
 					const parsedData = JSON.parse(storedAuthData);
 					token = parsedData.token;
-					if (parsedData.user && parsedData.user.name) {
-						setUserName(parsedData.user.name);
+					if (parsedData.user && parsedData.name) {
+						setUserName(parsedData.name);
 					}
 				}
 
