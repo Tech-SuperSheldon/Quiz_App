@@ -72,7 +72,7 @@ export default function QuizHeroBanner() {
 		<div 
 			className="rounded-2xl shadow p-6 flex items-center justify-between relative overflow-hidden bg-cover bg-center bg-no-repeat min-h-[250px] md:min-h-[300px]"
 			style={{
-				backgroundImage: "url('/banner.jpg')",
+				backgroundImage: "url('/banner.png')",
 			}}
 		>
 			{/* Overlay */}
