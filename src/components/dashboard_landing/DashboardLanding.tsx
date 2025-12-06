@@ -38,7 +38,7 @@ export default function DashboardLanding() {
       </div>
 
       {/* Top Quizzes Card spans full width */}
-      <TopQuizzesCard />
+      {/* <TopQuizzesCard /> */}
 
       <RecentQuizActivityCard />
     </section>
