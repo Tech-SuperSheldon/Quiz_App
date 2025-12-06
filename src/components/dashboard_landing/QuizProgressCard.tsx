@@ -48,7 +48,7 @@ export default function QuizProgressCard() {
           Quiz Progress
         </CardTitle>
         <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-full border border-slate-100">
-          <button
+          {/* <button
             onClick={() => setViewMode("completed")}
             className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 ${
               viewMode === "completed"
@@ -57,8 +57,8 @@ export default function QuizProgressCard() {
             }`}
           >
             Completed
-          </button>
-          <button
+          </button> */}
+          {/* <button
             onClick={() => setViewMode("average")}
             className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 ${
               viewMode === "average"
@@ -67,7 +67,7 @@ export default function QuizProgressCard() {
             }`}
           >
             Average Score
-          </button>
+          </button> */}
         </div>
       </CardHeader>
  
