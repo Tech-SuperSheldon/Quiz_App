@@ -86,6 +86,28 @@ export default function QuizProgressCard() {
           <BarChart2 className="w-5 h-5 text-indigo-600" />
           Quiz Progress (2025)
         </CardTitle>
+        <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-full border border-slate-100">
+          {/* <button
+            onClick={() => setViewMode("completed")}
+            className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 ${
+              viewMode === "completed"
+                ? "bg-white shadow-sm text-slate-900"
+                : "text-slate-500 hover:text-slate-700"
+            }`}
+          >
+            Completed
+          </button> */}
+          {/* <button
+            onClick={() => setViewMode("average")}
+            className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 ${
+              viewMode === "average"
+                ? "bg-white shadow-sm text-slate-900"
+                : "text-slate-500 hover:text-slate-700"
+            }`}
+          >
+            Average Score
+          </button> */}
+        </div>
       </CardHeader>
 
       <CardContent className="pt-0">

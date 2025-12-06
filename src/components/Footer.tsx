@@ -31,6 +31,8 @@ const Footer: React.FC = () => {
 
   return (
     <footer className="mt-6 text-gray-800 px-4 py-4">
+      {/* Full-bleed separator bar: use negative margins to cancel footer padding */}
+      <div className="-mx-4 sm:-mx-6 lg:-mx-8 h-1 bg-black mb-4" />
       <motion.div
         variants={containerVariants}
         initial="hidden"

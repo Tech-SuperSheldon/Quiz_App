@@ -7,19 +7,16 @@ export default function FAQSection() {
 
   const faqs = [
     {
-      question: "When will Room be launched?",
-      answer:
-        "We are working hard to launch in the coming months. By joining the waitlist, you'll be the first to know and will receive an exclusive invitation to play.",
+      question: "What types of exam-prep quizzes does LevelUp Quiz offer?",
+      answer: `LevelUp Quiz provides practice quizzes for a wide range of exams, including NAPLAN, SAT, ACT, GCSE, IELTS, and more. Each quiz is designed to match the exam style, difficulty level, and question format to help students prepare effectively.`,
     },
     {
-      question: "Is the game free to play?",
-      answer:
-        "Yes, Room is free to play! We offer both free and premium features to enhance your experience.",
+      question: "Are the quizzes based on real exam formats?",
+      answer: `Yes! All our quizzes are created to closely follow the official structure and standards of each exam. This includes question types, timing style, difficulty progression, and subject areas—so students can practice in a realistic exam-like environment.`,
     },
     {
-      question: "Can I challenge my friends directly?",
-      answer:
-        "Absolutely! You can create private rooms and invite your friends to compete directly in your favorite categories.",
+      question: "Can I track my improvement over time?",
+      answer: `Yes! LevelUp Quiz includes built-in progress tracking so you can monitor your scores, accuracy, and improvement across different exams like NAPLAN and SAT. This helps you identify strengths and target areas that need more practice.`,
     },
   ];
 
