@@ -92,7 +92,7 @@ export default function LoginPage() {
         );
 
         // Set Cookie (Your original structure)
-        document.cookie = `auth-client=${JSON.stringify({
+        const cookieValue = encodeURIComponent(JSON.stringify({
           token: data.token,
           userId: data.user.id,
           course: data.user.course,
@@ -100,7 +100,9 @@ export default function LoginPage() {
           year: data.user.grade,
           name: data.user.name,
           email: data.user.email
-        })}; path=/; max-age=86400; SameSite=Lax`;
+        }));
+
+        document.cookie = `auth-client=${cookieValue}; path=/; max-age=86400; SameSite=Lax; Secure`;
 
         toast.success("Login successful!");
         setTimeout(() => {
