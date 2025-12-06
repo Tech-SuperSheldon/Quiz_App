@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/uinew/card";
 import { Loader2 } from "lucide-react";
+import Image from "next/image";
 
 // --- Types ---
 interface LeaderboardUser {
@@ -73,22 +74,16 @@ export default function LeaderboardPage() {
 
   return (
     <div className="space-y-4 pb-2">
-      {/* Hero / Highlight Card */}
-      <Card className="border-slate-100/80 bg-gradient-to-r from-indigo-500 via-purple-500 to-fuchsia-500 text-white shadow-xl">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-xl md:text-2xl font-bold">
-            You&apos;re closer than you think!
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="pt-0 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <p className="text-sm md:text-base text-indigo-50 max-w-xl">
-            Earn more XP by completing quizzes and improving your accuracy to climb the leaderboard.
-          </p>
-          <button className="inline-flex items-center justify-center px-5 py-2 rounded-full bg-white text-indigo-700 text-sm font-semibold shadow-md hover:bg-indigo-50 transition-colors">
-            Continue Learning
-          </button>
-        </CardContent>
-      </Card>
+      {/* Hero image */}
+      <div className="rounded-lg overflow-hidden shadow-xl">
+        <Image
+          src="/leaderhead.png"
+          alt="Leaderboard hero"
+          width={1200}
+          height={320}
+          className="w-full h-auto object-cover"
+        />
+      </div>
 
       {/* Top Cards (Live Data) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -134,7 +129,7 @@ export default function LeaderboardPage() {
       </div>
 
       {/* Quiz Types / Modes (Static) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+      {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         {quizTypes.map((quiz) => (
           <Card
             key={quiz.name}
@@ -154,7 +149,7 @@ export default function LeaderboardPage() {
             </CardContent>
           </Card>
         ))}
-      </div>
+      </div> */}
 
       {/* Leaderboard Table (Live Data) */}
       <Card className="border-slate-100/80 bg-white/90 shadow-md shadow-slate-200/80">
