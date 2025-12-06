@@ -25,49 +25,50 @@ export default function GoogleAuthWrapper({
         return;
       }
 
-      // Call our Next.js API route
       const res = await fetch("/api/auth/google", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({
-          token: credentialResponse.credential,
-        }),
+        body: JSON.stringify({ token: credentialResponse.credential }),
       });
 
       const data = await res.json();
 
       if (res.ok && data.success) {
-        // Store user info in localStorage
+
+        const authData = {
+          token: data.token, 
+          userId: data.user.id,
+          course: data.user.course,
+          subject: data.user.subject,
+          year: data.user.grade,
+          name: data.user.name,
+          email: data.user.email
+        };
+
+        localStorage.setItem("authData", JSON.stringify(authData));
+
+        // Keep your existing user storage if needed elsewhere
         localStorage.setItem("user", JSON.stringify(data.user));
 
-        // Show appropriate success message
+        const cookieValue = encodeURIComponent(JSON.stringify(authData));
+        document.cookie = `auth-client=${cookieValue}; path=/; max-age=86400; SameSite=Lax; Secure`;
+
+
         if (data.user.backendConnected === false) {
-          toast.success(
-            `Welcome ${data.user.name}! Redirecting to registration...`
-          );
+          toast.success(`Welcome ${data.user.name}! Redirecting to registration...`);
         } else {
-          toast.success(
-            `Welcome ${data.user.name}! Redirecting to dashboard...`
-          );
+          toast.success(`Welcome ${data.user.name}! Redirecting to dashboard...`);
         }
 
-        // Redirect according to server response (dashboard for existing users,
-        // /auth/register for new users). Server sets HttpOnly cookies (auth-token)
-        // so we rely on server-provided redirectTo. Show a short toast when
-        // redirecting to registration so user sees context.
         const dest = data.redirectTo || "/";
         if (dest.includes("/auth/register")) {
           toast.info("Redirecting to registration...");
           setTimeout(() => router.replace(dest), 400);
         } else {
-          // dashboard or other destination — use full navigation for dashboard to ensure cookies are applied
           toast.success("Redirecting...");
           setTimeout(() => {
             if (dest === "/dashboard" || dest.includes("/dashboard")) {
-              // full reload to ensure auth cookie is used on the next request
               window.location.assign(dest);
             } else {
               router.replace(dest);
@@ -82,6 +83,8 @@ export default function GoogleAuthWrapper({
       toast.error("Google login failed");
     }
   };
+
+  
 
   if (!clientId) {
     // If client id is not set, don't render the Google button (avoids runtime errors).

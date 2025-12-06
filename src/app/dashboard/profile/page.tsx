@@ -5,13 +5,22 @@ import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 
 export default function ProfilePage() {
-  const [studentName, setStudentName] = useState("N/A");
-  const [studentClass, setStudentClass] = useState("N/A");
-  const [studentEmail, setStudentEmail] = useState("N/A");
-  const [studentMobile, setStudentMobile] = useState("N/A"); 
-  const [studentExam, setStudentExam] = useState("N/A");
   const router = useRouter();
 
+  // Toggle for Edit Mode
+  const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  // We use a single object for the form data to make updating easier
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    mobile: "",
+    year: "",     // maps to studentClass
+    course: "",   // maps to studentExam
+  });
+
+  // Load data on mount
   useEffect(() => {
     const authCookie = Cookies.get("auth-client");
 
@@ -21,54 +30,180 @@ export default function ProfilePage() {
     }
 
     try {
-    
       const data = JSON.parse(authCookie);
-      setStudentName(data.name || "N/A");
-      setStudentEmail(data.email || "N/A");
-      setStudentClass(data.year || "N/A");
 
+      // Parse course (handle array vs string)
+      let courseStr = "N/A";
       if (Array.isArray(data.course)) {
-        setStudentExam(data.course.join(", "));
-      } else {
-        setStudentExam(data.course || "N/A");
+        courseStr = data.course.join(", ");
+      } else if (data.course) {
+        courseStr = data.course;
       }
-      setStudentMobile(data.mobile || "N/A");
+
+      // Initialize form state
+      setFormData({
+        name: data.name || "",
+        email: data.email || "",
+        mobile: data.mobile || "",
+        year: data.year || "",
+        course: courseStr,
+      });
 
     } catch (error) {
       console.error("Failed to parse auth cookie:", error);
       router.replace("/auth/login");
     }
-
   }, [router]);
+
+  // Handle Input Change
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Handle Save
+  const handleSave = async () => {
+    setLoading(true);
+
+    try {
+      // 1. Get the CURRENT cookie data (we need the token/userId/exp)
+      const existingCookieStr = Cookies.get("auth-client");
+      if (!existingCookieStr) throw new Error("No session found");
+
+      const existingData = JSON.parse(existingCookieStr);
+
+      // 2. Prepare updated object
+      // Note: We convert course string back to array if your backend expects an array
+      const updatedData = {
+        ...existingData, // Keep token, userId, exp, etc.
+        name: formData.name,
+        email: formData.email,
+        mobile: formData.mobile,
+        year: formData.year,
+        course: [formData.course], // Wrapping back in array to match original structure
+      };
+
+      // 3. TODO: SEND TO BACKEND API
+      // await axios.put('/api/student/update', updatedData); 
+      // console.log("Simulating backend update...");
+      await new Promise(resolve => setTimeout(resolve, 500)); // Fake delay
+
+      // 4. Update the Cookie with new data
+      Cookies.set("auth-client", JSON.stringify(updatedData), { expires: 7 }); // resetting expiry if needed
+
+      // 5. Turn off edit mode
+      setIsEditing(false);
+      alert("Profile updated successfully!");
+
+    } catch (error) {
+      console.error("Update failed", error);
+      alert("Failed to update profile.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="max-w-3xl mx-auto p-8 bg-white shadow-lg rounded-xl mt-8">
-      <h1 className="text-3xl font-extrabold text-gray-900 mb-6 text-center">
-        Your Profile
-      </h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-extrabold text-gray-900">
+          Your Profile
+        </h1>
+        <button
+          onClick={() => isEditing ? handleSave() : setIsEditing(true)}
+          disabled={loading}
+          className={`mt-4 md:mt-0 px-8 py-3 rounded-xl font-bold text-white transition-all duration-300 shadow-sm hover:shadow-md flex items-center ${
+            isEditing
+              ? "bg-green-600 text-white hover:bg-green-700"
+              : "bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600"
+          }`}
+        >
+          {loading ? "Saving..." : isEditing ? "Save Changes" : "Edit Profile"}
+        </button>
+      </div>
 
       <div className="space-y-4">
-        <ProfileDetail label="Full Name" value={studentName} />
-        <ProfileDetail label="Email Address" value={studentEmail} />
-        <ProfileDetail label="Mobile Number" value={studentMobile} />
-        {/* Adjusted label slightly since data comes as 'Grade 10' */}
-        <ProfileDetail label="Class / Year" value={studentClass} />
-        <ProfileDetail label="Exam / Course" value={studentExam} />
+        <ProfileInput 
+          label="Full Name" 
+          name="name" 
+          value={formData.name} 
+          isEditing={isEditing} 
+          onChange={handleChange} 
+        />
+        <ProfileInput 
+          label="Email Address" 
+          name="email" 
+          value={formData.email} 
+          isEditing={isEditing} // Often email is read-only, set to false if needed
+          onChange={handleChange} 
+        />
+        <ProfileInput 
+          label="Mobile Number" 
+          name="mobile" 
+          value={formData.mobile} 
+          isEditing={isEditing} 
+          onChange={handleChange} 
+        />
+        <ProfileInput 
+          label="Class / Year" 
+          name="year" 
+          value={formData.year} 
+          isEditing={isEditing} 
+          onChange={handleChange} 
+        />
+        <ProfileInput 
+          label="Exam / Course" 
+          name="course" 
+          value={formData.course} 
+          isEditing={isEditing} 
+          onChange={handleChange} 
+        />
       </div>
+
+      {isEditing && (
+        <div className="mt-6 flex justify-end">
+             <button
+              onClick={() => setIsEditing(false)}
+              className="text-gray-500 hover:text-gray-700 font-medium mr-4"
+            >
+              Cancel
+            </button>
+        </div>
+      )}
     </div>
   );
 }
 
-// Helper component for displaying profile details
-function ProfileDetail({ label, value }: { label: string; value: string }) {
+// Reusable Component for Display OR Input
+interface ProfileInputProps {
+  label: string;
+  name: string;
+  value: string;
+  isEditing: boolean;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+function ProfileInput({ label, name, value, isEditing, onChange }: ProfileInputProps) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center py-3 border-b border-gray-100 last:border-b-0">
       <p className="w-full sm:w-1/3 text-lg font-medium text-gray-600">
         {label}:
       </p>
-      <p className="w-full sm:w-2/3 text-lg text-gray-800 break-words">
-        {value}
-      </p>
+      <div className="w-full sm:w-2/3">
+        {isEditing ? (
+          <input
+            type="text"
+            name={name}
+            value={value}
+            onChange={onChange}
+            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        ) : (
+          <p className="text-lg text-gray-800 break-words font-medium">
+            {value || <span className="text-gray-400 italic">Not Set</span>}
+          </p>
+        )}
+      </div>
     </div>
   );
 }
