@@ -11,9 +11,10 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
 
+  
   env: {
-    NEXT_PUBLIC_GOOGLE_CLIENT_ID:517061859674-s3agjbpk3lupq3b4fccqllejrp545i3s.apps.googleusercontent.com,
-    BASE_URL:https://levelupbackend.supersheldon.online/,
+    NEXT_PUBLIC_GOOGLE_CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+    BASE_URL: process.env.BASE_URL,
   },
 
   
