@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/uinew/card";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
+import { BASE_BACKEND_URL } from "@/config";
 
 // --- Types ---
 interface LeaderboardUser {
@@ -31,7 +32,6 @@ export default function LeaderboardPage() {
   const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const BASE_BACKEND_URL = "https://92c52865-c657-478a-b2e0-625fc822f55b-00-23crg2t5cyi67.pike.replit.dev:5000";
 
   useEffect(() => {
     // 1. Identify "You"
