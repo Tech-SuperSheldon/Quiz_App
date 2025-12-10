@@ -279,7 +279,7 @@ export default function LoginPage() {
             </div>
 
             {/* Divider */}
-            <div className="relative">
+            {/* <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-orange-300/50"></div>
               </div>
@@ -288,14 +288,14 @@ export default function LoginPage() {
                   Or
                 </span>
               </div>
-            </div>
+            </div> */}
 
             {/* Google Auth */}
-            <div className="text-center">
+            {/* <div className="text-center">
               <h3 className="text-lg font-semibold text-orange-800 mb-2">Sign in with Google</h3>
               <p className="text-sm text-orange-700/70 mb-4">Quick and secure access to your account</p>
             </div>
-            <GoogleAuthWrapper />
+            <GoogleAuthWrapper /> */}
 
             {/* Footer Features */}
             <div className="relative mt-6">
