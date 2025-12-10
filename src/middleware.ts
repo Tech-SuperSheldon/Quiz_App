@@ -6,9 +6,9 @@ export function middleware(request: NextRequest) {
   // Check that cookie and redirect unauthenticated users to the login page.
   const authToken = request.cookies.get("auth-client")?.value;
 
-  if (!authToken && request.nextUrl.pathname.startsWith("/dashboard")) {
-    return NextResponse.redirect(new URL("/auth/login", request.url));
-  }
+  // if (!authToken && request.nextUrl.pathname.startsWith("/dashboard")) {
+  //   return NextResponse.redirect(new URL("/auth/login", request.url));
+  // }
 
   return NextResponse.next();
 }
