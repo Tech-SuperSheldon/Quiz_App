@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import ScrollAnimation from "./ScrollAnimation";
 
 export default function Footer() {
@@ -33,9 +34,9 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-white transition">
+                <Link href="/privacy-policy" className="hover:text-white transition">
                   Privacy Policy
-                </a>
+                </Link>
               </li>
               <li>
                 <a href="#" className="hover:text-white transition">
@@ -116,9 +117,9 @@ export default function Footer() {
             <a href="#" className="hover:text-white transition">
               Terms & Conditions
             </a>
-            <a href="#" className="hover:text-white transition">
+            <Link href="/privacy-policy" className="hover:text-white transition">
               Privacy Policy
-            </a>
+            </Link>
           </div>
         </div>
       </div>
