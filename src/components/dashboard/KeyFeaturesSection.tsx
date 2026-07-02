@@ -117,6 +117,7 @@ export default function KeyFeaturesSection() {
           bg-white rounded-3xl p-10 shadow-[0_12px_40px_rgba(0,0,0,0.06)]
           flex flex-col md:flex-row items-center justify-between gap-10
           relative overflow-hidden
+          transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_24px_60px_rgba(0,0,0,0.12)]
         ">
           {/* Fade */}
           <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white/80 pointer-events-none" />
@@ -166,6 +167,7 @@ export default function KeyFeaturesSection() {
           <div className="
             bg-white rounded-3xl p-10 shadow-[0_12px_40px_rgba(0,0,0,0.06)]
             relative overflow-hidden flex flex-col gap-8
+            transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_24px_60px_rgba(0,0,0,0.12)]
           ">
             {/* Fade */}
             <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white/80 pointer-events-none" />
@@ -207,6 +209,7 @@ export default function KeyFeaturesSection() {
           <div className="
             bg-white rounded-3xl p-10 shadow-[0_12px_40px_rgba(0,0,0,0.06)]
             relative overflow-hidden flex flex-col gap-8
+            transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_24px_60px_rgba(0,0,0,0.12)]
           ">
             {/* Fade */}
             <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white/80 pointer-events-none" />

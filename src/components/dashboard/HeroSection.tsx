@@ -1,7 +1,12 @@
 "use client";
 
 import ScrollAnimation from "./ScrollAnimation";
-import Link from "next/link"; // Added Import
+import { motion } from "framer-motion";
+import { FaApple, FaGooglePlay } from "react-icons/fa";
+
+// Store links for the mobile apps
+const APP_STORE_URL = "https://apps.apple.com/us/app/levelup-learn-play/id6773067123";
+const PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.supersheldon.levelup";
 
 type ArrowProps = { className?: string };
 
@@ -102,42 +107,89 @@ export default function HeroSection() {
             {/* PLAY STACK */}
             <div className="flex flex-col items-center gap-8">
 
-              {/* PLAY NOW BUTTON -> REDIRECT TO SIGNUP */}
-              <Link
-                href="/auth/register"
-                className="
-                  px-16 md:px-20 py-5 md:py-6
-                  bg-gradient-to-b from-orange-400 to-orange-600
-                  text-white font-extrabold text-2xl md:text-3xl rounded-full tracking-wide
-                  shadow-[0_14px_30px_rgba(0,0,0,0.3)]
-                  transition-all duration-200
-                  hover:scale-105 hover:shadow-[0_22px_45px_rgba(0,0,0,0.45)]
-                  active:scale-95
-                  inline-block text-center
-                "
-              >
-                PLAY NOW
-              </Link>
+              {/* APP STORE BADGES -> download links */}
+              <div className="flex flex-col sm:flex-row items-center gap-4">
+                <motion.a
+                  href={APP_STORE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 px-6 py-3.5 bg-black text-white rounded-2xl shadow-lg"
+                  whileHover={{ scale: 1.04, y: -2 }}
+                  whileTap={{ scale: 0.97 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                >
+                  <FaApple className="w-8 h-8" />
+                  <span className="flex flex-col leading-none text-left">
+                    <span className="text-[11px] opacity-80">Download on the</span>
+                    <span className="text-lg font-semibold">App Store</span>
+                  </span>
+                </motion.a>
 
-              {/* ARROWS */}
+                <motion.a
+                  href={PLAY_STORE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 px-6 py-3.5 bg-black text-white rounded-2xl shadow-lg"
+                  whileHover={{ scale: 1.04, y: -2 }}
+                  whileTap={{ scale: 0.97 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                >
+                  <FaGooglePlay className="w-7 h-7" />
+                  <span className="flex flex-col leading-none text-left">
+                    <span className="text-[11px] opacity-80">GET IT ON</span>
+                    <span className="text-lg font-semibold">Google Play</span>
+                  </span>
+                </motion.a>
+              </div>
+
+              {/* ARROWS — gentle continuous float, each offset for a wave effect */}
               <div className="grid grid-cols-3 gap-12 md:gap-20 items-center">
-                <ArrowBlack className="w-14 h-14 md:w-20 md:h-20 rotate-45 mx-auto drop-shadow-lg" />
-                <ArrowOutlineOrange className="w-16 h-16 md:w-24 md:h-24 -rotate-10 mx-auto drop-shadow-lg" />
-                <ArrowSolidOrange className="w-14 h-14 md:w-20 md:h-20 -rotate-45 mx-auto drop-shadow-lg" />
+                <motion.div
+                  animate={{ y: [0, -10, 0] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 0 }}
+                >
+                  <ArrowBlack className="w-14 h-14 md:w-20 md:h-20 rotate-45 mx-auto drop-shadow-lg" />
+                </motion.div>
+                <motion.div
+                  animate={{ y: [0, -14, 0] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 0.4 }}
+                >
+                  <ArrowOutlineOrange className="w-16 h-16 md:w-24 md:h-24 -rotate-10 mx-auto drop-shadow-lg" />
+                </motion.div>
+                <motion.div
+                  animate={{ y: [0, -10, 0] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 0.8 }}
+                >
+                  <ArrowSolidOrange className="w-14 h-14 md:w-20 md:h-20 -rotate-45 mx-auto drop-shadow-lg" />
+                </motion.div>
               </div>
 
-              {/* NAME PILLS WITH SHADOW */}
-              <div className="grid grid-cols-3 gap-6 md:gap-20">
-                <div className="px-4 py-2 md:px-6 md:py-2 rounded-full border-2 border-white bg-black text-white text-sm md:text-base shadow-lg shadow-black/30">
-                  Roshdy
-                </div>
-                <div className="px-4 py-2 md:px-6 md:py-2 rounded-full border-2 border-orange-500 bg-white text-orange-500 text-sm md:text-base shadow-lg shadow-orange-500/30">
-                  Mohaimen
-                </div>
-                <div className="px-4 py-2 md:px-6 md:py-2 rounded-full border-2 border-white bg-orange-500 text-white text-sm md:text-base shadow-lg shadow-orange-500/40">
-                  Phoenix
-                </div>
-              </div>
+              {/* NAME PILLS WITH SHADOW — staggered pop-in */}
+              <motion.div
+                className="grid grid-cols-3 gap-6 md:gap-20"
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ staggerChildren: 0.15, delayChildren: 0.4 }}
+              >
+                {[
+                  { name: "Roshdy", cls: "border-white bg-black text-white shadow-black/30" },
+                  { name: "Mohaimen", cls: "border-orange-500 bg-white text-orange-500 shadow-orange-500/30" },
+                  { name: "Phoenix", cls: "border-white bg-orange-500 text-white shadow-orange-500/40" },
+                ].map((p) => (
+                  <motion.div
+                    key={p.name}
+                    variants={{
+                      hidden: { opacity: 0, y: 20, scale: 0.8 },
+                      visible: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", stiffness: 300, damping: 18 } },
+                    }}
+                    whileHover={{ scale: 1.08, y: -3 }}
+                    className={`px-4 py-2 md:px-6 md:py-2 rounded-full border-2 text-sm md:text-base shadow-lg cursor-default ${p.cls}`}
+                  >
+                    {p.name}
+                  </motion.div>
+                ))}
+              </motion.div>
 
             </div>
           </div>
@@ -148,7 +200,7 @@ export default function HeroSection() {
           <div className="space-y-6 md:space-y-8">
 
             {/* CARD 1 */}
-            <div className="bg-gradient-to-r from-orange-500 to-orange-400 rounded-3xl px-10 md:px-14 py-6 flex items-center gap-6 md:gap-8 shadow-2xl">
+            <motion.div whileHover={{ scale: 1.03, y: -4 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="bg-gradient-to-r from-orange-500 to-orange-400 rounded-3xl px-10 md:px-14 py-6 flex items-center gap-6 md:gap-8 shadow-2xl">
               <div className="text-center">
                 <div className="text-white text-2xl md:text-3xl font-bold">1</div>
                 <div className="text-green-300 text-lg md:text-2xl mt-1">▲</div>
@@ -167,10 +219,10 @@ export default function HeroSection() {
               <div className="px-3 py-1 md:px-4 md:py-2 bg-white/30 text-white font-bold rounded-full shadow-md text-sm md:text-base">
                 32
               </div>
-            </div>
+            </motion.div>
 
             {/* CARD 2 */}
-            <div className="bg-white/90 rounded-3xl px-10 md:px-14 py-6 flex items-center gap-6 md:gap-8 shadow-xl backdrop-blur-md">
+            <motion.div whileHover={{ scale: 1.03, y: -4 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="bg-white/90 rounded-3xl px-10 md:px-14 py-6 flex items-center gap-6 md:gap-8 shadow-xl backdrop-blur-md">
               <div className="text-center">
                 <div className="text-black text-2xl md:text-3xl font-bold">2</div>
                 <div className="text-red-500 text-lg md:text-2xl mt-1">▼</div>
@@ -189,10 +241,10 @@ export default function HeroSection() {
               <div className="px-3 py-1 md:px-4 md:py-2 bg-orange-500 text-white font-bold rounded-full shadow-md text-sm md:text-base">
                 24
               </div>
-            </div>
+            </motion.div>
 
             {/* CARD 3 */}
-            <div className="relative rounded-3xl px-10 md:px-14 py-6 flex items-center gap-6 md:gap-8 shadow-xl bg-white/85 backdrop-blur-md overflow-hidden h-32 md:h-40">
+            <motion.div whileHover={{ scale: 1.03, y: -4 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="relative rounded-3xl px-10 md:px-14 py-6 flex items-center gap-6 md:gap-8 shadow-xl bg-white/85 backdrop-blur-md overflow-hidden h-32 md:h-40">
 
               <div className="text-center">
                 <div className="text-gray-700 text-2xl md:text-3xl font-bold">3</div>
@@ -215,7 +267,7 @@ export default function HeroSection() {
 
               {/* BOTTOM FADE */}
               <div className="absolute bottom-0 left-0 right-0 h-20 md:h-28 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none" />
-            </div>
+            </motion.div>
 
           </div>
         </ScrollAnimation>

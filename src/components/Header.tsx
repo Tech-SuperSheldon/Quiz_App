@@ -6,10 +6,15 @@ import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Cookies from "js-cookie";
 import Image from "next/image";
-import { FaUserCircle, FaSignOutAlt, FaChevronDown } from "react-icons/fa";
+import { FaUserCircle, FaSignOutAlt, FaChevronDown, FaBars, FaTimes, FaApple, FaGooglePlay } from "react-icons/fa";
+
+// Store links for the mobile apps
+const APP_STORE_URL = "https://apps.apple.com/us/app/levelup-learn-play/id6773067123";
+const PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.supersheldon.levelup";
 
 export default function Header() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // User Data State
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -46,6 +51,11 @@ export default function Header() {
     } else {
       handleLogoutCleanup();
     }
+  }, [pathname]);
+
+  // ✅ Close mobile menu whenever the route changes
+  useEffect(() => {
+    setMobileMenuOpen(false);
   }, [pathname]);
 
   // Helper to clear state
@@ -119,10 +129,10 @@ export default function Header() {
           />
         </Link>
 
-        {/* Navigation Links: Hidden on Dashboard/Quiz */}
+        {/* Navigation Links: Hidden on Dashboard/Quiz — and hidden on mobile (moved into the hamburger menu) */}
         {!isMinimalHeader && (
           <div
-            className={`flex space-x-8 justify-center flex-grow transition-all duration-500
+            className={`hidden md:flex space-x-8 justify-center flex-grow transition-all duration-500
             ${scrolling ? "backdrop-blur-xl px-4" : "backdrop-blur-md px-6"}`}
           >
             <Link href="/" className="text-gray-800 hover:text-orange-600 transition-colors duration-300">Home</Link>
@@ -201,30 +211,107 @@ export default function Header() {
             </AnimatePresence>
           </div>
         ) : (
-          <div className="flex items-center gap-3">
-            <Link href="/auth/login">
-              <motion.button
-                className="px-4 py-2 rounded-xl border border-orange-500 text-orange-600 font-medium bg-orange-50/80 hover:bg-orange-100 shadow-sm hover:shadow-md transition-all duration-300"
-                style={{ backdropFilter: "blur(10px)", background: "linear-gradient(90deg, rgba(255,165,0,0.10) 0%, rgba(255,140,0,0.10) 100%)" }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Log in
-              </motion.button>
-            </Link>
-            <Link href="/auth/register">
-              <motion.button
-                className="px-4 py-2 font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-white bg-gradient-to-r from-orange-500 to-orange-400 hover:from-orange-600 hover:to-orange-500 border border-orange-500"
-                style={{ backdropFilter: "blur(10px)", background: "linear-gradient(90deg, rgba(255,140,0,0.92) 0%, rgba(255,165,0,0.92) 100%)" }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Sign up
-              </motion.button>
-            </Link>
+          <div className="hidden md:flex items-center gap-3">
+            {/* App Store */}
+            <motion.a
+              href={APP_STORE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-black text-white shadow-md hover:shadow-lg transition-all duration-300"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <FaApple className="w-6 h-6" />
+              <span className="flex flex-col leading-none text-left">
+                <span className="text-[10px] opacity-80">Download on the</span>
+                <span className="text-sm font-semibold">App Store</span>
+              </span>
+            </motion.a>
+            {/* Google Play */}
+            <motion.a
+              href={PLAY_STORE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-black text-white shadow-md hover:shadow-lg transition-all duration-300"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <FaGooglePlay className="w-5 h-5" />
+              <span className="flex flex-col leading-none text-left">
+                <span className="text-[10px] opacity-80">GET IT ON</span>
+                <span className="text-sm font-semibold">Google Play</span>
+              </span>
+            </motion.a>
           </div>
         )}
+
+        {/* Hamburger toggle: only on mobile, only when nav links exist */}
+        {!isMinimalHeader && (
+          <button
+            onClick={() => setMobileMenuOpen((prev) => !prev)}
+            aria-label="Toggle navigation menu"
+            aria-expanded={mobileMenuOpen}
+            className="md:hidden flex items-center justify-center w-10 h-10 rounded-xl border border-orange-500/60 text-orange-600 bg-orange-50/60 hover:bg-orange-100 transition-all duration-300"
+          >
+            {mobileMenuOpen ? <FaTimes className="w-5 h-5" /> : <FaBars className="w-5 h-5" />}
+          </button>
+        )}
       </nav>
+
+      {/* Mobile Menu */}
+      {!isMinimalHeader && (
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.25 }}
+              className="md:hidden overflow-hidden border-t border-white/30 bg-white/90 backdrop-blur-xl rounded-b-xl"
+            >
+              <div className="flex flex-col px-6 py-4 gap-1">
+                <Link href="/" className="py-2.5 text-gray-800 hover:text-orange-600 font-medium transition-colors duration-300">Home</Link>
+                <Link href="/dashboard" className="py-2.5 text-gray-800 hover:text-orange-600 font-medium transition-colors duration-300">Dashboard</Link>
+                <button
+                  onClick={() => { setMobileMenuOpen(false); handleContactWhatsApp(); }}
+                  className="py-2.5 text-left text-gray-800 hover:text-orange-600 font-medium transition-colors duration-300"
+                >
+                  Contact Us
+                </button>
+
+                {!userName && (
+                  <div className="flex flex-col gap-2 mt-3 pt-3 border-t border-gray-200/60">
+                    <a
+                      href={APP_STORE_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 w-full px-4 py-2.5 rounded-xl bg-black text-white shadow-md transition-all duration-300"
+                    >
+                      <FaApple className="w-6 h-6" />
+                      <span className="flex flex-col leading-none text-left">
+                        <span className="text-[10px] opacity-80">Download on the</span>
+                        <span className="text-sm font-semibold">App Store</span>
+                      </span>
+                    </a>
+                    <a
+                      href={PLAY_STORE_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 w-full px-4 py-2.5 rounded-xl bg-black text-white shadow-md transition-all duration-300"
+                    >
+                      <FaGooglePlay className="w-5 h-5" />
+                      <span className="flex flex-col leading-none text-left">
+                        <span className="text-[10px] opacity-80">GET IT ON</span>
+                        <span className="text-sm font-semibold">Google Play</span>
+                      </span>
+                    </a>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      )}
     </header>
   );
 }
