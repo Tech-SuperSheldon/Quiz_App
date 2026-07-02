@@ -136,7 +136,6 @@ export default function Header() {
             ${scrolling ? "backdrop-blur-xl px-4" : "backdrop-blur-md px-6"}`}
           >
             <Link href="/" className="text-gray-800 hover:text-orange-600 transition-colors duration-300">Home</Link>
-            <Link href="/dashboard" className="text-gray-800 hover:text-orange-600 transition-colors duration-300">Dashboard</Link>
             <Link href="#contact" onClick={(e) => { e.preventDefault(); handleContactWhatsApp(); }} className="text-gray-800 hover:text-orange-600 transition-colors duration-300">Contact Us</Link>
           </div>
         )}
@@ -271,7 +270,6 @@ export default function Header() {
             >
               <div className="flex flex-col px-6 py-4 gap-1">
                 <Link href="/" className="py-2.5 text-gray-800 hover:text-orange-600 font-medium transition-colors duration-300">Home</Link>
-                <Link href="/dashboard" className="py-2.5 text-gray-800 hover:text-orange-600 font-medium transition-colors duration-300">Dashboard</Link>
                 <button
                   onClick={() => { setMobileMenuOpen(false); handleContactWhatsApp(); }}
                   className="py-2.5 text-left text-gray-800 hover:text-orange-600 font-medium transition-colors duration-300"
